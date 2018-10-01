@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<job xmlns="http://eobjects.org/analyzerbeans/job/1.0">
+    <job-metadata>
+        <job-description>Created with DataCleaner Community edition 5.1.5</job-description>
+        <author>murasaki</author>
+        <updated-date>2018-08-29-03:00</updated-date>
+        <metadata-properties>
+            <property name="CoordinatesY.gcrhs.accdb.Lilacs_Autor_Afiliacao">120</property>
+            <property name="CoordinatesX.gcrhs.accdb.Lilacs_Autor_Afiliacao">40</property>
+        </metadata-properties>
+    </job-metadata>
+    <source>
+        <data-context ref="GCRHS 2018"/>
+        <columns>
+            <column id="col_fi" path="Lilacs_Autor_Afiliacao.FI" type="VARCHAR"/>
+            <column id="col_sch" path="Lilacs_Autor_Afiliacao.SCH" type="VARCHAR"/>
+            <column id="col_id" path="Lilacs_Autor_Afiliacao.ID" type="VARCHAR"/>
+            <column id="col_au" path="Lilacs_Autor_Afiliacao.AU" type="LONGVARCHAR"/>
+            <column id="col_fau" path="Lilacs_Autor_Afiliacao.FAU" type="VARCHAR"/>
+            <column id="col_af1" path="Lilacs_Autor_Afiliacao.AF1" type="LONGVARCHAR"/>
+            <column id="col_af2" path="Lilacs_Autor_Afiliacao.AF2" type="LONGVARCHAR"/>
+            <column id="col_af3" path="Lilacs_Autor_Afiliacao.AF3" type="LONGVARCHAR"/>
+            <column id="col_ci" path="Lilacs_Autor_Afiliacao.CI" type="VARCHAR"/>
+            <column id="col_paf" path="Lilacs_Autor_Afiliacao.PAF" type="VARCHAR"/>
+            <column id="col_af123" path="Lilacs_Autor_Afiliacao.AF123" type="LONGVARCHAR"/>
+            <column id="col_tpi" path="Lilacs_Autor_Afiliacao.TPI" type="VARCHAR"/>
+        </columns>
+    </source>
+    <transformation>
+        <transformer>
+            <descriptor ref="Transliterate"/>
+            <metadata-properties>
+                <property name="CoordinatesY">201</property>
+                <property name="CoordinatesX">76</property>
+            </metadata-properties>
+            <properties>
+                <property name="Latin to ascii" value="true"/>
+            </properties>
+            <input ref="col_au"/>
+            <output id="col_au_1" name="AU_1"/>
+        </transformer>
+        <transformer>
+            <descriptor ref="Text case transformer"/>
+            <metadata-properties>
+                <property name="CoordinatesY">265</property>
+                <property name="CoordinatesX">73</property>
+            </metadata-properties>
+            <properties>
+                <property name="Mode" value="UPPER_CASE"/>
+            </properties>
+            <input ref="col_au_1"/>
+            <output id="col_au_2" name="AU_2"/>
+        </transformer>
+        <transformer>
+            <descriptor ref="Tokenizer"/>
+            <metadata-properties>
+                <property name="CoordinatesY">340</property>
+                <property name="CoordinatesX">88</property>
+            </metadata-properties>
+            <properties>
+                <property name="Delimiters" value="[&amp;#44;]"/>
+                <property name="Number of tokens" value="2"/>
+                <property name="Token target" value="COLUMNS"/>
+            </properties>
+            <input ref="col_au_2"/>
+            <output id="col_au_2token1" name="AU_2 (token 1)"/>
+            <output id="col_au_2token2" name="AU_2 (token 2)"/>
+        </transformer>
+        <transformer>
+            <descriptor ref="Tokenizer"/>
+            <metadata-properties>
+                <property name="CoordinatesX">196</property>
+                <property name="CoordinatesY">394</property>
+            </metadata-properties>
+            <properties>
+                <property name="Delimiters" value="[ ]"/>
+                <property name="Number of tokens" value="10"/>
+                <property name="Token target" value="COLUMNS"/>
+            </properties>
+            <input ref="col_au_3"/>
+            <output id="col_au_3_t1" name="AU_3_t1"/>
+            <output id="col_au_3_t2" name="AU_3_t2"/>
+            <output id="col_au_3_t3" name="AU_3_t3"/>
+            <output id="col_au_3_t4" name="AU_3_t4"/>
+            <output id="col_au_3_t5" name="AU_3_t5"/>
+            <output id="col_au_3_t6" name="AU_3_t6"/>
+            <output id="col_au_3_t7" name="AU_3_t7"/>
+            <output id="col_au_3_t8" name="AU_3_t8"/>
+            <output id="col_au_3_t9" name="AU_3_t9"/>
+            <output id="col_au_3_t10" name="AU_3_t10"/>
+        </transformer>
+        <transformer>
+            <descriptor ref="JavaScript transformer (simple)"/>
+            <metadata-properties>
+                <property name="CoordinatesX">82</property>
+                <property name="CoordinatesY">450</property>
+            </metadata-properties>
+            <properties>
+                <property name="Return type" value="STRING"/>
+                <property name="Source code">function eval() {
+	return values&amp;#91;1&amp;#93; + &amp;quot;  &amp;quot; + values&amp;#91;0&amp;#93;;
+}
+
+eval();</property>
+            </properties>
+            <input ref="col_au_2token1"/>
+            <input ref="col_au_2token2"/>
+            <output id="col_au_3" name="AU_3"/>
+        </transformer>
+        <transformer>
+            <descriptor ref="JavaScript transformer (simple)"/>
+            <metadata-properties>
+                <property name="CoordinatesY">378</property>
+                <property name="CoordinatesX">307</property>
+            </metadata-properties>
+            <properties>
+                <property name="Return type" value="STRING"/>
+                <property name="Source code">function eval() {
+	result = &amp;quot;&amp;quot;;
+	l = values.length - 1;
+	for (i = 0; i &amp;lt; l ; i++) {
+		if (values&amp;#91;i&amp;#93; != null &amp;amp;&amp;amp; values&amp;#91;i&amp;#93; != &amp;quot;DA&amp;quot; &amp;amp;&amp;amp; values&amp;#91;i&amp;#93; != &amp;quot;DE&amp;quot; &amp;amp;&amp;amp; values&amp;#91;i&amp;#93; != &amp;quot;DO&amp;quot; &amp;amp;&amp;amp; values&amp;#91;i&amp;#93; != &amp;quot;DOS&amp;quot; &amp;amp;&amp;amp; values&amp;#91;i&amp;#93; != &amp;quot;DEL&amp;quot;) {
+			if (values&amp;#91;i+1&amp;#93; == null) {
+				//result = result + values&amp;#91;i&amp;#93; + &amp;quot; &amp;quot;;
+				result = values&amp;#91;i&amp;#93; + &amp;quot; &amp;quot; + result;
+				break;
+			} else {
+				result = result + values&amp;#91;i&amp;#93;.substr(0&amp;#44;1) + &amp;quot; &amp;quot;;
+			}
+		}
+	}
+	return result.trim();
+}
+
+eval();</property>
+            </properties>
+            <input ref="col_au_3_t1"/>
+            <input ref="col_au_3_t2"/>
+            <input ref="col_au_3_t3"/>
+            <input ref="col_au_3_t4"/>
+            <input ref="col_au_3_t5"/>
+            <input ref="col_au_3_t6"/>
+            <input ref="col_au_3_t7"/>
+            <input ref="col_au_3_t8"/>
+            <input ref="col_au_3_t9"/>
+            <input ref="col_au_3_t10"/>
+            <output id="col_au_4" name="AU_4"/>
+        </transformer>
+        <transformer>
+            <descriptor ref="JavaScript transformer (simple)"/>
+            <metadata-properties>
+                <property name="CoordinatesY">486</property>
+                <property name="CoordinatesX">529</property>
+            </metadata-properties>
+            <properties>
+                <property name="Return type" value="STRING"/>
+                <property name="Source code">function eval() {
+	result = values&amp;#91;0&amp;#93;;
+	l = values.length - 1;
+	for (i = 1; i &amp;lt; l ; i++) {
+		if (values&amp;#91;i&amp;#93; != null &amp;amp;&amp;amp; values&amp;#91;i&amp;#93; != &amp;quot;DA&amp;quot; &amp;amp;&amp;amp; values&amp;#91;i&amp;#93; != &amp;quot;DE&amp;quot; &amp;amp;&amp;amp; values&amp;#91;i&amp;#93; != &amp;quot;DO&amp;quot; &amp;amp;&amp;amp; values&amp;#91;i&amp;#93; != &amp;quot;DOS&amp;quot; &amp;amp;&amp;amp; values&amp;#91;i&amp;#93; != &amp;quot;DEL&amp;quot;) {
+			if (values&amp;#91;i+1&amp;#93; == null) {
+				//result = result + values&amp;#91;i&amp;#93; + &amp;quot; &amp;quot;;
+				result = result + &amp;quot; &amp;quot; + values&amp;#91;i&amp;#93;;
+				break;
+			} else {
+				result = result + &amp;quot; &amp;quot; + values&amp;#91;i&amp;#93;.substr(0&amp;#44;1);
+			}
+		}
+	}
+	return result.trim();
+}
+
+eval();</property>
+            </properties>
+            <input ref="col_au_3_t1"/>
+            <input ref="col_au_3_t2"/>
+            <input ref="col_au_3_t3"/>
+            <input ref="col_au_3_t4"/>
+            <input ref="col_au_3_t5"/>
+            <input ref="col_au_3_t6"/>
+            <input ref="col_au_3_t7"/>
+            <input ref="col_au_3_t8"/>
+            <input ref="col_au_3_t9"/>
+            <input ref="col_au_3_t10"/>
+            <output id="col_au_5" name="AU_5"/>
+        </transformer>
+    </transformation>
+    <analysis>
+        <analyzer>
+            <descriptor ref="Value distribution"/>
+            <metadata-properties>
+                <property name="CoordinatesX">346</property>
+                <property name="CoordinatesY">162</property>
+            </metadata-properties>
+            <properties>
+                <property name="Record unique values" value="true"/>
+                <property name="Record drill-down information" value="true"/>
+                <property name="Top n most frequent values" value="&lt;null&gt;"/>
+                <property name="Bottom n most frequent values" value="&lt;null&gt;"/>
+            </properties>
+            <input ref="col_au" name="Column"/>
+            <input ref="col_au_2" name="Column"/>
+            <input ref="col_au_4" name="Column"/>
+            <input ref="col_au_5" name="Column"/>
+        </analyzer>
+        <analyzer>
+            <descriptor ref="Create CSV file"/>
+            <metadata-properties>
+                <property name="CoordinatesY">203</property>
+                <property name="CoordinatesX">551</property>
+            </metadata-properties>
+            <properties>
+                <property name="File" value="file://C:/observatorio-producao-cientifica-alc/rrhh/gcrhs2018/LILACS_tabulacoes/lilacs_Autor_Afiliacao_AU_enriched.txt"/>
+                <property name="Separator char" value="&amp;#44;"/>
+                <property name="Quote char" value="&amp;quot;"/>
+                <property name="Escape char" value="\"/>
+                <property name="Include header" value="true"/>
+                <property name="Encoding" value="UTF-8"/>
+                <property name="Fields" value="[FI,SCH,ID,AU,FAU,AF1,AF2,AF3,CI,PAF,AF123,TPI,AU_4,AU_5]"/>
+                <property name="Overwrite file if exists" value="true"/>
+            </properties>
+            <input ref="col_fi" name="Columns"/>
+            <input ref="col_sch" name="Columns"/>
+            <input ref="col_id" name="Columns"/>
+            <input ref="col_au" name="Columns"/>
+            <input ref="col_fau" name="Columns"/>
+            <input ref="col_af1" name="Columns"/>
+            <input ref="col_af2" name="Columns"/>
+            <input ref="col_af3" name="Columns"/>
+            <input ref="col_ci" name="Columns"/>
+            <input ref="col_paf" name="Columns"/>
+            <input ref="col_af123" name="Columns"/>
+            <input ref="col_tpi" name="Columns"/>
+            <input ref="col_au_4" name="Columns"/>
+            <input ref="col_au_5" name="Columns"/>
+        </analyzer>
+    </analysis>
+</job>
