@@ -12,14 +12,14 @@
   <parameters>
     </parameters>
   <connection>
-    <name>Governanca</name>
-    <server>localhost</server>
-    <type>POSTGRESQL</type>
-    <access>Native</access>
-    <database>Governanca</database>
-    <port>5432</port>
-    <username>postgres</username>
-    <password>Encrypted 2be98afc86aa7f2e49f10af77d1b2fd88</password>
+    <name>0</name>
+    <server>0</server>
+    <type>0</type>
+    <access>0</access>
+    <database>0</database>
+    <port>0</port>
+    <username>0</username>
+    <password>0</password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
@@ -462,7 +462,7 @@
       <description/>
       <type>TRUNCATE_TABLES</type>
       <attributes/>
-      <connection>Governanca</connection>
+      <connection>0</connection>
       <arg_from_previous>N</arg_from_previous>
       <fields>
         <field>

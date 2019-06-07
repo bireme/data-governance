@@ -447,14 +447,14 @@
   <notepads>
   </notepads>
   <connection>
-    <name>FI-Admin</name>
-    <server>osmio02.bireme.br</server>
-    <type>MYSQL</type>
-    <access>Native</access>
-    <database>fi_admin</database>
-    <port>6612</port>
-    <username>acesso_fiadmin</username>
-    <password>Encrypted 2be98afc80ccead85af14a77efeb086e8</password>
+    <name>0</name>
+    <server>0</server>
+    <type>0</type>
+    <access>0</access>
+    <database>0</database>
+    <port>0</port>
+    <username>0</username>
+    <password>0</password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
@@ -502,14 +502,14 @@
     </attributes>
   </connection>
   <connection>
-    <name>Governanca_PRD</name>
-    <server>basalto15.bireme.br</server>
-    <type>POSTGRESQL</type>
+    <name>0</name>
+    <server>0</server>
+    <type>0</type>
     <access>Native</access>
-    <database>Governanca</database>
-    <port>5432</port>
-    <username>luciano.santos</username>
-    <password>Encrypted 2be98afc86aa7f288be1a8e228ec3f699</password>
+    <database>0</database>
+    <port>0</port>
+    <username>0</username>
+    <password>0</password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>

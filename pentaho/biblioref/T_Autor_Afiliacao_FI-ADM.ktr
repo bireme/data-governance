@@ -469,14 +469,14 @@ Autor / Afiliação</note>
     </notepad>
   </notepads>
   <connection>
-    <name>FI-Admin</name>
-    <server>osmio02.bireme.br</server>
-    <type>MYSQL</type>
-    <access>Native</access>
-    <database>fi_admin</database>
-    <port>6612</port>
-    <username>acesso_fiadmin</username>
-    <password>Encrypted 2be98afc80ccead85af14a77efeb086e8</password>
+    <name>0</name>
+    <server>0</server>
+    <type>0</type>
+    <access>0</access>
+    <database>0</database>
+    <port>0</port>
+    <username>0</username>
+    <password>0</password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
@@ -524,14 +524,14 @@ Autor / Afiliação</note>
     </attributes>
   </connection>
   <connection>
-    <name>Governanca</name>
-    <server>localhost</server>
-    <type>POSTGRESQL</type>
-    <access>Native</access>
-    <database>Governanca</database>
-    <port>5432</port>
-    <username>postgres</username>
-    <password>Encrypted 2be98afc86aa7f2e49f10af77d1b2fd88</password>
+    <name>0</name>
+    <server>0</server>
+    <type>0</type>
+    <access>0</access>
+    <database>0</database>
+    <port>0</port>
+    <username>0</username>
+    <password>0</password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
@@ -592,7 +592,7 @@ Autor / Afiliação</note>
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <connection>Governanca</connection>
+    <connection>0</connection>
     <schema/>
     <table>st_autor_afiliacao_temp</table>
     <commit>1000</commit>
@@ -652,7 +652,7 @@ Autor / Afiliação</note>
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <connection>FI-Admin</connection>
+    <connection>0</connection>
     <sql>select 	'lilacs' as FI, 
 		case when rf.id = an.reference_ptr_id and rf.id = al.reference_id then  
 				concat('biblio-',convert(rf.id, char))  

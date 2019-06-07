@@ -12,14 +12,14 @@
   <parameters>
     </parameters>
   <connection>
-    <name>Governanca_PRD</name>
-    <server>basalto15.bireme.br</server>
-    <type>POSTGRESQL</type>
-    <access>Native</access>
-    <database>Governanca</database>
-    <port>5432</port>
-    <username>luciano.santos</username>
-    <password>Encrypted 2be98afc86aa7f288be1a8e228ec3f699</password>
+    <name>0</name>
+    <server>0</server>
+    <type>0</type>
+    <access>0</access>
+    <database>0</database>
+    <port>0</port>
+    <username>0</username>
+    <password>0</password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
@@ -364,7 +364,7 @@
       <description/>
       <type>TRUNCATE_TABLES</type>
       <attributes/>
-      <connection>Governanca_PRD</connection>
+      <connection>0</connection>
       <arg_from_previous>N</arg_from_previous>
       <fields>
         <field>
