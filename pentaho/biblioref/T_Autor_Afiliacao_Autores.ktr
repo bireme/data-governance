@@ -7,18 +7,8 @@
     <trans_version/>
     <trans_type>Normal</trans_type>
     <trans_status>0</trans_status>
-    <directory>/CARGAS</directory>
+    <directory>/CARGAS_DATA_STAGE_Biblioref</directory>
     <parameters>
-      <parameter>
-        <name>lim_fim</name>
-        <default_value>0</default_value>
-        <description/>
-      </parameter>
-      <parameter>
-        <name>lim_ini</name>
-        <default_value>0</default_value>
-        <description/>
-      </parameter>
     </parameters>
     <log>
       <trans-log-table>
@@ -440,21 +430,42 @@
     <created_user>-</created_user>
     <created_date>2019/04/02 16:07:41.954</created_date>
     <modified_user>admin</modified_user>
-    <modified_date>2019/04/12 15:23:33.682</modified_date>
+    <modified_date>2019/05/22 17:21:56.401</modified_date>
     <key_for_session_key/>
     <is_key_private>N</is_key_private>
   </info>
   <notepads>
+    <notepad>
+      <note>Seleção das Afiliações</note>
+      <xloc>304</xloc>
+      <yloc>112</yloc>
+      <width>131</width>
+      <heigth>26</heigth>
+      <fontname>Segoe UI</fontname>
+      <fontsize>9</fontsize>
+      <fontbold>Y</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>0</fontcolorred>
+      <fontcolorgreen>0</fontcolorgreen>
+      <fontcolorblue>0</fontcolorblue>
+      <backgroundcolorred>255</backgroundcolorred>
+      <backgroundcolorgreen>205</backgroundcolorgreen>
+      <backgroundcolorblue>112</backgroundcolorblue>
+      <bordercolorred>100</bordercolorred>
+      <bordercolorgreen>100</bordercolorgreen>
+      <bordercolorblue>100</bordercolorblue>
+      <drawshadow>Y</drawshadow>
+    </notepad>
   </notepads>
   <connection>
-    <name>0</name>
-    <server>0</server>
-    <type>0</type>
-    <access>0</access>
-    <database>0</database>
-    <port>0</port>
-    <username>0</username>
-    <password>0</password>
+    <name>Governanca</name>
+    <server>localhost</server>
+    <type>POSTGRESQL</type>
+    <access>Native</access>
+    <database>Governanca</database>
+    <port>5432</port>
+    <username>postgres</username>
+    <password>Encrypted 2be98afc86aa7f2e49f10af77d1b2fd88</password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
@@ -473,7 +484,7 @@
       </attribute>
       <attribute>
         <code>PORT_NUMBER</code>
-        <attribute>0</attribute>
+        <attribute>5432</attribute>
       </attribute>
       <attribute>
         <code>PRESERVE_RESERVED_WORD_CASE</code>
@@ -482,10 +493,6 @@
       <attribute>
         <code>QUOTE_ALL_FIELDS</code>
         <attribute>N</attribute>
-      </attribute>
-      <attribute>
-        <code>STREAM_RESULTS</code>
-        <attribute>Y</attribute>
       </attribute>
       <attribute>
         <code>SUPPORTS_BOOLEAN_DATA_TYPE</code>
@@ -524,8 +531,8 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <connection>PDI_REP</connection>
-    <sql>SELECT * FROM autor_afiliacao LIMIT ${lim_ini},${lim_fim};</sql>
+    <connection>Governanca</connection>
+    <sql>SELECT * FROM st_autor_afiliacao_temp;</sql>
     <limit>0</limit>
     <lookup/>
     <execute_each_row>N</execute_each_row>
@@ -540,8 +547,8 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>208</xloc>
-      <yloc>176</yloc>
+      <xloc>192</xloc>
+      <yloc>160</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
@@ -556,9 +563,9 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <connection>PDI_REP</connection>
+    <connection>Governanca</connection>
     <schema/>
-    <table>autor_afiliacao_transf</table>
+    <table>st_autor_afiliacao_transf_temp</table>
     <commit>1000</commit>
     <truncate>N</truncate>
     <ignore_errors>N</ignore_errors>
@@ -620,8 +627,8 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>656</xloc>
-      <yloc>176</yloc>
+      <xloc>544</xloc>
+      <yloc>160</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
@@ -768,8 +775,8 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>432</xloc>
-      <yloc>176</yloc>
+      <xloc>368</xloc>
+      <yloc>160</yloc>
       <draw>Y</draw>
     </GUI>
   </step>

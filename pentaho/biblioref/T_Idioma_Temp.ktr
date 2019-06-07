@@ -7,7 +7,7 @@
     <trans_version/>
     <trans_type>Normal</trans_type>
     <trans_status>0</trans_status>
-    <directory>/CARGAS</directory>
+    <directory>/CARGAS_DATA_STAGE_Biblioref</directory>
     <parameters>
       <parameter>
         <name>lim_fim</name>
@@ -440,21 +440,21 @@
     <created_user>-</created_user>
     <created_date>2019/04/25 15:01:50.783</created_date>
     <modified_user>admin</modified_user>
-    <modified_date>2019/04/29 14:27:56.154</modified_date>
+    <modified_date>2019/05/16 17:27:04.319</modified_date>
     <key_for_session_key/>
     <is_key_private>N</is_key_private>
   </info>
   <notepads>
   </notepads>
   <connection>
-    <name>0</name>
-    <server>0</server>
-    <type>0</type>
-    <access>0</access>
-    <database>0</database>
-    <port>0</port>
-    <username>0</username>
-    <password>0</password>
+    <name>FI-Admin</name>
+    <server>osmio02.bireme.br</server>
+    <type>MYSQL</type>
+    <access>Native</access>
+    <database>fi_admin</database>
+    <port>6612</port>
+    <username>acesso_fiadmin</username>
+    <password>Encrypted 2be98afc80ccead85af14a77efeb086e8</password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
@@ -473,7 +473,7 @@
       </attribute>
       <attribute>
         <code>PORT_NUMBER</code>
-        <attribute>0</attribute>
+        <attribute>6612</attribute>
       </attribute>
       <attribute>
         <code>PRESERVE_RESERVED_WORD_CASE</code>
@@ -502,14 +502,14 @@
     </attributes>
   </connection>
   <connection>
-    <name>0</name>
-    <server>0</server>
-    <type>0</type>
-    <access>0</access>
-    <database>0</database>
-    <port>0</port>
-    <username>0</username>
-    <password>0</password>
+    <name>Governanca</name>
+    <server>localhost</server>
+    <type>POSTGRESQL</type>
+    <access>Native</access>
+    <database>Governanca</database>
+    <port>5432</port>
+    <username>postgres</username>
+    <password>Encrypted 2be98afc86aa7f2e49f10af77d1b2fd88</password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
@@ -528,7 +528,7 @@
       </attribute>
       <attribute>
         <code>PORT_NUMBER</code>
-        <attribute>0</attribute>
+        <attribute>5432</attribute>
       </attribute>
       <attribute>
         <code>PRESERVE_RESERVED_WORD_CASE</code>
@@ -537,10 +537,6 @@
       <attribute>
         <code>QUOTE_ALL_FIELDS</code>
         <attribute>N</attribute>
-      </attribute>
-      <attribute>
-        <code>STREAM_RESULTS</code>
-        <attribute>Y</attribute>
       </attribute>
       <attribute>
         <code>SUPPORTS_BOOLEAN_DATA_TYPE</code>
@@ -596,8 +592,10 @@
 		rf.text_language as LA 
 FROM	biblioref_reference AS rf LEFT JOIN biblioref_referenceanalytic AS an ON 
 		rf.id = an.reference_ptr_id LEFT JOIN biblioref_referencealternateid AS al ON 
-		rf.id = al.reference_id LEFT JOIN biblioref_referencesource AS so ON 
-		an.source_id = so.reference_ptr_id LIMIT ${lim_ini}, ${lim_fim};</sql>
+		rf.id = al.reference_id INNER JOIN biblioref_referencesource AS so ON 
+		an.source_id = so.reference_ptr_id
+where 	rf.treatment_level like '%a%' 
+LIMIT ${lim_ini}, ${lim_fim};</sql>
     <limit>0</limit>
     <lookup/>
     <execute_each_row>N</execute_each_row>
@@ -628,9 +626,9 @@ FROM	biblioref_reference AS rf LEFT JOIN biblioref_referenceanalytic AS an ON
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <connection>PDI_REP</connection>
+    <connection>Governanca</connection>
     <schema/>
-    <table>idiomas_temp</table>
+    <table>st_idiomas_temp</table>
     <commit>1000</commit>
     <truncate>N</truncate>
     <ignore_errors>N</ignore_errors>

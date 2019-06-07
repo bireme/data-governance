@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>T_Autor_Afiliacao_Norm</name>
+    <name>T_Autor_Afiliacao_FI-ADM_02</name>
     <description/>
     <extended_description/>
     <trans_version/>
@@ -9,6 +9,16 @@
     <trans_status>0</trans_status>
     <directory>/CARGAS_DATA_STAGE_Biblioref</directory>
     <parameters>
+      <parameter>
+        <name>lim_fim</name>
+        <default_value>0</default_value>
+        <description/>
+      </parameter>
+      <parameter>
+        <name>lim_ini</name>
+        <default_value>0</default_value>
+        <description/>
+      </parameter>
     </parameters>
     <log>
       <trans-log-table>
@@ -428,19 +438,20 @@
     <clusterschemas>
     </clusterschemas>
     <created_user>-</created_user>
-    <created_date>2019/04/01 10:04:45.582</created_date>
+    <created_date>2019/05/07 12:49:10.414</created_date>
     <modified_user>admin</modified_user>
-    <modified_date>2019/05/22 17:56:11.920</modified_date>
+    <modified_date>2019/05/20 11:44:11.850</modified_date>
     <key_for_session_key/>
     <is_key_private>N</is_key_private>
   </info>
   <notepads>
     <notepad>
-      <note>Normalização Autores</note>
-      <xloc>432</xloc>
-      <yloc>64</yloc>
-      <width>133</width>
-      <heigth>26</heigth>
+      <note>FI-Admin
+Autor / Afiliação</note>
+      <xloc>336</xloc>
+      <yloc>112</yloc>
+      <width>101</width>
+      <heigth>42</heigth>
       <fontname>Segoe UI</fontname>
       <fontsize>9</fontsize>
       <fontbold>Y</fontbold>
@@ -457,6 +468,61 @@
       <drawshadow>Y</drawshadow>
     </notepad>
   </notepads>
+  <connection>
+    <name>FI-Admin</name>
+    <server>osmio02.bireme.br</server>
+    <type>MYSQL</type>
+    <access>Native</access>
+    <database>fi_admin</database>
+    <port>6612</port>
+    <username>acesso_fiadmin</username>
+    <password>Encrypted 2be98afc80ccead85af14a77efeb086e8</password>
+    <servername/>
+    <data_tablespace/>
+    <index_tablespace/>
+    <attributes>
+      <attribute>
+        <code>FORCE_IDENTIFIERS_TO_LOWERCASE</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>FORCE_IDENTIFIERS_TO_UPPERCASE</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>IS_CLUSTERED</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>PORT_NUMBER</code>
+        <attribute>6612</attribute>
+      </attribute>
+      <attribute>
+        <code>PRESERVE_RESERVED_WORD_CASE</code>
+        <attribute>Y</attribute>
+      </attribute>
+      <attribute>
+        <code>QUOTE_ALL_FIELDS</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>STREAM_RESULTS</code>
+        <attribute>Y</attribute>
+      </attribute>
+      <attribute>
+        <code>SUPPORTS_BOOLEAN_DATA_TYPE</code>
+        <attribute>Y</attribute>
+      </attribute>
+      <attribute>
+        <code>SUPPORTS_TIMESTAMP_DATA_TYPE</code>
+        <attribute>Y</attribute>
+      </attribute>
+      <attribute>
+        <code>USE_POOLING</code>
+        <attribute>N</attribute>
+      </attribute>
+    </attributes>
+  </connection>
   <connection>
     <name>Governanca</name>
     <server>localhost</server>
@@ -510,43 +576,13 @@
   </connection>
   <order>
     <hop>
-      <from>NomeAutor</from>
-      <to>NomeSobrenomes</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>NomeSobrenomes</from>
-      <to>Nome_SobreNomes_Abr</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Nome_SobreNomes_Abr</from>
-      <to>Nome_Final</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Tokenize AU - 1</from>
-      <to>NomeAutor</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Upper_AU</from>
-      <to>Tokenize AU - 1</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Lista_Autor_Afiliacao_Trans</from>
-      <to>Upper_AU</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Nome_Final</from>
-      <to>Autor_norm</to>
+      <from>Autor_Afiliacao_FI-Admin</from>
+      <to>Auto_Afiliacao_Tmp</to>
       <enabled>Y</enabled>
     </hop>
   </order>
   <step>
-    <name>Autor_norm</name>
+    <name>Auto_Afiliacao_Tmp</name>
     <type>TableOutput</type>
     <description/>
     <distribute>Y</distribute>
@@ -558,7 +594,7 @@
     </partitioning>
     <connection>Governanca</connection>
     <schema/>
-    <table>st_autor_afiliacao</table>
+    <table>st_autor_afiliacao_temp</table>
     <commit>1000</commit>
     <truncate>N</truncate>
     <ignore_errors>N</ignore_errors>
@@ -587,52 +623,8 @@
         <stream_name>AU</stream_name>
       </field>
       <field>
-        <column_name>af1</column_name>
-        <stream_name>AF1</stream_name>
-      </field>
-      <field>
-        <column_name>af2</column_name>
-        <stream_name>AF2</stream_name>
-      </field>
-      <field>
-        <column_name>af3</column_name>
-        <stream_name>AF3</stream_name>
-      </field>
-      <field>
-        <column_name>ci</column_name>
-        <stream_name>CI</stream_name>
-      </field>
-      <field>
-        <column_name>paf</column_name>
-        <stream_name>PAF</stream_name>
-      </field>
-      <field>
-        <column_name>gr</column_name>
-        <stream_name>GRAU_RESP</stream_name>
-      </field>
-      <field>
-        <column_name>cn</column_name>
-        <stream_name>CN</stream_name>
-      </field>
-      <field>
-        <column_name>auid</column_name>
-        <stream_name>AUID</stream_name>
-      </field>
-      <field>
-        <column_name>nome_s_ab</column_name>
-        <stream_name>NAME_S_AB</stream_name>
-      </field>
-      <field>
-        <column_name>nome_f</column_name>
-        <stream_name>NAME_F</stream_name>
-      </field>
-      <field>
-        <column_name>dt_in</column_name>
-        <stream_name>dt_in</stream_name>
-      </field>
-      <field>
-        <column_name>dt_up</column_name>
-        <stream_name>dt_up</stream_name>
+        <column_name>qtde_au</column_name>
+        <stream_name>QTDE_AUTOR</stream_name>
       </field>
     </fields>
     <attributes/>
@@ -644,27 +636,46 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>192</xloc>
-      <yloc>240</yloc>
+      <xloc>480</xloc>
+      <yloc>176</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
   <step>
-    <name>Lista_Autor_Afiliacao_Trans</name>
+    <name>Autor_Afiliacao_FI-Admin</name>
     <type>TableInput</type>
     <description/>
-    <distribute>Y</distribute>
+    <distribute>N</distribute>
     <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <connection>Governanca</connection>
-    <sql>SELECT 	FI, ID, LEFT(AU, 255) AS AU, LEFT(AF1, 1200) AS AF1, LEFT(AF2, 1200) AS AF2, LEFT(AF3, 1200) AS AF3, 
-		CI, PAF, GRAU_RESP, CN, AUID, 
-		CURRENT_DATE as dt_in, CURRENT_DATE as dt_up 
-FROM 	st_autor_afiliacao_transf_temp;</sql>
+    <connection>FI-Admin</connection>
+    <sql>select 	'lilacs' as FI, 
+		case when rf.id = al.reference_id then  
+				concat('biblio-',convert(rf.id, char))  
+			when rf.id = so.reference_ptr_id then 
+				concat('lil-',convert(so.reference_ptr_id, char)) 
+			else 
+				rf.id 
+		end as ID, 
+		case when so.individual_author_monographic is not null then 
+				case when JSON_VALID(so.individual_author_monographic) = 1 then so.individual_author_monographic else '[{"text": "JSON Autor Mono Inválido"}]' end
+			when so.individual_author_collection is not null then 
+				case when JSON_VALID(so.individual_author_collection) = 1 then so.individual_author_collection else '[{"text": "JSON Autor Coll Inválido"}]' end
+		end as AU, 
+		case when so.individual_author_monographic is not null then 
+				case when JSON_VALID(so.individual_author_monographic) = 1 then JSON_LENGTH(so.individual_author_monographic) else 1 end
+			when so.individual_author_collection is not null then 
+				case when JSON_VALID(so.individual_author_collection) = 1 then JSON_LENGTH(so.individual_author_collection) else 1 end
+		end as QTDE_AUTOR 
+from	biblioref_reference as rf left join biblioref_referencealternateid as al on 
+		rf.id = al.reference_id inner join biblioref_referencesource as so on 
+		rf.id = so.reference_ptr_id 
+where 	rf.treatment_level not like '%a%' 
+LIMIT ${lim_ini}, ${lim_fim};</sql>
     <limit>0</limit>
     <lookup/>
     <execute_each_row>N</execute_each_row>
@@ -679,496 +690,8 @@ FROM 	st_autor_afiliacao_transf_temp;</sql>
       </output>
     </remotesteps>
     <GUI>
-      <xloc>192</xloc>
-      <yloc>112</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
-  <step>
-    <name>NomeAutor</name>
-    <type>ConcatFields</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <separator> </separator>
-    <enclosure/>
-    <enclosure_forced>N</enclosure_forced>
-    <enclosure_fix_disabled>N</enclosure_fix_disabled>
-    <header>N</header>
-    <footer>N</footer>
-    <format>DOS</format>
-    <compression>None</compression>
-    <encoding/>
-    <endedLine/>
-    <fileNameInField>N</fileNameInField>
-    <fileNameField/>
-    <create_parent_folder>Y</create_parent_folder>
-    <file>
-      <name>file</name>
-      <servlet_output>N</servlet_output>
-      <do_not_open_new_file_init>N</do_not_open_new_file_init>
-      <extention>txt</extention>
-      <append>N</append>
-      <split>N</split>
-      <haspartno>N</haspartno>
-      <add_date>N</add_date>
-      <add_time>N</add_time>
-      <SpecifyFormat>N</SpecifyFormat>
-      <date_time_format/>
-      <add_to_result_filenames>Y</add_to_result_filenames>
-      <pad>N</pad>
-      <fast_dump>N</fast_dump>
-      <splitevery>0</splitevery>
-    </file>
-    <fields>
-      <field>
-        <name>AU_N</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>-1</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>AU_S</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>-1</length>
-        <precision>-1</precision>
-      </field>
-    </fields>
-    <ConcatFields>
-      <targetFieldName>AU_NAME</targetFieldName>
-      <targetFieldLength>2</targetFieldLength>
-      <removeSelectedFields>N</removeSelectedFields>
-    </ConcatFields>
-    <attributes/>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>736</xloc>
-      <yloc>112</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
-  <step>
-    <name>NomeSobrenomes</name>
-    <type>FieldSplitter</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <splitfield>AU_NAME</splitfield>
-    <delimiter> </delimiter>
-    <enclosure/>
-    <fields>
-      <field>
-        <name>AU_N1</name>
-        <id/>
-        <idrem>N</idrem>
-        <type>String</type>
-        <format/>
-        <group/>
-        <decimal/>
-        <currency/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <nullif/>
-        <ifnull/>
-        <trimtype>both</trimtype>
-      </field>
-      <field>
-        <name>AU_S1</name>
-        <id/>
-        <idrem>N</idrem>
-        <type>String</type>
-        <format/>
-        <group/>
-        <decimal/>
-        <currency/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <nullif/>
-        <ifnull/>
-        <trimtype>both</trimtype>
-      </field>
-      <field>
-        <name>AU_S2</name>
-        <id/>
-        <idrem>N</idrem>
-        <type>String</type>
-        <format/>
-        <group/>
-        <decimal/>
-        <currency/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <nullif/>
-        <ifnull/>
-        <trimtype>both</trimtype>
-      </field>
-      <field>
-        <name>AU_S3</name>
-        <id/>
-        <idrem>N</idrem>
-        <type>String</type>
-        <format/>
-        <group/>
-        <decimal/>
-        <currency/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <nullif/>
-        <ifnull/>
-        <trimtype>both</trimtype>
-      </field>
-      <field>
-        <name>AU_S4</name>
-        <id/>
-        <idrem>N</idrem>
-        <type>String</type>
-        <format/>
-        <group/>
-        <decimal/>
-        <currency/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <nullif/>
-        <ifnull/>
-        <trimtype>both</trimtype>
-      </field>
-      <field>
-        <name>AU_S5</name>
-        <id/>
-        <idrem>N</idrem>
-        <type>String</type>
-        <format/>
-        <group/>
-        <decimal/>
-        <currency/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <nullif/>
-        <ifnull/>
-        <trimtype>both</trimtype>
-      </field>
-      <field>
-        <name>AU_S6</name>
-        <id/>
-        <idrem>N</idrem>
-        <type>String</type>
-        <format/>
-        <group/>
-        <decimal/>
-        <currency/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <nullif/>
-        <ifnull/>
-        <trimtype>both</trimtype>
-      </field>
-      <field>
-        <name>AU_S7</name>
-        <id/>
-        <idrem>N</idrem>
-        <type>String</type>
-        <format/>
-        <group/>
-        <decimal/>
-        <currency/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <nullif/>
-        <ifnull/>
-        <trimtype>both</trimtype>
-      </field>
-      <field>
-        <name>AU_S8</name>
-        <id/>
-        <idrem>N</idrem>
-        <type>String</type>
-        <format/>
-        <group/>
-        <decimal/>
-        <currency/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <nullif/>
-        <ifnull/>
-        <trimtype>both</trimtype>
-      </field>
-      <field>
-        <name>AU_S9</name>
-        <id/>
-        <idrem>N</idrem>
-        <type>String</type>
-        <format/>
-        <group/>
-        <decimal/>
-        <currency/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <nullif/>
-        <ifnull/>
-        <trimtype>both</trimtype>
-      </field>
-    </fields>
-    <attributes/>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>736</xloc>
-      <yloc>240</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
-  <step>
-    <name>Nome_Final</name>
-    <type>ScriptValueMod</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <compatible>N</compatible>
-    <optimizationLevel>9</optimizationLevel>
-    <jsScripts>
-      <jsScript>
-        <jsScript_type>0</jsScript_type>
-        <jsScript_name>Script 1</jsScript_name>
-        <jsScript_script>//Script here
-
-var valores = [AU_N1,AU_S1,AU_S2,AU_S3,AU_S4,AU_S5,AU_S6,AU_S7,AU_S8,AU_S9];
-var result = valores[0];
-var l = valores.length - 1;
-
-for (i = 1; i &lt; l ; i++) {
-	if (valores[i] != null &amp;&amp; valores[i] != "DA" &amp;&amp; valores[i] != "DE" &amp;&amp; valores[i] != "DO" &amp;&amp; valores[i] != "DOS" &amp;&amp; valores[i] != "DEL") {
-		if (valores[i+1] == null) {
-			result = result + " " + valores[i];
-			break;
-		} else {
-			result = result + " " + valores[i].substr(0,1);
-		}
-	}
-}
-
-var NAME_F = result</jsScript_script>
-      </jsScript>
-    </jsScripts>
-    <fields>
-      <field>
-        <name>NAME_F</name>
-        <rename>NAME_F</rename>
-        <type>String</type>
-        <length>-1</length>
-        <precision>-1</precision>
-        <replace>N</replace>
-      </field>
-    </fields>
-    <attributes/>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>384</xloc>
-      <yloc>240</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
-  <step>
-    <name>Nome_SobreNomes_Abr</name>
-    <type>ScriptValueMod</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <compatible>N</compatible>
-    <optimizationLevel>9</optimizationLevel>
-    <jsScripts>
-      <jsScript>
-        <jsScript_type>0</jsScript_type>
-        <jsScript_name>Script 1</jsScript_name>
-        <jsScript_script>//Script here
-
-var valores = [AU_N1,AU_S1,AU_S2,AU_S3,AU_S4,AU_S5,AU_S6,AU_S7,AU_S8,AU_S9];
-var result = ""
-var l = valores.length - 1;
-
-for (i = 0; i &lt; l ; i++) {
-	if (valores[i] != null &amp;&amp; valores[i] != "DA" &amp;&amp; valores[i] != "DE" &amp;&amp; valores[i] != "DO" &amp;&amp; valores[i] != "DOS" &amp;&amp; valores[i] != "DEL") {
-		if (valores[i+1] == null) {
-			result = valores[i] + " " + result;
-			break;
-		} else {
-			result = result + valores[i].substr(0,1) + " ";
-		}
-	}
-}
-
-var NAME_S_AB = result.trim()</jsScript_script>
-      </jsScript>
-    </jsScripts>
-    <fields>
-      <field>
-        <name>NAME_S_AB</name>
-        <rename>NAME_S_AB</rename>
-        <type>String</type>
-        <length>-1</length>
-        <precision>-1</precision>
-        <replace>N</replace>
-      </field>
-    </fields>
-    <attributes/>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>576</xloc>
-      <yloc>240</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
-  <step>
-    <name>Tokenize AU - 1</name>
-    <type>FieldSplitter</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <splitfield>AU_1</splitfield>
-    <delimiter>,</delimiter>
-    <enclosure/>
-    <fields>
-      <field>
-        <name>AU_S</name>
-        <id/>
-        <idrem>N</idrem>
-        <type>String</type>
-        <format/>
-        <group/>
-        <decimal/>
-        <currency/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <nullif/>
-        <ifnull/>
-        <trimtype>right</trimtype>
-      </field>
-      <field>
-        <name>AU_N</name>
-        <id/>
-        <idrem>N</idrem>
-        <type>String</type>
-        <format/>
-        <group/>
-        <decimal/>
-        <currency/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <nullif/>
-        <ifnull/>
-        <trimtype>left</trimtype>
-      </field>
-    </fields>
-    <attributes/>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>576</xloc>
-      <yloc>112</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
-  <step>
-    <name>Upper_AU</name>
-    <type>StringOperations</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <fields>
-      <field>
-        <in_stream_name>AU</in_stream_name>
-        <out_stream_name>AU_1</out_stream_name>
-        <trim_type>none</trim_type>
-        <lower_upper>upper</lower_upper>
-        <padding_type>none</padding_type>
-        <pad_char/>
-        <pad_len/>
-        <init_cap>no</init_cap>
-        <mask_xml>none</mask_xml>
-        <digits>none</digits>
-        <remove_special_characters>none</remove_special_characters>
-      </field>
-    </fields>
-    <attributes/>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>384</xloc>
-      <yloc>112</yloc>
+      <xloc>272</xloc>
+      <yloc>176</yloc>
       <draw>Y</draw>
     </GUI>
   </step>

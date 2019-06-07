@@ -7,7 +7,7 @@
     <trans_version/>
     <trans_type>Normal</trans_type>
     <trans_status>0</trans_status>
-    <directory>/CARGAS</directory>
+    <directory>/CARGAS_DATA_STAGE_Biblioref</directory>
     <parameters>
       <parameter>
         <name>lim_fim</name>
@@ -440,21 +440,21 @@
     <created_user>-</created_user>
     <created_date>2019/04/17 11:58:33.819</created_date>
     <modified_user>admin</modified_user>
-    <modified_date>2019/04/29 12:22:46.197</modified_date>
+    <modified_date>2019/05/31 17:28:17.943</modified_date>
     <key_for_session_key/>
     <is_key_private>N</is_key_private>
   </info>
   <notepads>
   </notepads>
   <connection>
-    <name>0</name>
-    <server>0</server>
-    <type>0</type>
-    <access>0</access>
-    <database>0</database>
-    <port>0</port>
-    <username>0</username>
-    <password>0</password>
+    <name>FI-Admin</name>
+    <server>osmio02.bireme.br</server>
+    <type>MYSQL</type>
+    <access>Native</access>
+    <database>fi_admin</database>
+    <port>6612</port>
+    <username>acesso_fiadmin</username>
+    <password>Encrypted 2be98afc80ccead85af14a77efeb086e8</password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
@@ -473,7 +473,7 @@
       </attribute>
       <attribute>
         <code>PORT_NUMBER</code>
-        <attribute>0</attribute>
+        <attribute>6612</attribute>
       </attribute>
       <attribute>
         <code>PRESERVE_RESERVED_WORD_CASE</code>
@@ -502,14 +502,14 @@
     </attributes>
   </connection>
   <connection>
-    <name>0</name>
-    <server>0</server>
-    <type>0</type>
-    <access>0</access>
-    <database>0</database>
-    <port>0</port>
-    <username>0</username>
-    <password>0</password>
+    <name>Governanca_PRD</name>
+    <server>basalto15.bireme.br</server>
+    <type>POSTGRESQL</type>
+    <access>Native</access>
+    <database>Governanca</database>
+    <port>5432</port>
+    <username>luciano.santos</username>
+    <password>Encrypted 2be98afc86aa7f288be1a8e228ec3f699</password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
@@ -528,7 +528,7 @@
       </attribute>
       <attribute>
         <code>PORT_NUMBER</code>
-        <attribute>0</attribute>
+        <attribute>5432</attribute>
       </attribute>
       <attribute>
         <code>PRESERVE_RESERVED_WORD_CASE</code>
@@ -565,6 +565,11 @@
     </hop>
     <hop>
       <from>JSON input</from>
+      <to>Split fields</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Split fields</from>
       <to>Meta_Dados</to>
       <enabled>Y</enabled>
     </hop>
@@ -589,33 +594,52 @@
 			else 
 				rf.id 
 		end as ID, 
-		rf.cooperative_center_code as CC, rf.literature_type as TL, 
-		rf.treatment_level AS NT, so.title_serial as TA,  
-		so.total_number_of_volumes as VL, so.volume_serial as FA, so.issn as ISSN, 
+		rf.cooperative_center_code as CC, 
+		rf.literature_type as TL, 
+		rf.treatment_level AS NT, 
+		so.title_serial as TA,  
+		so.total_number_of_volumes as VL, 
+		so.volume_serial as FA, 
+		so.issn as ISSN, 
 		cast(left(case when rf.publication_date_normalized REGEXP'[a-z].[A-Z]' then NULL else rf.publication_date_normalized end, 4)as DECIMAL) as DP, 
-		so.publication_city as CY, rf.publication_type as PT, 
-		rf.created_time as CT, rf.updated_time as UT,  
-		rf.status as ST, rf.indexer_cc_code as ICC, 
+		utl.code as CY, 
+		rf.publication_type as PT, 
+		rf.created_time as CT, 
+		rf.updated_time as UT,  
+		rf.status as ST, 
+		rf.indexer_cc_code as ICC, 
 		CASE WHEN JSON_VALID(so.title_monographic) = 0 THEN '[{"text": "JSON Titulo Monografia Inválido"}]' ELSE so.title_monographic END as BOOK_TITLE, 
-		al.alternate_id as AI, utl.name as CP, 
-		rf.publication_date_normalized as DA, so.edition as ED, 
-		rf.transfer_date_to_database as ENTRY_DATE, so.isbn as ISBN, 
-		lo.cooperative_center_code as LO, so.publisher as PU, 
+		al.alternate_id as AI, 
+		utl.code, 
+		utl.name as CP, 
+		rf.publication_date_normalized as DA, 
+		so.edition as ED, 
+		rf.transfer_date_to_database as ENTRY_DATE, 
+		so.isbn as ISBN, 
+		lo.cooperative_center_code as LO, 
+		so.publisher as PU, 
 		rf.non_decs_region as Region, 
 		CASE WHEN an.title IS NOT NULL OR an.title &lt;&gt; '' THEN
 				CASE WHEN JSON_VALID(an.pages) = 0 THEN '[{"text": "JSON Paginas Inválido"}]' ELSE an.pages END
 			WHEN so.title_monographic IS NOT NULL OR so.title_monographic &lt;&gt; '' THEN
 				CASE WHEN JSON_VALID(so.pages_monographic) = 0 THEN '[{"text": "JSON Paginas Inválido"}]' ELSE so.pages_monographic END 
 		END as PG, 
-		so.thesis_dissertation_institution as TH_IN, so.thesis_dissertation_leader as TH_LE, 
-		so.thesis_dissertation_academic_title as TH_TI, lo.inventory_number as TOMBO, 
-		CURRENT_DATE as dt_in, CURRENT_DATE as dt_up 
-from	biblioref_reference as rf left join biblioref_referenceanalytic as an on 
-		rf.id = an.reference_ptr_id left join biblioref_referencealternateid as al on 
-		rf.id = al.reference_id left join biblioref_referencesource as so on 
-		an.source_id = so.reference_ptr_id left join utils_country as utl on 
-		so.publication_country_id = utl.id left join biblioref_referencelocal as lo on 
-		so.reference_ptr_id = lo.source_id LIMIT ${lim_ini}, ${lim_fim};
+		so.thesis_dissertation_institution as TH_IN, 
+		so.thesis_dissertation_leader as TH_LE, 
+		so.thesis_dissertation_academic_title as TH_TI, 
+		lo.inventory_number as TOMBO, 
+		CURRENT_DATE as dt_in, 
+		CURRENT_DATE as dt_up   
+from	biblioref_reference as rf 			left join biblioref_referenceanalytic as an on 
+		rf.id = an.reference_ptr_id 		left join biblioref_referencealternateid as al on 
+		rf.id = al.reference_id 			left join biblioref_referencesource as so on 
+		an.source_id = so.reference_ptr_id 	left join title_title t on 
+		so.title_serial = t.shortened_title left join title_title_country tc on 
+		t.id = tc.title_id 					left join utils_country as utl on 
+		tc.country_id = utl.id 				left join biblioref_referencelocal as lo on 
+		so.reference_ptr_id = lo.source_id 
+where 	rf.treatment_level like '%a%' 
+LIMIT 	${lim_ini}, ${lim_fim};
 		</sql>
     <limit>0</limit>
     <lookup/>
@@ -756,7 +780,7 @@ from	biblioref_reference as rf left join biblioref_referenceanalytic as an on
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <connection>Governanca</connection>
+    <connection>Governanca_PRD</connection>
     <schema/>
     <table>meta_dados</table>
     <commit>1000</commit>
@@ -875,10 +899,6 @@ from	biblioref_reference as rf left join biblioref_referenceanalytic as an on
         <stream_name>PU</stream_name>
       </field>
       <field>
-        <column_name>region</column_name>
-        <stream_name>Region</stream_name>
-      </field>
-      <field>
         <column_name>pg_i</column_name>
         <stream_name>PG_i</stream_name>
       </field>
@@ -918,6 +938,18 @@ from	biblioref_reference as rf left join biblioref_referenceanalytic as an on
         <column_name>dt_up</column_name>
         <stream_name>dt_up</stream_name>
       </field>
+      <field>
+        <column_name>cidade</column_name>
+        <stream_name>cidade</stream_name>
+      </field>
+      <field>
+        <column_name>estado</column_name>
+        <stream_name>estado</stream_name>
+      </field>
+      <field>
+        <column_name>code</column_name>
+        <stream_name>code</stream_name>
+      </field>
     </fields>
     <attributes/>
     <cluster_schema/>
@@ -928,8 +960,8 @@ from	biblioref_reference as rf left join biblioref_referenceanalytic as an on
       </output>
     </remotesteps>
     <GUI>
-      <xloc>816</xloc>
-      <yloc>112</yloc>
+      <xloc>800</xloc>
+      <yloc>256</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
@@ -968,6 +1000,66 @@ from	biblioref_reference as rf left join biblioref_referenceanalytic as an on
     </remotesteps>
     <GUI>
       <xloc>400</xloc>
+      <yloc>112</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>Split fields</name>
+    <type>FieldSplitter</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <splitfield>Region</splitfield>
+    <delimiter>,</delimiter>
+    <enclosure/>
+    <fields>
+      <field>
+        <name>cidade</name>
+        <id/>
+        <idrem>N</idrem>
+        <type>String</type>
+        <format/>
+        <group/>
+        <decimal/>
+        <currency/>
+        <length>-1</length>
+        <precision>-1</precision>
+        <nullif/>
+        <ifnull/>
+        <trimtype>none</trimtype>
+      </field>
+      <field>
+        <name>estado</name>
+        <id/>
+        <idrem>N</idrem>
+        <type>String</type>
+        <format/>
+        <group/>
+        <decimal/>
+        <currency/>
+        <length>-1</length>
+        <precision>-1</precision>
+        <nullif/>
+        <ifnull/>
+        <trimtype>none</trimtype>
+      </field>
+    </fields>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>800</xloc>
       <yloc>112</yloc>
       <draw>Y</draw>
     </GUI>
