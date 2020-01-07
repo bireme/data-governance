@@ -1,0 +1,539 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=iso-8859-15">
+<style>
+      .table {
+        background-color:#F5F5FF;
+        border-left:4px solid gray;
+        border-bottom:4px solid gray;
+        border-top:4px solid gray;
+        border-right:4px solid gray;
+        margin-bottom:3em;
+        margin-left:2em;
+        margin-right:2em;
+        padding:1em;
+      }
+      .tableNameHeading h1 {
+          display: inline;
+        font-family: Segoe UI, Arial, sans-serif;
+        font-size:125%;
+        font-weight:bold;
+      }
+        
+      .tableNameHeading h2 {
+        display: inline;
+        font-family: Segoe UI, Arial, sans-serif;
+        font-size:115%;
+        font-weight:normal;
+      }
+      
+      .tableComment { 
+        background-color:#e4efff; margin-bottom:20px;
+      }
+      
+      .tableDefinition { 
+        padding:2px;
+        border-collapse:collapse;
+        margin-top:1em;
+      }
+
+      .tdTableDefinition {
+        padding-right:10px;
+        vertical-align:top;
+        border-top:1px solid #C0C0C0;
+      }
+
+      .tdLogicalColName {
+        width:20em;
+      }
+      
+      .tdPhysicalColName {
+        width:20em;
+      }
+      
+      .tdDataType {
+        width:10em;
+      }
+
+      .tdPkFlag {
+        width:4em;
+      }
+
+      .tdNullFlag {
+        width:9em;
+      }
+
+      .tdTableHeading {
+        padding:2px;
+        font-family: Segoe UI, Arial, sans-serif;
+        font-weight: bold;
+        vertical-align:top;
+        border-bottom: 1px solid #C0C0C0;
+        background-color: rgb(240,240,240);
+      }
+      
+      .subTitle {
+        font-family: Segoe UI, Arial, sans-serif;
+        font-weight: bold;
+      }
+
+      .references {
+      }
+      .comment {
+        color:#666666;
+        margin-left:3em;
+        padding:0.25em;
+      }
+    </style>
+<title>dicionario_medline</title>
+</head>
+<body>
+<center>
+<h2>dicionario_medline</h2>
+</center>
+<h3>List of tables</h3>
+<ul>
+<li>
+<a href="#st_autores">st_autores</a>
+</li>
+<li>
+<a href="#st_base_dados">st_base_dados</a>
+</li>
+<li>
+<a href="#st_descritores_qualificadores">st_descritores_qualificadores</a>
+</li>
+<li>
+<a href="#st_estrategias">st_estrategias</a>
+</li>
+<li>
+<a href="#st_idiomas">st_idiomas</a>
+</li>
+<li>
+<a href="#st_jd">st_jd</a>
+</li>
+<li>
+<a href="#st_meta_dados">st_meta_dados</a>
+</li>
+<li>
+<a href="#st_resumo">st_resumo</a>
+</li>
+<li>
+<a href="#st_titulo">st_titulo</a>
+</li>
+</ul>
+<div class="tableNameHeading">
+<h1>st_autores<a name="st_autores"></a>
+</h1>
+<h2>
+      (Physical Name: st_autores)
+      </h2>
+<p class="comment">Tabela com dados de Autores de Medline</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (MEDLINE_Autor_Afiliacao.txt) (id)</td><td class="tdTableDefinition">BIGINT</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">Nome da base processada (MEDLINE_Autor_Afiliacao.txt) (fi)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sch</td><td class="tdTableDefinition">Label do Tema (MEDLINE_Autor_Afiliacao.txt) (sch)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">au</td><td class="tdTableDefinition">Nome do Autor (MEDLINE_Autor_Afiliacao.txt) (au)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fau</td><td class="tdTableDefinition">Nome e Sobre Nome do Autor ((MEDLINE_Autor_Afiliacao.txt) (fau)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af1</td><td class="tdTableDefinition">Universidade (MEDLINE_Autor_Afiliacao.txt) (af1)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af2</td><td class="tdTableDefinition">Faculdade (MEDLINE_Autor_Afiliacao.txt) (af2)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af3</td><td class="tdTableDefinition">Departamento (MEDLINE_Autor_Afiliacao.txt) (af3)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ci</td><td class="tdTableDefinition">Cidade (MEDLINE_Autor_Afiliacao.txt) (ci)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">paf</td><td class="tdTableDefinition">Pa&iacute;s de Afilia&ccedil;&atilde;o (MEDLINE_Autor_Afiliacao.txt) (paf)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cn</td><td class="tdTableDefinition">Autor Corporativo (MEDLINE_Autor_Afiliacao.txt) (cn)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">auid</td><td class="tdTableDefinition">Identificador do Autor (MEDLINE_Autor_Afiliacao.txt) (auid)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_base_dados<a name="st_base_dados"></a>
+</h1>
+<h2>
+      (Physical Name: st_base_dados)
+      </h2>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (MEDLINE_id_issn_base_de_dados.txt) (id)</td><td class="tdTableDefinition">BIGINT</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">Nome da base processada (MEDLINE_id_issn_base_de_dados.txt) (fi)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sch</td><td class="tdTableDefinition">Label do Tema (MEDLINE_id_issn_base_de_dados.txt) (sch)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">IS</td><td class="tdTableDefinition">Issn (MEDLINE_id_issn_base_de_dados.txt) (IS)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">db</td><td class="tdTableDefinition">Base de Dados (MEDLINE_id_issn_base_de_dados.txt) (db)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sf</td><td class="tdTableDefinition">(MEDLINE_id_issn_base_de_dados.txt) (sf)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_descritores_qualificadores<a name="st_descritores_qualificadores"></a>
+</h1>
+<h2>
+      (Physical Name: st_descritores_qualificadores)
+      </h2>
+<p class="comment">Tabela com dados de Descritores e respectiivos Quialificadores</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (MEDLINE_id_issn_descritor_qualificador.txt (id)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">Nome da base processada (MEDLINE_id_issn_descritor_qualificador.txt) (fi)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sch</td><td class="tdTableDefinition">Label do Tema (MEDLINE_id_issn_descritor_qualificador.txt) (sch)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">IS</td><td class="tdTableDefinition">Issn (MEDLINE_id_issn_descritor_qualificador.txt) (IS)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">mhd</td><td class="tdTableDefinition">Descritor (MEDLINE_id_issn_descritor_qualificador.txt) (mhd)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">mhs</td><td class="tdTableDefinition">Qualificador (MEDLINE_id_issn_descritor_qualificador.txt) (mhs)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">mtn</td><td class="tdTableDefinition">Categoria hier&aacute;rquica (MEDLINE_id_issn_descritor_qualificador.txt) (mtn)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_estrategias<a name="st_estrategias"></a>
+</h1>
+<h2>
+      (Physical Name: st_estrategias)
+      </h2>
+<p class="comment">Tabela com dados de Estrat&eacute;gias de Busca</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (MEDLINE_Autor_Afiliacao.txt) (id)</td><td class="tdTableDefinition">BIGINT</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">banco</td><td class="tdTableDefinition">Banco de Dados (MEDLINE_id_tema_subtema.txt) (banco)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tema</td><td class="tdTableDefinition">Tema da Estrategia (MEDLINE_id_tema_subtema.txt) (tema)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sub_tema1</td><td class="tdTableDefinition">Sub Tema 1 da Estrategia Banco de Dados (MEDLINE_id_tema_subtema.txt) (sub_tema1)</td><td class="tdTableDefinition">VARCHAR(500)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sub_tema2</td><td class="tdTableDefinition">Sub Tema 2 da Estrategia Banco de Dados (MEDLINE_id_tema_subtema.txt) (sub_tema2)</td><td class="tdTableDefinition">VARCHAR(500)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sub_tema12</td><td class="tdTableDefinition">Jun&ccedil;&atilde;o dos Sub Tema 1 e 2 da Estrategia Banco de Dados (MEDLINE_id_tema_subtema.txt) (sub_tema12)</td><td class="tdTableDefinition">VARCHAR(1000)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_idiomas<a name="st_idiomas"></a>
+</h1>
+<h2>
+      (Physical Name: st_idiomas)
+      </h2>
+<p class="comment">Tabela com dados de Idiomas das respectivas publica&ccedil;&otilde;es</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (MEDLINE_id_issn_idioma.txt) (id)</td><td class="tdTableDefinition">BIGINT</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">Nome da base processada (MEDLINE_id_issn_idioma.txt) (fi)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sch</td><td class="tdTableDefinition">Label do Tema (MEDLINE_id_issn_idioma.txt) (sch)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">IS</td><td class="tdTableDefinition">Issn (MEDLINE_id_issn_idioma.txt) (IS)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la</td><td class="tdTableDefinition">Idioma (MEDLINE_id_issn_idioma.txt) (la)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_jd<a name="st_jd"></a>
+</h1>
+<h2>
+      (Physical Name: st_jd)
+      </h2>
+<p class="comment">Tabela com dados de Journal Descriptors</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (MEDLINE_id_issn_journal_descriptor.txt (id)</td><td class="tdTableDefinition">BIGINT</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">Nome da base processada (MEDLINE_id_issn_journal_descriptor.txt) (fi)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sch</td><td class="tdTableDefinition">Label do Tema (MEDLINE_id_issn_journal_descriptor.txt) (sch)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">IS</td><td class="tdTableDefinition">Issn (MEDLINE_id_issn_journal_descriptor.txt (IS)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">jd</td><td class="tdTableDefinition">Journal Descriptor (MEDLINE_id_issn_journal_descriptor.txt (jd)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_meta_dados<a name="st_meta_dados"></a>
+</h1>
+<h2>
+      (Physical Name: st_meta_dados)
+      </h2>
+<p class="comment">Tabela com Meta Dados das Publica&ccedil;&otilde;es</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (MEDLINE_todos.txt) (id)</td><td class="tdTableDefinition">BIGINT</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">Nome da base processada (MEDLINE_todos.txt) (fi)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sch</td><td class="tdTableDefinition">Label do Tema (MEDLINE_todos.txt) (sch)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cc</td><td class="tdTableDefinition">Centro Cooperante (MEDLINE_todos.txt) (cc)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tl</td><td class="tdTableDefinition">Tipo de Literatura (MEDLINE_todos.txt) (tl)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">nt</td><td class="tdTableDefinition">N&iacute;vel de Tratamento (MEDLINE_todos.txt) (nt)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ur</td><td class="tdTableDefinition">Url (MEDLINE_todos.txt) (ur)</td><td class="tdTableDefinition">BIGINT</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ta</td><td class="tdTableDefinition">T&iacute;tulo Abreviado (MEDLINE_todos.txt) (ta)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">vi</td><td class="tdTableDefinition">Volume (MEDLINE_todos.txt) (vi)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fa</td><td class="tdTableDefinition">N&iacute;vel do Fasc&iacute;culo (MEDLINE_todos.txt) (fa)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">IS</td><td class="tdTableDefinition">Issn (MEDLINE_todos.txt) (IS)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dp</td><td class="tdTableDefinition">Data de Publica&ccedil;&atilde;o (MEDLINE_todos.txt) (dp)</td><td class="tdTableDefinition">BIGINT</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cy</td><td class="tdTableDefinition">Cidade de Publica&ccedil;&atilde;o (MEDLINE_todos.txt) (cy)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la</td><td class="tdTableDefinition">Idoma (MEDLINE_todos.txt) (la)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">db</td><td class="tdTableDefinition">Base de Dados (MEDLINE_todos.txt) (db)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">jd</td><td class="tdTableDefinition">Journal Descriptors (MEDLINE_todos.txt) (jd)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pt</td><td class="tdTableDefinition">Tipo de Publica&ccedil;&atilde;o (MEDLINE_todos.txt) (tp)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_resumo<a name="st_resumo"></a>
+</h1>
+<h2>
+      (Physical Name: st_resumo)
+      </h2>
+<p class="comment">Tabela com dados de Resumo das respectivas publica&ccedil;&otilde;es</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (MEDLINE_id_resumo_idioma.txt) (id)</td><td class="tdTableDefinition">BIGINT</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">Nome da base processada (MEDLINE_id_resumo_idioma.txt) (fi)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sch</td><td class="tdTableDefinition">Label do Tema (MEDLINE_id_resumo_idioma.txt) (sch)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tl</td><td class="tdTableDefinition">Tipo de Literatura (MEDLINE_id_resumo_idioma.txt) (tl)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">nt</td><td class="tdTableDefinition">N&iacute;vel de Tratamento (MEDLINE_id_resumo_idioma.txt) (nt)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ab</td><td class="tdTableDefinition">Resumo (MEDLINE_id_resumo_idioma.txt) (ab)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la</td><td class="tdTableDefinition">Idioma (MEDLINE_id_resumo_idioma.txt) (la)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_titulo<a name="st_titulo"></a>
+</h1>
+<h2>
+      (Physical Name: st_titulo)
+      </h2>
+<p class="comment">Tebela com dados de Titulo das respectivas publica&ccedil;&otilde;es</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (MEDLINE_id_titulo_idioma.txt) (id)</td><td class="tdTableDefinition">BIGINT</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">Nome da base processada (MEDLINE_id_titulo_idioma.txt) (fi)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sch</td><td class="tdTableDefinition">Label do Tema (MEDLINE_id_titulo_idioma.txt) (sch)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tl</td><td class="tdTableDefinition">Tipo de Literatura (MEDLINE_id_titulo_idioma.txt) (tl)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">nt</td><td class="tdTableDefinition">N&iacute;vel de Tratamento (MEDLINE_id_titulo_idioma.txt) (nt)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ti</td><td class="tdTableDefinition">T&iacute;tulo (MEDLINE_id_titulo_idioma.txt) (ti)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la</td><td class="tdTableDefinition">Idioma (MEDLINE_id_titulo_idioma.txt) (la)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+</body>
+</html>

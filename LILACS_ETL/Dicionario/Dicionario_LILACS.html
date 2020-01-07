@@ -1,0 +1,1703 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=iso-8859-15">
+<style>
+      .table {
+        background-color:#F5F5FF;
+        border-left:4px solid gray;
+        border-bottom:4px solid gray;
+        border-top:4px solid gray;
+        border-right:4px solid gray;
+        margin-bottom:3em;
+        margin-left:2em;
+        margin-right:2em;
+        padding:1em;
+      }
+      .tableNameHeading h1 {
+          display: inline;
+        font-family: Segoe UI, Arial, sans-serif;
+        font-size:125%;
+        font-weight:bold;
+      }
+        
+      .tableNameHeading h2 {
+        display: inline;
+        font-family: Segoe UI, Arial, sans-serif;
+        font-size:115%;
+        font-weight:normal;
+      }
+      
+      .tableComment { 
+        background-color:#e4efff; margin-bottom:20px;
+      }
+      
+      .tableDefinition { 
+        padding:2px;
+        border-collapse:collapse;
+        margin-top:1em;
+      }
+
+      .tdTableDefinition {
+        padding-right:10px;
+        vertical-align:top;
+        border-top:1px solid #C0C0C0;
+      }
+
+      .tdLogicalColName {
+        width:20em;
+      }
+      
+      .tdPhysicalColName {
+        width:20em;
+      }
+      
+      .tdDataType {
+        width:10em;
+      }
+
+      .tdPkFlag {
+        width:4em;
+      }
+
+      .tdNullFlag {
+        width:9em;
+      }
+
+      .tdTableHeading {
+        padding:2px;
+        font-family: Segoe UI, Arial, sans-serif;
+        font-weight: bold;
+        vertical-align:top;
+        border-bottom: 1px solid #C0C0C0;
+        background-color: rgb(240,240,240);
+      }
+      
+      .subTitle {
+        font-family: Segoe UI, Arial, sans-serif;
+        font-weight: bold;
+      }
+
+      .references {
+      }
+      .comment {
+        color:#666666;
+        margin-left:3em;
+        padding:0.25em;
+      }
+    </style>
+<title>Dicionario</title>
+</head>
+<body>
+<center>
+<h2>Dicionario</h2>
+</center>
+<h3>List of tables</h3>
+<ul>
+<li>
+<a href="#autor_afiliacao">autor_afiliacao</a>
+</li>
+<li>
+<a href="#descritores_qualificadores">descritores_qualificadores</a>
+</li>
+<li>
+<a href="#estrategias">estrategias</a>
+</li>
+<li>
+<a href="#meta_dados">meta_dados</a>
+</li>
+<li>
+<a href="#monitor_etl">monitor_etl</a>
+</li>
+<li>
+<a href="#regional_office">regional_office</a>
+</li>
+<li>
+<a href="#sjr">sjr</a>
+</li>
+<li>
+<a href="#st_assunto_revista">st_assunto_revista</a>
+</li>
+<li>
+<a href="#st_autor_afiliacao">st_autor_afiliacao</a>
+</li>
+<li>
+<a href="#st_autor_afiliacao_temp">st_autor_afiliacao_temp</a>
+</li>
+<li>
+<a href="#st_autor_afiliacao_transf_temp">st_autor_afiliacao_transf_temp</a>
+</li>
+<li>
+<a href="#st_autor_keywords">st_autor_keywords</a>
+</li>
+<li>
+<a href="#st_base_dados">st_base_dados</a>
+</li>
+<li>
+<a href="#st_complementos">st_complementos</a>
+</li>
+<li>
+<a href="#st_desc_quali_checktag">st_desc_quali_checktag</a>
+</li>
+<li>
+<a href="#st_descritor_qualificadores">st_descritor_qualificadores</a>
+</li>
+<li>
+<a href="#st_evento">st_evento</a>
+</li>
+<li>
+<a href="#st_idiomas">st_idiomas</a>
+</li>
+<li>
+<a href="#st_idiomas_temp">st_idiomas_temp</a>
+</li>
+<li>
+<a href="#st_instituto">st_instituto</a>
+</li>
+<li>
+<a href="#st_pais_idiomas">st_pais_idiomas</a>
+</li>
+<li>
+<a href="#st_resumo">st_resumo</a>
+</li>
+<li>
+<a href="#st_thesaurus_des_qua">st_thesaurus_des_qua</a>
+</li>
+<li>
+<a href="#st_thesaurus_term_desc">st_thesaurus_term_desc</a>
+</li>
+<li>
+<a href="#st_titulo">st_titulo</a>
+</li>
+<li>
+<a href="#st_titulo_range">st_titulo_range</a>
+</li>
+<li>
+<a href="#st_titulo_variacao">st_titulo_variacao</a>
+</li>
+<li>
+<a href="#st_url">st_url</a>
+</li>
+<li>
+<a href="#tab_pais">tab_pais</a>
+</li>
+</ul>
+<div class="tableNameHeading">
+<h1>autor_afiliacao<a name="autor_afiliacao"></a>
+</h1>
+<h2>
+      (Physical Name: autor_afiliacao)
+      </h2>
+<p class="comment">Tabela final com dados tranformados de Afilia&ccedil;&otilde;es da tabela st_autor_afiliacao</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">au</td><td class="tdTableDefinition">Autor Pessoal (biblioref_referenceanalytic.individual_author ou biblioref_referencesource.individual_author_monographic ou biblioref_referencesource.individual_author_collection)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ordem_au</td><td class="tdTableDefinition">Ordem de Inclus&atilde;o do Autor na Base (auto num&eacute;ric)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af1</td><td class="tdTableDefinition">Afilia&ccedil;&atilde;o Autor 1 (Ex.: Universidade) (deriva do campo au)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af2</td><td class="tdTableDefinition">Afilia&ccedil;&atilde;o Autor 2 (Ex.: Faculdade) (deriva do campo au)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af3</td><td class="tdTableDefinition">Afilia&ccedil;&atilde;o Autor 3 (Ex.: Departamento) (deriva do campo au)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ci</td><td class="tdTableDefinition">Cidade de afilia&ccedil;&atilde;o (deriva de campo au)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">paf</td><td class="tdTableDefinition">Pa&iacute;s de afilia&ccedil;&atilde;o (deriva de campo au)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cn</td><td class="tdTableDefinition">** Obsoleto (foi tratado na tabela st_evento)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">auid</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">gr</td><td class="tdTableDefinition">Grau de Responsabilidade (deriva de campo au)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">nome_s_ab</td><td class="tdTableDefinition">Sobre Nome e Nome Abreviado do Autor (deriva de campo au)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">nome_f</td><td class="tdTableDefinition">Nome (sem abrevia&ccedil;&atilde;o) e Sobre Nome do Autor (deriva de campo au)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af1_9_1_1</td><td class="tdTableDefinition">Nome completo da Afili&ccedil;&atilde;o (deriva do campo af1)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af1_10</td><td class="tdTableDefinition">Nome abrevidado da Afilia&ccedil;&atilde;o (deriva do campo af1)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af2_9_1_1</td><td class="tdTableDefinition">Nome completo da Afili&ccedil;&atilde;o (deriva do campo af2)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af2_10</td><td class="tdTableDefinition">Nome abrevidado da Afilia&ccedil;&atilde;o (deriva do campo af2)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af3_9_1_1</td><td class="tdTableDefinition">Nome completo da Afili&ccedil;&atilde;o (deriva do campo af3)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af3_10</td><td class="tdTableDefinition">Nome abrevidado da Afilia&ccedil;&atilde;o (deriva do campo af3)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tl</td><td class="tdTableDefinition">Tipo de Literatura (biblioref_reference.literature_type)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">nt</td><td class="tdTableDefinition">N&iacute;vel de Tratamento (biblioref_reference.treatment_level)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">th_orientador</td><td class="tdTableDefinition">Tese, Disserta&ccedil;&atilde;o &ndash; Orientador (biblioref_referencesource.thesis_dissertation_leader)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">th_titulo_academico</td><td class="tdTableDefinition">Tese, Disserta&ccedil;&atilde;o &ndash; T&iacute;tulo Acad&ecirc;mico (biblioref_referencesource.thesis_dissertation_academic_title)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>descritores_qualificadores<a name="descritores_qualificadores"></a>
+</h1>
+<h2>
+      (Physical Name: descritores_qualificadores)
+      </h2>
+<p class="comment">Dados de Descritores e respectivos Qualificadores</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">issn</td><td class="tdTableDefinition">Issn (biblioref_referencesource.issn)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">mhd_cod</td><td class="tdTableDefinition">C&oacute;digo do Descritor (main_descriptor.code)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">mhd</td><td class="tdTableDefinition">Descri&ccedil;&atilde;o do Descritor (main_descriptor.text)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">mhs_cod</td><td class="tdTableDefinition">C&oacute;digo do Qualificador (main_descriptor.code)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">mhs</td><td class="tdTableDefinition">Descri&ccedil;&atilde;o do Qualificador (main_descriptor.text)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">decs_code_des</td><td class="tdTableDefinition">C&oacute;digo do Descritor (thesaurus_identifierdesc.decs_code)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">en_des</td><td class="tdTableDefinition">Descritor em Ingl&ecirc;s (thesaurus_termlistdesc.term_string language_code = 'en')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">es_des</td><td class="tdTableDefinition">Descritor em Espanhol (thesaurus_termlistdesc.term_string language_code = 'es')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fr_des</td><td class="tdTableDefinition">Descritor em Franc&ecirc;s (thesaurus_termlistdesc.term_string language_code = 'fr')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pt_br_des</td><td class="tdTableDefinition">Descritor em Portugu&ecirc;s (thesaurus_termlistdesc.term_string language_code = 'pt-br')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">decs_code_qua</td><td class="tdTableDefinition">C&oacute;digo do Qualificador (thesaurus_identifierdesc.decs_code)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">en_qua</td><td class="tdTableDefinition">Qualificador em Ingl&ecirc;s (thesaurus_termlistdesc.term_string language_code = 'en')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">es_qua</td><td class="tdTableDefinition">Qualificador em Espanhol (thesaurus_termlistdesc.term_string language_code = 'es')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fr_qua</td><td class="tdTableDefinition">Qualificador em Franc&ecirc;s (thesaurus_termlistdesc.term_string language_code = 'fr')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pt_br_qua</td><td class="tdTableDefinition">Qualificador em Portugu&ecirc;s (thesaurus_termlistdesc.term_string language_code = 'pt-br')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tipo_desc</td><td class="tdTableDefinition">Tipo de Descritor (main_descriptor.primary ou 'check_tags')</td><td class="tdTableDefinition">VARCHAR(20)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>estrategias<a name="estrategias"></a>
+</h1>
+<h2>
+      (Physical Name: estrategias)
+      </h2>
+<p class="comment">Tabela com os IDs de Publica&ccedil;&otilde;es em uma ou mais Tabela contendo as Estrat&eacute;gias de Busca. Dados utilizados para infometria e na gera&ccedil;&atilde;o do arquivo XML do IAHX.</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de uma publica&ccedil;&atilde;o em uma determinada Estrat&eacute;gia</td><td class="tdTableDefinition">BIGINT</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">banco</td><td class="tdTableDefinition">Banco referentre a publica&ccedil;&atilde;o (LILACS)</td><td class="tdTableDefinition">VARCHAR(100)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id_iahx</td><td class="tdTableDefinition">Identificador IAHX (ex.: lil-216946, biblio-833068)</td><td class="tdTableDefinition">VARCHAR(100)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tema</td><td class="tdTableDefinition">Tema da Estrat&eacute;gia (Cluster)</td><td class="tdTableDefinition">VARCHAR(100)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sub_tema1</td><td class="tdTableDefinition">Sub Tema1 da Estrat&eacute;gia</td><td class="tdTableDefinition">VARCHAR(500)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sub_tema2</td><td class="tdTableDefinition">Sub Tema2 da Estrat&eacute;gia</td><td class="tdTableDefinition">VARCHAR(500)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sub_tema12</td><td class="tdTableDefinition">Jun&ccedil;&atilde;o dos Sub Tema 1 e 2</td><td class="tdTableDefinition">VARCHAR(1000)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr>
+<td colspan="4">
+<div class="comment">Data de Inclus&atilde;o (ETL)</div>
+</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr>
+<td colspan="4">
+<div class="comment">Data de Atualiza&ccedil;&atilde;o (ETL)</div>
+</td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>meta_dados<a name="meta_dados"></a>
+</h1>
+<h2>
+      (Physical Name: meta_dados)
+      </h2>
+<p class="comment">Tabela central para rela&ccedil;&atilde;o entre todas as tabelas do modelo com os respectivos Meta Dados</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cc</td><td class="tdTableDefinition">Centro Cooperante (biblioref_reference.cooperative_center_code)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tl</td><td class="tdTableDefinition">Tipo de Literatura (biblioref_reference.literature_type)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">nt</td><td class="tdTableDefinition">N&iacute;vel de Tratamento (biblioref_reference.treatment_level)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ta</td><td class="tdTableDefinition">T&iacute;tulo Abreviado (biblioref_referencesource.title_serial ou title_monographic ou title_collection)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">vi</td><td class="tdTableDefinition">Volume (biblioref_referencesource.total_number_of_volumes)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">vis</td><td class="tdTableDefinition">Volume (n&iacute;vel s&eacute;rie) (biblioref_referencesource.volume_serial)</td><td class="tdTableDefinition">VARCHAR(100)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">vim</td><td class="tdTableDefinition">Volume (n&iacute;vel monogr&aacute;fico) (biblioref_referencesource.volume_monographic)</td><td class="tdTableDefinition">VARCHAR(100)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fa</td><td class="tdTableDefinition">N&iacute;vel do Fasc&iacute;culo (n&iacute;vel s&eacute;rie) (biblioref_referencesource.issue_number)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">issn</td><td class="tdTableDefinition">Issn (biblioref_referencesource.issn)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dp</td><td class="tdTableDefinition">Data de Publica&ccedil;&atilde;o (biblioref_reference.publication_date_normalized)</td><td class="tdTableDefinition">VARCHAR(25)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cy</td><td class="tdTableDefinition">Cidade de Publica&ccedil;&atilde;o (biblioref_referencesource.publication_city)</td><td class="tdTableDefinition">VARCHAR(100)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pt</td><td class="tdTableDefinition">Tipo de Publica&ccedil;&atilde;o (biblioref_reference.publication_type)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ct</td><td class="tdTableDefinition">Data de Cria&ccedil;&atilde;o do Registro (biblioref_reference.created_time)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ut</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o do Registro (biblioref_reference.updated_time)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">st</td><td class="tdTableDefinition">Status (biblioref_reference.status)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">icc</td><td class="tdTableDefinition">C&oacute;digo de indexa&ccedil;&atilde;o do Centro Cooperente (biblioref_reference.indexer_cc_code)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">lilacs_original_id</td><td class="tdTableDefinition">Id Original Lilacs (Legado) (biblioref_reference.lilacs_original_id)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">code</td><td class="tdTableDefinition">C&oacute;digo do Pa&iacute;s (utils_country.code)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cp</td><td class="tdTableDefinition">Nome do Pa&iacute;s de Publica&ccedil;&atilde;o (utils_country.name)</td><td class="tdTableDefinition">VARCHAR(100)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">da</td><td class="tdTableDefinition">Data Normalizada (biblioref_reference.publication_date_normalized)</td><td class="tdTableDefinition">VARCHAR(25)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ed</td><td class="tdTableDefinition">Edi&ccedil;&atilde;o (biblioref_referencesource.edition)</td><td class="tdTableDefinition">VARCHAR(150)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">entry_date</td><td class="tdTableDefinition">Data da Transfer&ecirc;ncia Para a Base de Dados (biblioref_reference.transfer_date_to_database)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">isbn</td><td class="tdTableDefinition">Isbn (biblioref_referencesource.isbn)</td><td class="tdTableDefinition">VARCHAR(60)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pu</td><td class="tdTableDefinition">Editora (biblioref_referencesource.publisher)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">non_decs_region</td><td class="tdTableDefinition">Regi&atilde;o n&atilde;o DECS (biblioref_reference.non_decs_region)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tombo</td><td class="tdTableDefinition">Tombo (biblioref_referencelocal.inventory_number)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>monitor_etl<a name="monitor_etl"></a>
+</h1>
+<h2>
+      (Physical Name: monitor_etl)
+      </h2>
+<p class="comment">Tabela com dados quantitativos de carga d&iacute;aria do ETL</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificado (Autonumerico)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">qtde</td><td class="tdTableDefinition">Quantidade de Registros (count)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tabela</td><td class="tdTableDefinition">Nome da Tabela no processo de carga</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tipo</td><td class="tdTableDefinition">Tipo de carga (Inclus&atilde;o ou Altera&ccedil;&atilde;o)</td><td class="tdTableDefinition">VARCHAR(20)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o na tabela</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>regional_office<a name="regional_office"></a>
+</h1>
+<h2>
+      (Physical Name: regional_office)
+      </h2>
+<p class="comment">Tabela com pa&iacute;s e respectivo Escrit&oacute;rio Reginal abreviado, que utilizamos no campo regional_office co arquivo XML do IAHX</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador Autonumber</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">regional_ex</td><td class="tdTableDefinition">Nome da Regional por extenso (who-roG4.txt)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">regional_abv</td><td class="tdTableDefinition">Nome da Regional abrevido (who-roG4.txt)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pais_ex</td><td class="tdTableDefinition">Nome de Pa&iacute;s por extenso (who-roG4.txt)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pais_abv</td><td class="tdTableDefinition">Nome do Pa&iacute;s abrevido (who-roG4.txt)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la</td><td class="tdTableDefinition">Idioma (who-roG4.txt)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>sjr<a name="sjr"></a>
+</h1>
+<h2>
+      (Physical Name: sjr)
+      </h2>
+<p class="comment">Tabela com dados de ISS e respectivo Score, utilizado no calculo do campo boost do arquivo XML do IAHX</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador (sjr.csv)</td><td class="tdTableDefinition">BIGINT</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">titulo</td><td class="tdTableDefinition">Titulo (sjr.csv)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">issn</td><td class="tdTableDefinition">Issn (sjr.csv)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">score</td><td class="tdTableDefinition">Score (sjr.csv) (Utilizado no calculo do boost - XML IAHX)</td><td class="tdTableDefinition">NUMERIC(12,4)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pais</td><td class="tdTableDefinition">Pais (sjr.csv)</td><td class="tdTableDefinition">VARCHAR(200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_assunto_revista<a name="st_assunto_revista"></a>
+</h1>
+<h2>
+      (Physical Name: st_assunto_revista)
+      </h2>
+<p class="comment">Tabela com assuntos de publica&ccedil;&atilde;o de revistas</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">issn</td><td class="tdTableDefinition">Issn da Revista (biblioref_referencesource.issn)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">mhd_cod</td><td class="tdTableDefinition">C&oacute;digo do Assunto (main_descriptor.code)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">mhd</td><td class="tdTableDefinition">Descritor (main_descriptor.text)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tipo_desc</td><td class="tdTableDefinition">Tipo Descritor (main_descriptor.primary)</td><td class="tdTableDefinition">VARCHAR(20)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_autor_afiliacao<a name="st_autor_afiliacao"></a>
+</h1>
+<h2>
+      (Physical Name: st_autor_afiliacao)
+      </h2>
+<p class="comment">Tabela com dados tranformados de Nomes de Autores da tabela st_autor_afiliacao_transf_temp</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">au</td><td class="tdTableDefinition">Autor Pessoal (biblioref_referenceanalytic.individual_author ou biblioref_referencesource.individual_author_monographic ou biblioref_referencesource.individual_author_collection)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ordem_au</td><td class="tdTableDefinition">Ordem de Inclus&atilde;o do Autor na Base (auto num&eacute;ric)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af1</td><td class="tdTableDefinition">Afilia&ccedil;&atilde;o Autor 1 (Ex.: Universidade) (deriva do campo au)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af2</td><td class="tdTableDefinition">Afilia&ccedil;&atilde;o Autor 2 (Ex.: Faculdade) (deriva do campo au)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af3</td><td class="tdTableDefinition">Afilia&ccedil;&atilde;o Autor 3 (Ex.: Departamento) (deriva do campo au)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ci</td><td class="tdTableDefinition">Cidade de afilia&ccedil;&atilde;o (deriva de campo au)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">paf</td><td class="tdTableDefinition">Pa&iacute;s de afilia&ccedil;&atilde;o (deriva de campo au)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cn</td><td class="tdTableDefinition">** Obsoleto (foi tratado na tabela st_evento)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">auid</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">gr</td><td class="tdTableDefinition">Grau de Responsabilidade (deriva de campo au)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">nome_s_ab</td><td class="tdTableDefinition">Sobre Nome e Nome Abreviado do Autor (deriva de campo au)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">nome_f</td><td class="tdTableDefinition">Nome (sem abrevia&ccedil;&atilde;o) e Sobre Nome do Autor (deriva de campo au)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tl</td><td class="tdTableDefinition">Tipo de Literatura (biblioref_reference.literature_type)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">nt</td><td class="tdTableDefinition">N&iacute;vel de Tratamento (biblioref_reference.treatment_level)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">th_orientador</td><td class="tdTableDefinition">Tese, Disserta&ccedil;&atilde;o &ndash; Orientador (biblioref_referencesource.thesis_dissertation_leader)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">th_titulo_academico</td><td class="tdTableDefinition">Tese, Disserta&ccedil;&atilde;o &ndash; T&iacute;tulo Acad&ecirc;mico (biblioref_referencesource.thesis_dissertation_academic_title)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_autor_afiliacao_temp<a name="st_autor_afiliacao_temp"></a>
+</h1>
+<h2>
+      (Physical Name: st_autor_afiliacao_temp)
+      </h2>
+<p class="comment">Tabela para cara inicial de Autores e Afilia&ccedil;&otilde;es do FI-Admin</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">au</td><td class="tdTableDefinition">Autor Pessoal (biblioref_referenceanalytic.individual_author ou biblioref_referencesource.individual_author_monographic ou biblioref_referencesource.individual_author_collection)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tl</td><td class="tdTableDefinition">Tipo de Literatura (biblioref_reference.literature_type)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">nt</td><td class="tdTableDefinition">N&iacute;vel de Tratamento (biblioref_reference.treatment_level)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">th_instituicao</td><td class="tdTableDefinition">Tese, Disserta&ccedil;&atilde;o &ndash; Institui&ccedil;&atilde;o &agrave; Qual se Apresenta (biblioref_referencesource.thesis_dissertation_institution)</td><td class="tdTableDefinition">VARCHAR(300)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">th_orientador</td><td class="tdTableDefinition">Tese, Disserta&ccedil;&atilde;o &ndash; Orientador (biblioref_referencesource.thesis_dissertation_leader)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">th_titulo_academico</td><td class="tdTableDefinition">Tese, Disserta&ccedil;&atilde;o &ndash; T&iacute;tulo Acad&ecirc;mico (biblioref_referencesource.thesis_dissertation_academic_title)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_autor_afiliacao_transf_temp<a name="st_autor_afiliacao_transf_temp"></a>
+</h1>
+<h2>
+      (Physical Name: st_autor_afiliacao_transf_temp)
+      </h2>
+<p class="comment">Tabela com dados tranformados/separados de Afilia&ccedil;&otilde;es, CI, PAF e GRAU_RESP da tabela st_autor_afiliacao_temp</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">au</td><td class="tdTableDefinition">Autor Pessoal (biblioref_referenceanalytic.individual_author ou biblioref_referencesource.individual_author_monographic ou biblioref_referencesource.individual_author_collection)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ordem_au</td><td class="tdTableDefinition">Ordem de Inclus&atilde;o do Autor na Base (auto num&eacute;ric)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af1</td><td class="tdTableDefinition">Afilia&ccedil;&atilde;o Autor 1 (Ex.: Universidade) (deriva do campo au)</td><td class="tdTableDefinition">VARCHAR(3000)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af2</td><td class="tdTableDefinition">Afilia&ccedil;&atilde;o Autor 2 (Ex.: Faculdade) (deriva do campo au)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">af3</td><td class="tdTableDefinition">Afilia&ccedil;&atilde;o Autor 3 (Ex.: Departamento) (deriva do campo au)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ci</td><td class="tdTableDefinition">Cidade de afilia&ccedil;&atilde;o (deriva de campo au)</td><td class="tdTableDefinition">VARCHAR(300)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">paf</td><td class="tdTableDefinition">Pa&iacute;s de afilia&ccedil;&atilde;o (deriva de campo au)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">grau_resp</td><td class="tdTableDefinition">Grau de Responsabilidade (deriva de campo au)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cn</td><td class="tdTableDefinition">** Obsoleto (foi tratado na tabela st_evento)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">auid</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tl</td><td class="tdTableDefinition">Tipo de Literatura (biblioref_reference.literature_type)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">nt</td><td class="tdTableDefinition">N&iacute;vel de Tratamento (biblioref_reference.treatment_level)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">th_orientador</td><td class="tdTableDefinition">Tese, Disserta&ccedil;&atilde;o &ndash; Orientador (biblioref_referencesource.thesis_dissertation_leader)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">th_titulo_academico</td><td class="tdTableDefinition">Tese, Disserta&ccedil;&atilde;o &ndash; T&iacute;tulo Acad&ecirc;mico (biblioref_referencesource.thesis_dissertation_academic_title)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_autor_keywords<a name="st_autor_keywords"></a>
+</h1>
+<h2>
+      (Physical Name: st_autor_keywords)
+      </h2>
+<p class="comment">Tablea com Palavras-Chave do Autor</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ky</td><td class="tdTableDefinition">Palavras-Chave do Autor (biblioref_reference.author_keyword)</td><td class="tdTableDefinition">VARCHAR(3000)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_base_dados<a name="st_base_dados"></a>
+</h1>
+<h2>
+      (Physical Name: st_base_dados)
+      </h2>
+<p class="comment">Tabela com a resctiva Base de Dados das Publica&ccedil;&otilde;es (BBO, LILACS, etc.)</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">db</td><td class="tdTableDefinition">Nome da Base de Dados (database_database.acronym)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">st</td><td class="tdTableDefinition">Status</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_complementos<a name="st_complementos"></a>
+</h1>
+<h2>
+      (Physical Name: st_complementos)
+      </h2>
+<p class="comment">Tabela com dados complementares das respectivas publica&ccedil;&otilde;es</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">lo</td><td class="tdTableDefinition">Localiza&ccedil;&atilde;o do Documento (biblioref_referencelocal.cooperative_center_code)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pg_i</td><td class="tdTableDefinition">P&aacute;gina inicil (anal&iacute;tica) (biblioref_referenceanalytic.pages ou biblioref_referencesource.pages_monographic)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pg_f</td><td class="tdTableDefinition">P&aacute;gina final (anal&iacute;tica) (biblioref_referenceanalytic.pages ou biblioref_referencesource.pages_monographic)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pg_e</td><td class="tdTableDefinition">P&aacute;ginas (collection) (biblioref_referenceanalytic.pages)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pg_m</td><td class="tdTableDefinition">P&aacute;gina (monogr&aacute;fica) (biblioref_referencesource.pages_monographic)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">di</td><td class="tdTableDefinition">Informa&ccedil;&atilde;o Descritiva (biblioref_reference.descriptive_information)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">sy</td><td class="tdTableDefinition">Symbol (biblioref_referencesource.sumbol)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">local_descriptors</td><td class="tdTableDefinition">Descritores Locais (biblioref_referencelocal.local_descriptors)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tombo</td><td class="tdTableDefinition">Tombo (biblioref_referencelocal.inventory_number)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ec_t</td><td class="tdTableDefinition">Nome do Registro de Ensaio Cl&iacute;nico (biblioref_referenceanalytic.clinical_trial_registry_name)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ec_u</td><td class="tdTableDefinition">Nome do Registro de Ensaio Cl&iacute;nico (biblioref_referenceanalytic.clinical_trial_registry_name)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ec_b</td><td class="tdTableDefinition">Nome do Registro de Ensaio Cl&iacute;nico (biblioref_referenceanalytic.clinical_trial_registry_name)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL) </td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_desc_quali_checktag<a name="st_desc_quali_checktag"></a>
+</h1>
+<h2>
+      (Physical Name: st_desc_quali_checktag)
+      </h2>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">issn</td><td class="tdTableDefinition">Issn (biblioref_referencesource.issn)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">check_tags</td><td class="tdTableDefinition">Check Tags de uma publica&ccedil;&atilde;o (biblioref_reference.check_tags)</td><td class="tdTableDefinition">VARCHAR(100)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tipo_desc</td><td class="tdTableDefinition">Tipo de Descritor ('check_tags')</td><td class="tdTableDefinition">VARCHAR(20)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_descritor_qualificadores<a name="st_descritor_qualificadores"></a>
+</h1>
+<h2>
+      (Physical Name: st_descritor_qualificadores)
+      </h2>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">issn</td><td class="tdTableDefinition">Issn (biblioref_referencesource.issn)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">mhd_cod</td><td class="tdTableDefinition">C&oacute;digo do Descritor (main_descriptor.code ^d)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">mhd</td><td class="tdTableDefinition">Descri&ccedil;&atilde;o do Descritor (main_descriptor.text)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">mhs_cod</td><td class="tdTableDefinition">C&oacute;digo do Qualificador (main_descriptor.code ^s)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">mhs</td><td class="tdTableDefinition">Descri&ccedil;&atilde;o do Qualificador (main_descriptor.text)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tipo_desc</td><td class="tdTableDefinition">Tipo de Descritor (main_descriptor.primary)</td><td class="tdTableDefinition">VARCHAR(20)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_evento<a name="st_evento"></a>
+</h1>
+<h2>
+      (Physical Name: st_evento)
+      </h2>
+<p class="comment">Tabela com dados de Enventos</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cn_co</td><td class="tdTableDefinition">Pa&iacute;s do Evento (biblioref_referencecomplement.conference_country_id)</td><td class="tdTableDefinition">NUMERIC(131089,0)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cn_cy</td><td class="tdTableDefinition">Cidade do Evento (biblioref_referencecomplement.conference_city)</td><td class="tdTableDefinition">VARCHAR(100)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cn_da</td><td class="tdTableDefinition">Data Normalizada do Evento (biblioref_referencecomplement.conference_normalized_date)</td><td class="tdTableDefinition">VARCHAR(100)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cn_dt</td><td class="tdTableDefinition">Data do Evento (biblioref_referencecomplement.conference_date)</td><td class="tdTableDefinition">VARCHAR(100)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cn_in</td><td class="tdTableDefinition">Institui&ccedil;&atilde;o Patrocinadora do Evento (biblioref_referencecomplement.conference_sponsoring_institution)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">cn_na</td><td class="tdTableDefinition">Nome do Evento (biblioref_referencecomplement.conference_name)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pr_in</td><td class="tdTableDefinition">Institui&ccedil;&atilde;o Patrocinadora do Projeto (biblioref_referencecomplement.project_sponsoring_institution)</td><td class="tdTableDefinition">VARCHAR(500)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pr_na</td><td class="tdTableDefinition">Nome do Projeto (biblioref_referencecomplement.project_name)</td><td class="tdTableDefinition">VARCHAR(500)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pr_nu</td><td class="tdTableDefinition">N&uacute;mero do Projeto (biblioref_referencecomplement.project_number)</td><td class="tdTableDefinition">VARCHAR(500)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_idiomas<a name="st_idiomas"></a>
+</h1>
+<h2>
+      (Physical Name: st_idiomas)
+      </h2>
+<p class="comment">Tabela com<br>dados de idiomas (tratados) para respectivas publica&ccedil;&otilde;es.</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la_en</td><td class="tdTableDefinition">Idioma Ingl&ecirc;s (biblioref_reference.text_language)</td><td class="tdTableDefinition">VARCHAR(20)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la_pt</td><td class="tdTableDefinition">Idioma Portugu&ecirc;s (biblioref_reference.text_language)</td><td class="tdTableDefinition">VARCHAR(20)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la_es</td><td class="tdTableDefinition">Idioma Espanhol (biblioref_reference.text_language)</td><td class="tdTableDefinition">VARCHAR(20)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la_fr</td><td class="tdTableDefinition">Idioma Franc&ecirc;s (biblioref_reference.text_language)</td><td class="tdTableDefinition">VARCHAR(20)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la_de</td><td class="tdTableDefinition">Idioma Alem&atilde;o (biblioref_reference.text_language)</td><td class="tdTableDefinition">VARCHAR(20)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la_it</td><td class="tdTableDefinition">Idioma Italiano (biblioref_reference.text_language)</td><td class="tdTableDefinition">VARCHAR(20)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la_bo</td><td class="tdTableDefinition">Idioma Espanhol (Bol&iacute;via) (biblioref_reference.text_language)</td><td class="tdTableDefinition">VARCHAR(20)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la_sl</td><td class="tdTableDefinition">Idioma Esloveno (biblioref_reference.text_language)</td><td class="tdTableDefinition">VARCHAR(20)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la_zh</td><td class="tdTableDefinition">Idioma Chinese (biblioref_reference.text_language)</td><td class="tdTableDefinition">VARCHAR(20)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_idiomas_temp<a name="st_idiomas_temp"></a>
+</h1>
+<h2>
+      (Physical Name: st_idiomas_temp)
+      </h2>
+<p class="comment">Tabela com dados de idiomas (FI_Admin) das respectivas publica&ccedil;&otilde;es</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la_1</td><td class="tdTableDefinition">Idioma 1 (biblioref_reference.text_language)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la_2</td><td class="tdTableDefinition">Idioma 2 (biblioref_reference.text_language)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la_3</td><td class="tdTableDefinition">Idioma 3 (biblioref_reference.text_language)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la_4</td><td class="tdTableDefinition">Idioma 4 (biblioref_reference.text_language)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_instituto<a name="st_instituto"></a>
+</h1>
+<h2>
+      (Physical Name: st_instituto)
+      </h2>
+<p class="comment">Tabela com dados do Autor Institucional</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">au</td><td class="tdTableDefinition">(biblioref_referenceanalytic.corporate_author ou biblioref_referencesource.corporate_author_monographic ou biblioref_referencesource.corporate_author_collection)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">gr</td><td class="tdTableDefinition">Grau de Responsabilidade (biblioref_referenceanalytic.corporate_author ou biblioref_referencesource.corporate_author_monographic ou biblioref_referencesource.corporate_author_collection)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_pais_idiomas<a name="st_pais_idiomas"></a>
+</h1>
+<h2>
+      (Physical Name: st_pais_idiomas)
+      </h2>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">code (PK)</td><td class="tdTableDefinition">C&oacute;digo do Pa&iacute;s (code - tabpais4idiomas.seq)</td><td class="tdTableDefinition">VARCHAR(2)</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">es</td><td class="tdTableDefinition">Nome do Pa&iacute;s em Espanhol (es - tabpais4idiomas.seq)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">en</td><td class="tdTableDefinition">Nome do Pa&iacute;s em Ingl&ecirc;s (en - tabpais4idiomas.seq)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fr</td><td class="tdTableDefinition">Nome do Pa&iacute;s em Franc&ecirc;s (fr - tabpais4idiomas.seq)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pt_br</td><td class="tdTableDefinition">Nome do Pa&iacute;s em Portugu&ecirc;s (pt_br - tabpais4idiomas.seq)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_resumo<a name="st_resumo"></a>
+</h1>
+<h2>
+      (Physical Name: st_resumo)
+      </h2>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ab</td><td class="tdTableDefinition">Resumo (biblioref_reference.abstract)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la</td><td class="tdTableDefinition">Idioma (biblioref_reference.abstract)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_thesaurus_des_qua<a name="st_thesaurus_des_qua"></a>
+</h1>
+<h2>
+      (Physical Name: st_thesaurus_des_qua)
+      </h2>
+<p class="comment">Tabela com dados de Thesaurus de Descritores e Qualificadores</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">decs_code (PK)</td><td class="tdTableDefinition">C&oacute;digo do Descritor/Qualificador (thesaurus_identifierdesc.decs_code)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">en</td><td class="tdTableDefinition">Descritor/Qualificador em Ingl&ecirc;s (thesaurus_termlistdesc.term_string language_code = 'en')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">es</td><td class="tdTableDefinition">Descritor/Qualificador em Espanhol (thesaurus_termlistdesc.term_string language_code = 'es')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fr</td><td class="tdTableDefinition">Descritor/Qualificador em Franc&ecirc;s (thesaurus_termlistdesc.term_string language_code = 'fr')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pt_br</td><td class="tdTableDefinition">Descritor/Qualificador em Portugu&ecirc;s (thesaurus_termlistdesc.term_string language_code = 'pt-br')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_thesaurus_term_desc<a name="st_thesaurus_term_desc"></a>
+</h1>
+<h2>
+      (Physical Name: st_thesaurus_term_desc)
+      </h2>
+<p class="comment">Tabela com dados de Thesaurus de Termos dos Descritores</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador da Terminologia (thesaurus_termlistdesc.identifier_concept_id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">en</td><td class="tdTableDefinition">Termo em Ingl&ecirc;s (thesaurus_termlistdesc.term_string language_code = 'en')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">es</td><td class="tdTableDefinition">Termo em Espanhol (thesaurus_termlistdesc.term_string language_code = 'es')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fr</td><td class="tdTableDefinition">Termo em Franc&ecirc;s (thesaurus_termlistdesc.term_string language_code = 'fr')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pt_br</td><td class="tdTableDefinition">Termo em Portugu&ecirc;s (thesaurus_termlistdesc.term_string language_code = 'pt-br')</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_titulo<a name="st_titulo"></a>
+</h1>
+<h2>
+      (Physical Name: st_titulo)
+      </h2>
+<p class="comment">Tabela com dados de Titulo da publica&ccedil;&atilde;o.</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ti</td><td class="tdTableDefinition">T&iacute;tulo da Publica&ccedil;&atilde;o (an.title + an.english_translated_title ou so.title_monographic + so.english_title_monographic ou so.title_collection + so.english_title_collection) </td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la</td><td class="tdTableDefinition">Idioma do T&iacute;tulo (an.title + an.english_translated_title ou so.title_monographic + so.english_title_monographic ou so.title_collection + so.english_title_collection) </td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_titulo_range<a name="st_titulo_range"></a>
+</h1>
+<h2>
+      (Physical Name: st_titulo_range)
+      </h2>
+<p class="comment">Tabela utilizada para resgatar dados da Varia&ccedil;&atilde;o do T&iacute;tulo, de acordo com a linha do tempo (range de data)</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">title_serial</td><td class="tdTableDefinition">T&iacute;tulo Abreviado (biblioref_referencesource.title_serial)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">title_range</td><td class="tdTableDefinition">T&iacute;tulo (extenso) (title_title.title)</td><td class="tdTableDefinition">VARCHAR(455)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">medline_code</td><td class="tdTableDefinition">C&oacute;digo Medline (title_title.medline_code)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">medline_shortened_title</td><td class="tdTableDefinition">T&iacute;tulo Abreviado Medline (title_title.medline_shortened_title)</td><td class="tdTableDefinition">VARCHAR(455)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">thematic_area</td><td class="tdTableDefinition">&Aacute;rea T&eacute;cnica (title_title.thematic_area)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">subtitle</td><td class="tdTableDefinition">Sub T&iacute;tulo (title_title.subtitle)</td><td class="tdTableDefinition">VARCHAR(455)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">state</td><td class="tdTableDefinition">Estado (title_title.state)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">status_ragne</td><td class="tdTableDefinition">Status (title_title.status - C ou D)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">editor_cc_code</td><td class="tdTableDefinition">C&oacute;digo Centro Cooperante (title_title.editor_cc_code)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">title_id</td><td class="tdTableDefinition">Identificado do T&iacute;tulo (title_indexrange.title_id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">index_code_id</td><td class="tdTableDefinition">C&oacute;digo de Indexa&ccedil;&atilde;o (title_indexrange.index_code_id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">indexer_cc_code</td><td class="tdTableDefinition">C&oacute;digo Centro Cooperante indexador (title_indexrange.indexer_cc_code)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">initial_date</td><td class="tdTableDefinition">Ano inicial de Indexa&ccedil;&atilde;o (title_indexrange.initial_date)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">initial_volume</td><td class="tdTableDefinition">Volume inicial de Indexa&ccedil;&atilde;o (title_indexrange.initial_volume)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">initial_number</td><td class="tdTableDefinition">N&uacute;mero inicial de Indexa&ccedil;&atilde;o (title_indexrange.initial_number)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">final_date</td><td class="tdTableDefinition">Ano final de Indexa&ccedil;&atilde;o (title_indexrange.final_date)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">final_volume</td><td class="tdTableDefinition">Volume final de Indexa&ccedil;&atilde;o (title_indexrange.final_volume)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">final_number</td><td class="tdTableDefinition">N&uacute;mero final de Indexa&ccedil;&atilde;o (title_indexrange.final_number)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">copy</td><td class="tdTableDefinition">(title_indexrange.copy - MR ou MI)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">distribute</td><td class="tdTableDefinition">(title_indexrange.distribute - True ou False)</td><td class="tdTableDefinition">BOOLEAN</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">selective</td><td class="tdTableDefinition">(title_indexrange.selective True ou False)</td><td class="tdTableDefinition">BOOLEAN</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">code_range</td><td class="tdTableDefinition">C&oacute;digo do Pa&iacute;s de Indexa&ccedil;&atilde;o (utils_country.code_range)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">pais_range</td><td class="tdTableDefinition">Nome do Pa&iacute;s de Indexa&ccedil;&atilde;o (utils_country.pais_range)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_titulo_variacao<a name="st_titulo_variacao"></a>
+</h1>
+<h2>
+      (Physical Name: st_titulo_variacao)
+      </h2>
+<p class="comment">Tabelas com dados da Varia&ccedil;&atilde;o do T&iacute;tulo</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador do T&iacute;tulo (title_title.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">title</td><td class="tdTableDefinition">Varia&ccedil;&atilde;o do T&iacute;tulo (title_title.title)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">medline_code</td><td class="tdTableDefinition">C&oacute;digo Medline (title_title.medline_code)</td><td class="tdTableDefinition">VARCHAR(255)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">medline_shortened_title</td><td class="tdTableDefinition">T&iacute;tulo Abreveiado Medline (title_title.medline_shortened_title)</td><td class="tdTableDefinition">VARCHAR(455)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">subtitle</td><td class="tdTableDefinition">Sub T&iacute;tulo (title_title.subtitle)</td><td class="tdTableDefinition">VARCHAR(455)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id_variacao</td><td class="tdTableDefinition">Identificador da Varia&ccedil;&atilde;o do T&iacute;tulo (title_titlevariance.id_variacao)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">type</td><td class="tdTableDefinition">Tipo de Varia&ccedil;&atilde;o (title_titlevariance.type)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">label</td><td class="tdTableDefinition">Label da Varia&ccedil;&atilde;o (title_titlevariance.label)</td><td class="tdTableDefinition">VARCHAR(455)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">issn</td><td class="tdTableDefinition">Issn da Varia&ccedil;&atilde;o (title_titlevariance.issn)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">initial_year</td><td class="tdTableDefinition">Ano inicial da Varia&ccedil;&atilde;o (title_titlevariance.initial_year)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">title_id</td><td class="tdTableDefinition">Identificador do T&iacute;tulo (title_titlevariance.title_id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">initial_number</td><td class="tdTableDefinition">N&uacute;mero inicial da Varia&ccedil;&atilde;o (title_titlevariance.initial_number)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">initial_volume</td><td class="tdTableDefinition">Volume inicial da Varia&ccedil;&atilde;o (title_titlevariance.initial_volume)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>st_url<a name="st_url"></a>
+</h1>
+<h2>
+      (Physical Name: st_url)
+      </h2>
+<p class="comment">Tabela com dados de Url das respectivas publica&ccedil;&otilde;es.</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">id (PK)</td><td class="tdTableDefinition">Identificador de Publica&ccedil;&atilde;o (FI-Admin) (biblioref_reference.id)</td><td class="tdTableDefinition">INTEGER</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">alternate_id</td><td class="tdTableDefinition">Id Original da Fonte (biblioref_referencealternateid.alternate_id)</td><td class="tdTableDefinition">VARCHAR(55)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">fi</td><td class="tdTableDefinition">** Obsoleto</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">tp</td><td class="tdTableDefinition">Tipo de Url (biblioref_reference.electronic_address)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">ur</td><td class="tdTableDefinition">Endere&ccedil;o Eletronico (biblioref_reference.electronic_address)</td><td class="tdTableDefinition">CLOB</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">arq</td><td class="tdTableDefinition">Tipo de arquivo na Url (biblioref_reference.electronic_address)</td><td class="tdTableDefinition">VARCHAR(50)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">la</td><td class="tdTableDefinition">Idioma da Url (biblioref_reference.electronic_address)</td><td class="tdTableDefinition">VARCHAR(10)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">texto_completo</td><td class="tdTableDefinition">Se a publica&ccedil;&atilde;o poss&uacute;i Texto Completo ((biblioref_reference.electronic_address - True ou False)</td><td class="tdTableDefinition">BOOLEAN</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">nota_publicacao</td><td class="tdTableDefinition">Nota de Publica&ccedil;&atilde;o (biblioref_reference.electronic_address)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">nota_n_publica</td><td class="tdTableDefinition">Nota n&atilde;o Publica&ccedil;&atilde;o ((biblioref_reference.electronic_address)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+<div class="tableNameHeading">
+<h1>tab_pais<a name="tab_pais"></a>
+</h1>
+<h2>
+      (Physical Name: tab_pais)
+      </h2>
+<p class="comment">Tabela com dados de vari&ccedil;&atilde;o de nome de pa&iacute;s de acodo com seu c&oacute;digo</p>
+</div>
+<div class="table">
+<table class="tableDefinition" width="100%">
+<tr>
+<td class="tdTableHeading tdLogicalColName">Logical Column Name</td><td class="tdTableHeading tdPhysicalColName">Physical Column Name</td><td class="tdTableHeading tdDataType">Type</td><td class="tdTableHeading tdPkFlag">PK</td><td class="tdTableHeading tdNullFlag">Nullable</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">code (PK)</td><td class="tdTableDefinition">C&oacute;digo do Pa&iacute;s (code - tabpais_new.txt)</td><td class="tdTableDefinition">VARCHAR(2)</td><td class="tdTableDefinition" nowrap>PK</td><td class="tdTableDefinition" nowrap>NOT NULL</td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">variacao</td><td class="tdTableDefinition">Varia&ccedil;&atilde;o do nome do pa&iacute;s (variacao - tabpais_new.txt)</td><td class="tdTableDefinition">VARCHAR(1200)</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_in</td><td class="tdTableDefinition">Data de Inclus&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+<tr valign="top">
+<td class="tdTableDefinition">dt_up</td><td class="tdTableDefinition">Data de Atualiza&ccedil;&atilde;o (ETL)</td><td class="tdTableDefinition">TIMESTAMP</td><td class="tdTableDefinition" nowrap></td><td class="tdTableDefinition" nowrap></td>
+</tr>
+</table>
+<div class="references"></div>
+</div>
+</body>
+</html>
