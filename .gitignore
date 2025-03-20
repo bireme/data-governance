@@ -1,0 +1,25 @@
+# Arquivos compilados do Python
+*.pyc
+*.pyo
+
+# Cache do Python
+__pycache__/
+
+# Ambientes virtuais
+.venv/
+env/
+venv/
+ENV/
+
+# Arquivos de configuração do editor
+.vscode/
+.idea/
+*.sublime-*
+
+# Arquivos de log
+*.log
+
+# Airflow
+*.db
+logs/
+standalone_admin_password.txt
