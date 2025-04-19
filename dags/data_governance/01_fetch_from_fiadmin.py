@@ -13,7 +13,9 @@ import requests
 import pymongo
 import logging
 import time
+import math
 from datetime import datetime
+from datetime import timedelta
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from airflow import DAG
@@ -59,19 +61,31 @@ def get_and_send_json_from_api(**kwargs):
     limit = 100
     offset = 0
     status = 1
+    extra_params = {}
     headers = {'apikey': fiadmin_conn.password}
     session = get_requests_session()
+
+    # Pega o modo de update enviado da DAG anterior
+    dag_run = kwargs.get('dag_run')
+    update_mode = dag_run.conf.get('update_mode')
+    if update_mode == "INCREMENTAL":
+        incremental_update_date = (datetime.today() - timedelta(days=5)).strftime('%Y-%m-%d')
+        extra_params = {'updated_time__gte': incremental_update_date}
+    elif update_mode == "FULL":
+        total_records = mongo_collection.count_documents({})
+        offset = math.floor(total_records / limit) * limit
+        logger.info(f"Há {total_records} registros na coleção. Ativando offset {offset}.")
     
     has_more_data = True
     while has_more_data:
-        logger.info(f"Coletando offset {offset} no FI-Admin")
-
         params = {
             "limit": limit,
             "offset": offset,
             "status": status,
-            "format": "json"
+            "format": "json",
+            **extra_params
         }
+        logger.info(f"Coletando offset {offset} no FI-Admin com os parametros {params}")
         with Timer() as t:
             response = session.get(url, params=params, headers=headers)
         logger.info(f"Tempo de coleta de dados no FI-Admin: {t.interval:.4f} segundos")
@@ -80,7 +94,7 @@ def get_and_send_json_from_api(**kwargs):
             json_data = response.json()
             
             # Se a resposta estiver vazia, não há mais dados
-            if not json_data:
+            if not json_data or (json_data and not json_data['objects']):
                 has_more_data = False
             else:
                 results = json_data['objects']
