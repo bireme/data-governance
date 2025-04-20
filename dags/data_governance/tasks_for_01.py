@@ -1,13 +1,30 @@
 """
-# Data Governance - DG_01_fetch_from_fiadmin
+# Data Governance - Tasks for 01 DAG
 
-DAG responsável pela coleta de dados do sistema FI-Admin e armazenamento no MongoDB.
+Task reutilizável para coleta e armazenamento de dados do FI-Admin no MongoDB.
 
-## Fluxo Principal
-1. **Coleta Paginada**: Utiliza API do FI-Admin com paginação (limit/offset)
-2. **Persistência**: Armazena dados no MongoDB com tratamento de duplicidades
-3. **Monitoramento**: Registra métricas de performance usando contexto de timer
+## Objetivo Principal
+Coordenar a ingestão segura e eficiente de dados do sistema FI-Admin para a camada de landing zone no MongoDB, com tratamento de dados e monitoramento integrado.
+
+## 🔑 Funcionalidades-Chave
+1. **Coleta Resiliente**
+   - Paginação automática (limit/offset)
+   - Retry inteligente para falhas HTTP (5 tentativas com backoff)
+   - Tratamento especial para erro 502 (continuação automática)
+
+2. **Gestão de Dados**
+   - Detecção e prevenção de duplicidades
+   - Modos de atualização configuráveis (FULL/INCREMENTAL)
+   - Inserção em lote
+
+## ⚙️ Parâmetros de Configuração
+| Parâmetro        | Tipo    | Default  | Descrição                                                                 |
+|------------------|---------|----------|---------------------------------------------------------------------------|
+| `update_mode`    | string  | REQUIRED | Modo de operação: `FULL` (carga completa) ou `INCREMENTAL` (5 dias atrás) |
+| `mongo_conn_id`  | string  | 'mongo'  | Conexão Airflow para MongoDB                                             |
+| `fiadmin_conn_id`| string  | 'fiadmin'| Conexão Airflow com host da API e apikey no password        
 """
+
 
 import requests
 import pymongo
@@ -18,10 +35,9 @@ from datetime import datetime
 from datetime import timedelta
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from airflow import DAG
-from airflow.operators.python import PythonOperator
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.hooks.base import BaseHook
+from airflow.decorators import task
 
 
 class Timer:
@@ -47,7 +63,8 @@ def get_requests_session():
 
 
 # Função para obter JSON da API de forma paginada e enviar para o MongoDB
-def get_and_send_json_from_api(**kwargs):
+@task
+def harvest_fiadmin_and_store_in_mongodb(update_mode):
     logger = logging.getLogger(__name__)
 
     fiadmin_conn = BaseHook.get_connection('fiadmin')
@@ -65,9 +82,6 @@ def get_and_send_json_from_api(**kwargs):
     headers = {'apikey': fiadmin_conn.password}
     session = get_requests_session()
 
-    # Pega o modo de update enviado da DAG anterior
-    dag_run = kwargs.get('dag_run')
-    update_mode = dag_run.conf.get('update_mode')
     if update_mode == "INCREMENTAL":
         incremental_update_date = (datetime.today() - timedelta(days=5)).strftime('%Y-%m-%d')
         extra_params = {'updated_time__gte': incremental_update_date}
@@ -137,27 +151,3 @@ def send_json_to_mongodb(json_data, collection):
                 else:
                     # Handle other errors
                     raise Exception(f"Error code {err['code']}: {err['errmsg']}")
-
-
-# Configuração do DAG
-default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retries': 0,
-}
-
-with DAG(
-    'DG_01_fetch_from_fiadmin',
-    default_args=default_args,
-    description='Data Governance - Obtém JSON paginado do FI-Admin e envia para o MongoDB',
-    tags=["data_governance", "fi-admin", "mongodb"],
-    schedule=None,
-    catchup=False,
-    doc_md=__doc__
-) as dag:
-    fetch_and_send_json_task = PythonOperator(
-        task_id='fetch_and_send_json',
-        python_callable=get_and_send_json_from_api
-    )
