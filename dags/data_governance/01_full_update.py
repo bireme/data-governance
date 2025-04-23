@@ -16,7 +16,8 @@ Executar carga completa de todos os registros disponíveis no FI-Admin para o Mo
 """
 
 from airflow import DAG
-from data_governance.tasks_for_01 import harvest_fiadmin_and_store_in_mongodb
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from data_governance.dags.data_governance.tasks_for_01 import harvest_fiadmin_and_store_in_mongodb
 
 
 # Configuração do DAG
@@ -40,3 +41,10 @@ with DAG(
     harvest_fiadmin_and_store_in_mongodb_task = harvest_fiadmin_and_store_in_mongodb(
         update_mode='FULL'
     )
+
+    create_iahx_xml_collection = TriggerDagRunOperator(
+        task_id='02_create_iahx_xml_collection',
+        trigger_dag_id='DG_02_create_iahx_xml_collection'
+    )
+
+    harvest_fiadmin_and_store_in_mongodb_task >> create_iahx_xml_collection
