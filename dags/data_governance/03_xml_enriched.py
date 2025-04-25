@@ -1,23 +1,30 @@
 """
 # DG_03_enrich_xml
 
-Esta DAG realiza o enriquecimento da coleção XML utilizada pelo iah-X, adicionando campos estáticos e dinâmicos de instância e coleções temáticas, a partir de múltiplas fontes no MongoDB.
+Esta DAG realiza o enriquecimento da coleção XML utilizada pelo iah-X, adicionando campos estáticos e dinâmicos de instância e coleções temáticas a partir de múltiplas fontes no MongoDB.
+
+---
 
 ## Objetivos
 
 - **Enriquecer a coleção `03_xml_enriched`** com campos estáticos e dinâmicos, facilitando consultas e segmentações no iah-X.
-- **Adicionar informações de instância** provenientes de diversas coleções temáticas (`TEMAS_BVS`).
-- **Padronizar campos de coleção** para diferentes recortes temáticos.
+- **Adicionar informações de instância e coleções temáticas** provenientes de diversas coleções do MongoDB (TEMAS_BVS).
+- **Padronizar e expandir metadados** para diferentes recortes temáticos e contextos de uso.
 
-## Principais Etapas
+---
 
-1. **enrich_static_data**  
-   - Copia o conteúdo da coleção `02_iahx_xml` para `03_xml_enriched`.
-   - Adiciona campos estáticos como `instance` (lista de instâncias regionais e nacionais) e coleções temáticas (`collection_*`).
+## Fluxo Principal
 
-2. **enrich_instancia**  
-   - Para cada coleção em `TEMAS_BVS`, busca os identificadores presentes em `03_xml_enriched`.
+1. **enrich_static_data**
+   - Copia a coleção `02_iahx_xml` para `03_xml_enriched`.
+   - Adiciona campos estáticos como `instance` (lista de instâncias regionais e nacionais) e coleções temáticas (`collection_*`), padronizando o ponto de partida do enriquecimento.
+
+2. **enrich_instancia**
+   - Para cada coleção em TEMAS_BVS, busca os identificadores presentes em `03_xml_enriched`.
    - Atualiza o campo `instance` de cada documento, unificando as instâncias encontradas em todas as coleções.
+   - Aplica as enrichment_rules para adicionar campos dinâmicos conforme regras temáticas, contextos e tags.
+
+---
 
 ## Campos Enriquecidos
 
@@ -34,6 +41,45 @@ Esta DAG realiza o enriquecimento da coleção XML utilizada pelo iah-X, adicion
 | collection_guatemala      | Nome da coleção temática da Guatemala                         |
 | collection_honduras       | Nome da coleção temática de Honduras                          |
 | collection_costarica      | Nome da coleção temática da Costa Rica                        |
+| tags/contextos            | Campos dinâmicos para segmentação e contexto temático         |
+
+---
+
+## Regras de Enriquecimento (`enrichment_rules`)
+
+O enriquecimento dinâmico é controlado pelo dicionário `enrichment_rules`, que define, para cada coleção temática de TEMAS_BVS, quais campos adicionais devem ser aplicados aos documentos correspondentes.  
+Cada regra pode adicionar:
+
+- **instances**: Adiciona valores ao array `instance` do documento.
+- **collections**: Cria campos do tipo `collection_<tema>` com valor padrão (ex: "LILACS").
+- **tags**: Cria campos do tipo `tag_<tema>` populados com valores específicos do tema/subtema.
+- **contextos**: Cria campos do tipo `tag_contexto` associado ao campo instância.
+
+---
+
+## Como funcionam as enrichment_rules
+
+- **Estrutura**:  
+  Cada chave de `enrichment_rules` corresponde ao nome de uma coleção em TEMAS_BVS. Os valores são dicionários que especificam quais campos devem ser enriquecidos e como.
+- **Execução**:  
+  Durante o enriquecimento, para cada documento em `03_xml_enriched` que tenha correspondência em uma coleção de TEMAS_BVS, aplica-se a regra definida:
+    - Campos do tipo `instances` são agregados ao array `instance`.
+    - Campos do tipo `collections` criam ou atualizam campos `collection_<tema>`.
+    - Campos do tipo `tags` criam arrays com os subtemas ou classificações do documento.
+    - Campos do tipo `contextos` criam arrays com valores contextuais, baseado no campo `instancia`.
+- **Exemplo prático**:  
+  Se um documento com `id_pk=123` existe em `TEMAS_BVS.hanseniase` com `tema_subtema="diagnóstico"` e `instancia="regional"`, após o enriquecimento ele terá:
+  - `instance`: incluirá "hanseniase"
+  - `collection_hanseniase`: "LILACS"
+  - `tag_hanseniase`: ["diagnóstico"]
+
+---
+
+## Considerações Técnicas
+
+- **Desempenho**: O processamento é feito em batches para eficiência, utilizando operações em lote (`bulk_write`) no MongoDB.
+- **Idempotência**: O enriquecimento pode ser reexecutado sem duplicar valores, pois arrays são atualizados via operações de união.
+- **Extensibilidade**: Novas regras podem ser adicionadas facilmente ao dicionário `enrichment_rules`, permitindo expansão para novas coleções ou temas.
 
 """
 
@@ -45,6 +91,203 @@ from airflow import DAG
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.operators.python import PythonOperator
 from pymongo import UpdateOne
+
+
+enrichment_rules = {
+    'adolec': {
+        'instances': ['adolec']
+    },
+    'aps': {
+        'instances': ['aps']
+    },
+    'aps_colecao': {
+        'instances': ['collection_aps']
+    },
+    'assa2030': {
+        'tags': ['tag_assa2030']
+    },
+    'assa2030_wizard': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    },
+    'aspect': {
+        'tags': ['aspect']
+    },
+    'brasil': {
+        'tags': ['tema_brasil']
+    },
+    'bvs_sp': {
+        'tags': ['tag_sp']
+    },
+    'carpha_country_focus': {
+        'tags': ['carpha_country_focus']
+    },
+    'carpha_language': {
+        'tags': ['carpha_language']
+    },
+    'carpha_type_document': {
+        'tags': ['carpha_type_document']
+    },
+    'carpha_author_location': {
+        'tags': ['carpha_author_location']
+    },
+    'carpha_geral': {
+        'instances': ['carpha'],
+        'tags': ['carpha_geral']
+    },
+    'controlecancer': {
+        'instances': ['controlecancer'],
+        'collections': ['collection_controlecancer']
+    },
+    'controle_cancer': {
+        'tags': ['tag_controlecancer']
+    },
+    'dimentions': {
+        'tags': ['tag_dimentions']
+    },
+    'ecos': {
+        'instances': ['economia'],
+        'collections': ['collection_economia'],
+        'tags': ['economia_tag']
+    },
+    'enfermeria': {
+        'tags': ['tag_enfermeria']
+    },
+    'evideasy_perguntas': {
+        'tags': ['evideasy_perguntas']
+    },
+    'hanseniase': {
+        'instances': ['hanseniase'],
+        'collections': ['collection_hanseniase'],
+        'tags': ['tag_hanseniase']
+    },
+    'homeopatia': {
+        'instances': ['homeopatia']
+    },
+    'limit': {
+        'tags': ['limit']
+    },
+    'mocambique': {
+        'instances': ['mocambique'],
+        'collections': ['collection_mocambique']
+    },
+    'mtc': {
+        'instances': ['mtc', 'tmgl'],
+        'collections': ['collection_mtc', 'collection_tmgl']
+    },
+    'mtc': {
+        'instances': ['mtc', 'tmgl'],
+        'collections': ['collection_mtc', 'collection_tmgl']
+    },
+    'mtc_elementos': {
+        'instances': ['mtc', 'tmgl'],
+        'collections': ['collection_mtc', 'collection_tmgl'],
+        'tags': ['tag_mtc_elementos']
+    },
+    'mtc_tema1': {
+        'instances': ['mtc', 'tmgl'],
+        'collections': ['collection_mtc', 'collection_tmgl'],
+        'tags': ['tag_mtc_tema1']
+    },
+    'mtc_tema2': {
+        'instances': ['mtc', 'tmgl'],
+        'collections': ['collection_mtc', 'collection_tmgl'],
+        'tags': ['tag_mtc_tema2']
+    },
+    'mtc_tema3': {
+        'instances': ['mtc', 'tmgl'],
+        'collections': ['collection_mtc', 'collection_tmgl'],
+        'tags': ['tag_mtc_tema3']
+    },
+    'mtc_tema4': {
+        'tags': ['tag_mtc_tema4']
+    },
+    'mtc_transversales': {
+        'instances': ['mtc', 'tmgl'],
+        'collections': ['collection_mtc', 'collection_tmgl'],
+        'tags': ['tag_mtc_transversales']
+    },
+    'odontologia_temas': {
+        'instances': ['odontologia'],
+        'tags': ['tema_odontologia']
+    },
+    'ods3': {
+        'tags': ['tag_ods3']
+    },
+    'ods3_wizard': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    },
+    'ods3_wizard_mortalidade_materna': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    },
+    'ods3_wizard_enfermedades_notrasmisibles': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    },
+    'ods3_wizard_muertes_prevenibles_nacidos_ninos': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    },
+    'ods3_wizard_consumo_sustancias_psicoactivas': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    },
+    'ods3_wizard_accidentes_transito': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    },
+    'ods3_wizard_salud_sexual_reprodutiva': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    },
+    'ods3_wizard_cobertura_universal': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    },
+    'ods3_wizard_hazardous_chemicals_pollution_contamination': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    },
+    'ods3_wizard_tobacco_control': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    },
+    'ods3_wizard_health_workforce': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    },
+    'ods3_wizard_global_health_risks': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    },
+    'pais_assunto': {
+        'tags': ['pais_assunto']
+    },
+    'neglected_disease': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    },
+    'rhs': {
+        'instances': ['recursos_humanos'],
+        'tags': ['tag_rhs']
+    },
+    'saude_ambiental': {
+        'instances': ['saude_ambiental'],
+        'tags': ['tag_saudeambiental']
+    },
+    'sessp': {
+        'tags': ['tag_sessp']
+    },
+    'study_type': {
+        'tags': ['type_of_study']
+    },
+    'transmisible_diseases': {
+        'tags': ['tag_tema_saude'],
+        'contextos': ['tag_contexto']
+    }
+}
 
 
 def enrich_static_data():
@@ -97,26 +340,50 @@ def enrich_instancia():
     id_pks = list(enriched_collection.distinct('id_pk'))
     id_pks = [str(x) for x in id_pks]
     
-    # 2. Para cada coleção no TEMAS_BVS
+    # 2. Para cada coleção no TEMAS_BVS especificado no enrichment_rules
     temas_bvs = mongo_client["TEMAS_BVS"]
-    temas_collections = temas_bvs.list_collection_names()
-    batch_size = 5000
+    temas_collections = enrichment_rules.keys()
+    batch_size = 1000
     doc_map = {}
 
     for coll_name in temas_collections:
         coll = temas_bvs[coll_name]
         cursor = coll.find(
             {'id_isis': {'$in': list(id_pks)}},
-            {'_id': 0, 'id_isis': 1, 'instancia': 1},
+            {'_id': 0, 'id_isis': 1, 'instancia': 1, 'tema_subtema': 1},
             batch_size=batch_size
         )
+
+        instances = enrichment_rules[coll_name].get('instances', [])
+        collections = enrichment_rules[coll_name].get('collections', [])
+        contextos = enrichment_rules[coll_name].get('contextos', [])
+        tags = enrichment_rules[coll_name].get('tags', [])
 
         for doc in cursor:
             key = int(doc['id_isis'])
             if key not in doc_map:
-                doc_map[key] = {'instances': set(), 'collections': set()}
-            doc_map[key]['instances'].add(doc['instancia'])
-            doc_map[key]['collections'].add(coll_name)
+                doc_map[key] = {
+                    'instances': set(), 
+                    'collections': set(), 
+                    'temas': set(), 
+                    'campo_instancia': set(),
+                    'tags': set(),
+                    'contextos': set()
+                }
+
+            doc_map[key]['instances'].update(instances)
+
+            if doc['tema_subtema']:
+                # Corner case for Odontologia
+                if not (coll_name == 'odontologia_temas' and doc['tema_subtema'] == 'geral'):
+                    doc_map[key]['temas'].add(doc['tema_subtema'])
+
+            if doc['instancia']:
+                doc_map[key]['campo_instancia'].add(doc['instancia'])
+
+            doc_map[key]['collections'].update(collections)
+            doc_map[key]['contextos'].update(contextos)
+            doc_map[key]['tags'].update(tags)
             
             # 3. Enviar batch
             if len(doc_map) >= batch_size:
@@ -144,7 +411,23 @@ def _process_batch(collection, doc_map):
         }
         # Adiciona campos collection_<nome_colecao>: "LILACS"
         for coll_name in data['collections']:
-            set_fields[f'collection_{coll_name}'] = "LILACS"
+            set_fields[coll_name] = "LILACS"
+
+        for coll_name in data['tags']:
+            set_fields[coll_name] = {
+                '$setUnion': [
+                    {'$ifNull': [f'${coll_name}', []]},
+                    {'$literal': list(data['temas'])}
+                ]
+            }
+
+        for coll_name in data['contextos']:
+            set_fields[coll_name] = {
+                '$setUnion': [
+                    {'$ifNull': [f'${coll_name}', []]},
+                    {'$literal': list(data['campo_instancia'])}
+                ]
+            }
 
         bulk_ops.append(
             UpdateOne(
@@ -179,3 +462,5 @@ with DAG(
         task_id='enrich_instancia',
         python_callable=enrich_instancia
     )
+
+    enrich_static_data_task >> enrich_instancia_task
