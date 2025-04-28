@@ -83,16 +83,26 @@ XML_FILES = {
     'bin_regional.xml',
     'vti_regional.xml',
     'mtc_regional.xml',
+    'psi_regional.xml',
     'ijh_regional.xml',
     'bbo_regional.xml',
     'sus_regional.xml',
+    'ses_regional.xml',
     'sms_regional.xml',
     'lip_regional.xml',
     'aim_regional.xml',
     'med_regional.xml',
     'phr_regional.xml',
     'hom_regional.xml',
-    'bri_regional.xml'
+    'bri_regional.xml',
+    'cid_regional.xml',
+    'pru_regional.xml',
+    'han_regional.xml',
+    'big_regional.xml',
+    'bdn_regional.xml',
+    'pie_regional.xml',
+    'rhs_regional.xml',
+    'arg_regional.xml'
 }
 
 
