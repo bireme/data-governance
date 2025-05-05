@@ -9,7 +9,7 @@ O fluxo foi desenvolvido para extrair, transformar e inserir dados de forma efic
 ## Como Funciona
 
 1. **Configuração da Coleção**:  
-   Garante que a coleção `tmgl_metrics` (no banco `01_landing_zone`) exista no MongoDB e que possua um índice único no campo `id_pk`.
+   Garante que a coleção `tmgl_metrics` (no banco `01_landing_zone`) exista no MongoDB e que possua um índice único no campo `id`.
 
 2. **Seleção dos Arquivos XML**:  
    Apenas arquivos XML que atendam aos seguintes critérios serão processados:
@@ -20,7 +20,7 @@ O fluxo foi desenvolvido para extrair, transformar e inserir dados de forma efic
    - Processamento iterativo de XML usando `lxml.etree` para controle de memória
    - Apenas documentos onde o campo `instance` seja igual a `tmgl` são considerados
    - Campos com múltiplos valores são transformados em arrays
-   - Verificação de duplicatas de `id_pk` dentro do mesmo lote
+   - Verificação de duplicatas de `id` dentro do mesmo lote
    - Inserção/atualização (upsert) no MongoDB em lotes de 1000 registros
    - Limpeza de memória durante o parsing
 
@@ -130,7 +130,7 @@ def setup_collection():
     """Configura coleção e índices no MongoDB"""
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     target_collection = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
-    target_collection.create_index([('id_pk', 1)], unique=True)
+    target_collection.create_index([('id', 1)], unique=True)
 
 
 def process_xml_files():
@@ -152,7 +152,7 @@ def process_xml_files():
         batch = []
         batch_size = 1000
         doc_count = 0
-        seen_id_pks = set()  # Track IDs in current batch [2]
+        seen_ids = set()  # Track IDs in current batch [2]
 
         context = ET.iterparse(
             file_path,
@@ -189,17 +189,17 @@ def process_xml_files():
                 elem.clear()
 
             elif event == 'end' and elem.tag == 'doc':
-                if in_relevant_doc and 'id_pk' in current_fields:
-                    id_pk = current_fields['id_pk']
+                if in_relevant_doc and 'id' in current_fields:
+                    id_field = current_fields['id']
                     
                     # Checa duplicatas
-                    if id_pk not in seen_id_pks:
+                    if id_field not in seen_ids:
                         batch.append(ReplaceOne(
-                            {'id_pk': id_pk},
+                            {'id': id_field},
                             current_fields.copy(),
                             upsert=True
                         ))
-                        seen_id_pks.add(id_pk)
+                        seen_ids.add(id_field)
                         doc_count += 1
 
                     if len(batch) >= batch_size:
@@ -220,7 +220,7 @@ def process_xml_files():
 
         # Limpeza final
         del context
-        seen_id_pks.clear()
+        seen_ids.clear()
 
 
 default_args = {
