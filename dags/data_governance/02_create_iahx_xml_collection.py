@@ -55,7 +55,7 @@ from datetime import datetime
 from airflow import DAG
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.operators.python import PythonOperator
-from pymongo import UpdateOne
+from pymongo import ReplaceOne
 
 
 def standardize_pages(value):
@@ -151,6 +151,15 @@ def standardize_individual_authors(authors):
     return result
 
 
+def standardize_id(id_pk, lilacs_original_id):
+    id_value = None
+    if lilacs_original_id:
+        id_value = f"lil-{lilacs_original_id}"
+    else:
+        id_value = f"biblio-{id_pk}"
+    return {'id': id_value}
+
+
 def transform_and_migrate():
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     source_col = mongo_hook.get_collection('01_landing_zone', 'data_governance')
@@ -188,6 +197,8 @@ def transform_and_migrate():
         if 'author_keyword' in doc:
             author_keyword_fields = standardize_author_keyword(doc['author_keyword'])
 
+        id_fields = standardize_id(doc.get('id'), doc.get('LILACS_original_id'))
+
         transformed = {
             '_id': doc['_id'],
             'vi': doc.get('volume_serial'),
@@ -203,16 +214,20 @@ def transform_and_migrate():
             'db': doc.get('indexed_database'),
             'dp': doc.get('publication_date_normalized', '')[:4] if doc.get('publication_date_normalized') else None,
             'pg': pg_value,
+            **id_fields,
             **title_fields,
             **abstract_fields,
             **eletronic_fields,
             **author_keyword_fields,
             **individual_author_fields
         }
+
+        # Remove campos com valor None, '', [], ou {}
+        transformed = {k: v for k, v in transformed.items() if v not in (None, '', [], {})}
         
-        batch.append(UpdateOne(
+        batch.append(ReplaceOne(
             {'_id': transformed['_id']},
-            {'$set': transformed},
+            transformed,
             upsert=True
         ))
         
