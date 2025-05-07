@@ -290,6 +290,42 @@ enrichment_rules = {
 }
 
 
+def create_union_view():
+    mongo_hook = MongoHook(mongo_conn_id='mongo')
+    mongo_client = mongo_hook.get_conn()
+
+    db = mongo_client["TEMAS_BVS"]
+
+    all_collections = list(enrichment_rules.keys())
+
+    # Pipeline para adicionar o campo '_source' e unir as collections
+    pipeline = []
+    
+    # Primeira collection: adiciona _source e define como base
+    first_coll = all_collections[0]
+    pipeline.append({
+        '$addFields': {
+            '_source': first_coll  # Nome da collection de origem
+        }
+    })
+    
+    # Demais collections: união com adição de _source
+    for coll in all_collections[1:]:
+        pipeline.append({
+            '$unionWith': {
+                'coll': coll,
+                'pipeline': [{
+                    '$addFields': {
+                        '_source': coll  # Nome da collection atual
+                    }
+                }]
+            }
+        })
+
+    # Cria a view usando a primeira collection como base
+    db.command('create', '0_view_uniao_data_governance', viewOn=first_coll, pipeline=pipeline)
+
+
 def enrich_static_data():
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     source_col = mongo_hook.get_collection('02_iahx_xml', 'data_governance')
@@ -336,71 +372,71 @@ def enrich_instancia():
     mongo_client = mongo_hook.get_conn()
     enriched_collection = mongo_hook.get_collection('03_xml_enriched', 'data_governance')
 
-    # 1. Obter todos os id_pk da coleção origem
-    id_pks = list(enriched_collection.distinct('id_pk'))
-    id_pks = [str(x) for x in id_pks]
+    # 1. Obter todos os ids da coleção origem
+    id_values = list(enriched_collection.distinct('id'))
+    id_values = [str(x) for x in id_values]
     
     # 2. Para cada coleção no TEMAS_BVS especificado no enrichment_rules
     temas_bvs = mongo_client["TEMAS_BVS"]
-    temas_collections = enrichment_rules.keys()
+    coll = temas_bvs["0_view_uniao_data_governance"]
     batch_size = 1000
     doc_map = {}
 
-    for coll_name in temas_collections:
-        coll = temas_bvs[coll_name]
-        cursor = coll.find(
-            {'id_isis': {'$in': list(id_pks)}},
-            {'_id': 0, 'id_isis': 1, 'instancia': 1, 'tema_subtema': 1},
-            batch_size=batch_size
-        )
+    cursor = coll.find(
+        {'id_iahx': {'$in': list(id_values)}},
+        {'_id': 0, 'id_iahx': 1, 'instancia': 1, 'tema_subtema': 1, '_source': 1},
+        batch_size=batch_size
+    )
+
+    for doc in cursor:
+        coll_name = doc['_source']
 
         instances = enrichment_rules[coll_name].get('instances', [])
         collections = enrichment_rules[coll_name].get('collections', [])
         contextos = enrichment_rules[coll_name].get('contextos', [])
         tags = enrichment_rules[coll_name].get('tags', [])
+        
+        key = doc['id_iahx']
+        if key not in doc_map:
+            doc_map[key] = {
+                'instances': set(), 
+                'collections': set(), 
+                'temas': set(), 
+                'campo_instancia': set(),
+                'tags': set(),
+                'contextos': set()
+            }
 
-        for doc in cursor:
-            key = int(doc['id_isis'])
-            if key not in doc_map:
-                doc_map[key] = {
-                    'instances': set(), 
-                    'collections': set(), 
-                    'temas': set(), 
-                    'campo_instancia': set(),
-                    'tags': set(),
-                    'contextos': set()
-                }
+        doc_map[key]['instances'].update(instances)
 
-            doc_map[key]['instances'].update(instances)
+        if doc['tema_subtema']:
+            # Corner case for Odontologia
+            if not (coll_name == 'odontologia_temas' and doc['tema_subtema'] == 'geral'):
+                doc_map[key]['temas'].add(doc['tema_subtema'])
 
-            if doc['tema_subtema']:
-                # Corner case for Odontologia
-                if not (coll_name == 'odontologia_temas' and doc['tema_subtema'] == 'geral'):
-                    doc_map[key]['temas'].add(doc['tema_subtema'])
+        if doc['instancia']:
+            doc_map[key]['campo_instancia'].add(doc['instancia'])
 
-            if doc['instancia']:
-                doc_map[key]['campo_instancia'].add(doc['instancia'])
-
-            doc_map[key]['collections'].update(collections)
-            doc_map[key]['contextos'].update(contextos)
-            doc_map[key]['tags'].update(tags)
-            
-            # 3. Enviar batch
-            if len(doc_map) >= batch_size:
-                logger.info("Enviando batch de %i da coleção %s para o MongoDB" % (batch_size, coll_name))
-                _process_batch(enriched_collection, doc_map)
-                doc_map.clear()
-
-        # 4. Processar restante
-        if doc_map:
-            logger.info("Enviando batch de menos de %i da coleção %s para o MongoDB" % (batch_size, coll_name,))
+        doc_map[key]['collections'].update(collections)
+        doc_map[key]['contextos'].update(contextos)
+        doc_map[key]['tags'].update(tags)
+        
+        # 3. Enviar batch
+        if len(doc_map) >= batch_size:
+            logger.info("Enviando batch de %i da coleção %s para o MongoDB" % (batch_size, coll_name))
             _process_batch(enriched_collection, doc_map)
             doc_map.clear()
+
+    # 4. Processar restante
+    if doc_map:
+        logger.info("Enviando batch de menos de %i da coleção %s para o MongoDB" % (batch_size, coll_name,))
+        _process_batch(enriched_collection, doc_map)
+        doc_map.clear()
     
 
 def _process_batch(collection, doc_map):
     bulk_ops = []
-    for id_pk, data in doc_map.items():
+    for id_value, data in doc_map.items():
         set_fields = {
             'instance': {
                 '$setUnion': [
@@ -431,7 +467,7 @@ def _process_batch(collection, doc_map):
 
         bulk_ops.append(
             UpdateOne(
-                {'id_pk': id_pk},
+                {'id': id_value},
                 [{'$set': set_fields}]
             )
         )
@@ -463,4 +499,10 @@ with DAG(
         python_callable=enrich_instancia
     )
 
+    create_union_view_task = PythonOperator(
+        task_id='create_union_view',
+        python_callable=create_union_view
+    )
+
     enrich_static_data_task >> enrich_instancia_task
+    create_union_view_task >> enrich_instancia_task
