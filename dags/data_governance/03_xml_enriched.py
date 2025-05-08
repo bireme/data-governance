@@ -391,7 +391,7 @@ def enrich_instancia():
     # 2. Para cada coleção no TEMAS_BVS especificado no enrichment_rules
     temas_bvs = mongo_client["TEMAS_BVS"]
     coll = temas_bvs["0_view_uniao_data_governance"]
-    batch_size = 1000
+    batch_size = 100
     doc_map = {}
 
     cursor = coll.find(
