@@ -391,53 +391,54 @@ def enrich_instancia():
     # 2. Para cada coleção no TEMAS_BVS especificado no enrichment_rules
     temas_bvs = mongo_client["TEMAS_BVS"]
     coll = temas_bvs["0_view_uniao_data_governance"]
-    batch_size = 100
+
+    batch_size = 1000
     doc_map = {}
+    for i in range(0, len(id_values), batch_size):
+        batch_ids = id_values[i:i + batch_size]
+        cursor = coll.find(
+            {'id_iahx': {'$in': batch_ids}},
+            {'_id': 0, 'id_iahx': 1, 'instancia': 1, 'tema_subtema': 1, '_source': 1}
+        )
 
-    cursor = coll.find(
-        {'id_iahx': {'$in': list(id_values)}},
-        {'_id': 0, 'id_iahx': 1, 'instancia': 1, 'tema_subtema': 1, '_source': 1},
-        batch_size=batch_size
-    )
+        for doc in cursor:
+            coll_name = doc['_source']
 
-    for doc in cursor:
-        coll_name = doc['_source']
+            instances = enrichment_rules[coll_name].get('instances', [])
+            collections = enrichment_rules[coll_name].get('collections', [])
+            contextos = enrichment_rules[coll_name].get('contextos', [])
+            tags = enrichment_rules[coll_name].get('tags', [])
+            
+            key = doc['id_iahx']
+            if key not in doc_map:
+                doc_map[key] = {
+                    'instances': set(), 
+                    'collections': set(), 
+                    'temas': set(), 
+                    'campo_instancia': set(),
+                    'tags': set(),
+                    'contextos': set()
+                }
 
-        instances = enrichment_rules[coll_name].get('instances', [])
-        collections = enrichment_rules[coll_name].get('collections', [])
-        contextos = enrichment_rules[coll_name].get('contextos', [])
-        tags = enrichment_rules[coll_name].get('tags', [])
-        
-        key = doc['id_iahx']
-        if key not in doc_map:
-            doc_map[key] = {
-                'instances': set(), 
-                'collections': set(), 
-                'temas': set(), 
-                'campo_instancia': set(),
-                'tags': set(),
-                'contextos': set()
-            }
+            doc_map[key]['instances'].update(instances)
 
-        doc_map[key]['instances'].update(instances)
+            if doc['tema_subtema']:
+                # Corner case for Odontologia
+                if not (coll_name == 'odontologia_temas' and doc['tema_subtema'] == 'geral'):
+                    doc_map[key]['temas'].add(doc['tema_subtema'])
 
-        if doc['tema_subtema']:
-            # Corner case for Odontologia
-            if not (coll_name == 'odontologia_temas' and doc['tema_subtema'] == 'geral'):
-                doc_map[key]['temas'].add(doc['tema_subtema'])
+            if doc['instancia']:
+                doc_map[key]['campo_instancia'].add(doc['instancia'])
 
-        if doc['instancia']:
-            doc_map[key]['campo_instancia'].add(doc['instancia'])
-
-        doc_map[key]['collections'].update(collections)
-        doc_map[key]['contextos'].update(contextos)
-        doc_map[key]['tags'].update(tags)
-        
-        # 3. Enviar batch
-        if len(doc_map) >= batch_size:
-            logger.info("Enviando batch de %i da coleção %s para o MongoDB" % (batch_size, coll_name))
-            _process_batch(enriched_collection, doc_map)
-            doc_map.clear()
+            doc_map[key]['collections'].update(collections)
+            doc_map[key]['contextos'].update(contextos)
+            doc_map[key]['tags'].update(tags)
+            
+            # 3. Enviar batch
+            if len(doc_map) >= batch_size:
+                logger.info("Enviando batch de %i da coleção %s para o MongoDB" % (batch_size, coll_name))
+                _process_batch(enriched_collection, doc_map)
+                doc_map.clear()
 
     # 4. Processar restante
     if doc_map:
