@@ -291,39 +291,49 @@ enrichment_rules = {
 
 
 def create_union_view():
+    logger = logging.getLogger(__name__)
+
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     mongo_client = mongo_hook.get_conn()
 
     db = mongo_client["TEMAS_BVS"]
+    view_name = '0_view_uniao_data_governance'
 
-    all_collections = list(enrichment_rules.keys())
+    # Verifica se a view já existe
+    existing_views = db.list_collection_names(filter={"type": "view"})
+    if view_name in existing_views:
+        logger.info(f"View '{view_name}' já existe. Nenhuma ação necessária.")
 
-    # Pipeline para adicionar o campo '_source' e unir as collections
-    pipeline = []
-    
-    # Primeira collection: adiciona _source e define como base
-    first_coll = all_collections[0]
-    pipeline.append({
-        '$addFields': {
-            '_source': first_coll  # Nome da collection de origem
-        }
-    })
-    
-    # Demais collections: união com adição de _source
-    for coll in all_collections[1:]:
+    else:
+        all_collections = list(enrichment_rules.keys())
+
+        # Pipeline para adicionar o campo '_source' e unir as collections
+        pipeline = []
+        
+        # Primeira collection: adiciona _source e define como base
+        first_coll = all_collections[0]
         pipeline.append({
-            '$unionWith': {
-                'coll': coll,
-                'pipeline': [{
-                    '$addFields': {
-                        '_source': coll  # Nome da collection atual
-                    }
-                }]
+            '$addFields': {
+                '_source': first_coll  # Nome da collection de origem
             }
         })
+        
+        # Demais collections: união com adição de _source
+        for coll in all_collections[1:]:
+            pipeline.append({
+                '$unionWith': {
+                    'coll': coll,
+                    'pipeline': [{
+                        '$addFields': {
+                            '_source': coll  # Nome da collection atual
+                        }
+                    }]
+                }
+            })
 
-    # Cria a view usando a primeira collection como base
-    db.command('create', '0_view_uniao_data_governance', viewOn=first_coll, pipeline=pipeline)
+        # Cria a view usando a primeira collection como base
+        db.command('create', view_name, viewOn=first_coll, pipeline=pipeline)
+        logger.info(f"View '{view_name}' criada com sucesso.")
 
 
 def enrich_static_data():
@@ -363,6 +373,7 @@ def enrich_static_data():
         {},
         {"$set": update_fields}
     )
+    target_col.create_index("id")
 
 
 def enrich_instancia():
@@ -373,8 +384,9 @@ def enrich_instancia():
     enriched_collection = mongo_hook.get_collection('03_xml_enriched', 'data_governance')
 
     # 1. Obter todos os ids da coleção origem
-    id_values = list(enriched_collection.distinct('id'))
-    id_values = [str(x) for x in id_values]
+    pipeline = [{"$group": {"_id": "$id"}}]
+    cursor = enriched_collection.aggregate(pipeline, allowDiskUse=True)
+    id_values = [str(doc["_id"]) for doc in cursor]
     
     # 2. Para cada coleção no TEMAS_BVS especificado no enrichment_rules
     temas_bvs = mongo_client["TEMAS_BVS"]
