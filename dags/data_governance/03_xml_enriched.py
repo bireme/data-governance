@@ -414,31 +414,33 @@ def enrich_instancia():
                 doc_map[key] = {
                     'instances': set(), 
                     'collections': set(), 
-                    'temas': set(), 
                     'campo_instancia': set(),
-                    'tags': set(),
+                    'tags': {},
                     'contextos': set()
                 }
 
             doc_map[key]['instances'].update(instances)
-
-            if doc['tema_subtema']:
-                # Corner case for Odontologia
-                if not (coll_name == 'odontologia_temas' and doc['tema_subtema'] == 'geral'):
-                    doc_map[key]['temas'].add(doc['tema_subtema'])
 
             if doc['instancia']:
                 doc_map[key]['campo_instancia'].add(doc['instancia'])
 
             doc_map[key]['collections'].update(collections)
             doc_map[key]['contextos'].update(contextos)
-            doc_map[key]['tags'].update(tags)
+
+            for tag in tags:
+                if tag not in doc_map[key]['tags']:
+                    doc_map[key]['tags'][tag] = []
+
+                if doc['tema_subtema']:
+                    # Corner case for Odontologia
+                    if not (coll_name == 'odontologia_temas' and doc['tema_subtema'] == 'geral'):
+                        doc_map[key]['tags'][tag].append(doc['tema_subtema'])
             
-            # 3. Enviar batch
-            if len(doc_map) >= batch_size:
-                logger.info("Enviando batch de %i da coleção %s para o MongoDB" % (batch_size, coll_name))
-                _process_batch(enriched_collection, doc_map)
-                doc_map.clear()
+        # 3. Enviar batch
+        if doc_map:
+            logger.info("Enviando batch de %i da coleção %s para o MongoDB" % (batch_size, coll_name))
+            _process_batch(enriched_collection, doc_map)
+            doc_map.clear()
 
     # 4. Processar restante
     if doc_map:
@@ -462,11 +464,11 @@ def _process_batch(collection, doc_map):
         for coll_name in data['collections']:
             set_fields[coll_name] = "LILACS"
 
-        for coll_name in data['tags']:
+        for coll_name in data['tags'].keys():
             set_fields[coll_name] = {
                 '$setUnion': [
                     {'$ifNull': [f'${coll_name}', []]},
-                    {'$literal': list(data['temas'])}
+                    {'$literal': data['tags'][coll_name]}
                 ]
             }
 
