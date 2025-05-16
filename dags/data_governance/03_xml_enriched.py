@@ -164,6 +164,9 @@ enrichment_rules = {
     'homeopatia': {
         'instances': ['homeopatia']
     },
+    'lilacsplus_alc': {
+        'instances': ['lilacsplus']
+    },
     'limit': {
         'tags': ['limit']
     },
@@ -286,6 +289,9 @@ enrichment_rules = {
     'transmisible_diseases': {
         'tags': ['tag_tema_saude'],
         'contextos': ['tag_contexto']
+    },
+    'who_regions': {
+        'tags': ['who_regions']
     }
 }
 
@@ -438,13 +444,13 @@ def enrich_instancia():
             
         # 3. Enviar batch
         if doc_map:
-            logger.info("Enviando batch de %i da coleção %s para o MongoDB" % (batch_size, coll_name))
+            logger.info("Enviando batch de %i para o MongoDB" % (batch_size, ))
             _process_batch(enriched_collection, doc_map)
             doc_map.clear()
 
     # 4. Processar restante
     if doc_map:
-        logger.info("Enviando batch de menos de %i da coleção %s para o MongoDB" % (batch_size, coll_name,))
+        logger.info("Enviando batch de menos de %i para o MongoDB" % (batch_size, ))
         _process_batch(enriched_collection, doc_map)
         doc_map.clear()
     
