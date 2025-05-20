@@ -88,6 +88,17 @@ color: #fff!important;
 
 </div>
 </div>
+
+<script>
+  function sendHeight() {
+    const height = document.body.scrollHeight || document.documentElement.scrollHeight;
+    parent.postMessage({ type: "resize", height }, "*");
+  }
+
+  window.addEventListener("load", sendHeight);
+  window.addEventListener("resize", sendHeight);
+  new MutationObserver(sendHeight).observe(document.body, { childList: true, subtree: true });
+</script>
 </body>
 </html>
 """

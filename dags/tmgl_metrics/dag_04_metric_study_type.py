@@ -124,6 +124,7 @@ def create_metric_studytypes():
                             {"case": {"$eq": ["$type_of_study", "evidence_synthesis"]}, "then": "Evidence synthesis"},
                             {"case": {"$eq": ["$type_of_study", "observational_studies"]}, "then": "Observationals"},
                             {"case": {"$eq": ["$type_of_study", "sysrev_observational_studies"]}, "then": "Observationals"},
+                            {"case": {"$eq": ["$type_of_study", "policy_brief"]}, "then": "Policy brief"},
                             {"case": {"$eq": ["$type_of_study", "diagnostic_studies"]}, "then": "Other studies"},
                             {"case": {"$eq": ["$type_of_study", "etiology_studies"]}, "then": "Other studies"},
                             {"case": {"$eq": ["$type_of_study", "prognostic_studies"]}, "then": "Other studies"},
