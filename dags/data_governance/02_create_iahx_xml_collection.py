@@ -51,11 +51,44 @@ Esta DAG realiza a transformação e padronização dos dados coletados do FI-Ad
 """
 
 
+import logging
 from datetime import datetime
 from airflow import DAG
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.operators.python import PythonOperator
 from pymongo import ReplaceOne
+
+
+def load_tabpais(tabpais_col):
+    country_map = {}
+    
+    for country in tabpais_col.find():
+        all_data = country.get('all', {})
+
+        # Mapeia todos os valores e sinônimos
+        for lang in ['pt', 'en', 'es', 'fr']:
+            lang_value = all_data.get(lang, '')
+            if lang_value:
+                country_map[lang_value.lower().strip()] = all_data
+
+        if all_data.get('sinonimo'):
+            for synonym in all_data.get('sinonimo', []):
+                country_map[synonym.lower().strip()] = all_data
+
+    return country_map
+
+
+def load_decs_descriptors(decs_col):    
+    descriptor_map = {}
+    for decs_doc in decs_col.find():
+        english_desc = decs_doc.get('Descritor Inglês', '').strip().lower()
+        if english_desc:
+            # Processa MFN: remove zeros à esquerda e adiciona prefixo
+            raw_mfn = decs_doc['Mfn'].lstrip('0')
+            formatted_mfn = f'^d{raw_mfn}' if raw_mfn else None
+            descriptor_map[english_desc] = formatted_mfn
+    
+    return descriptor_map
 
 
 def standardize_pages(value):
@@ -95,9 +128,23 @@ def standardize_eletronic_address(value):
     if isinstance(value, list):
         values = [
             entry['_u'] for entry in value
-            if '_u' in entry and isinstance(entry['_u'], str)
+            if isinstance(entry, dict) and '_u' in entry and entry['_u'] and isinstance(entry['_u'], str)
         ]
         fields['ur'] = values
+
+        if fields['ur']:
+            fields['fulltext'] = 1
+    return fields
+
+
+def standardize_location(value):
+    fields = {}
+    if isinstance(value, list):
+        values = [
+            entry['text'] for entry in value
+            if isinstance(entry, dict) and 'text' in entry and entry['text'] and isinstance(entry['text'], str)
+        ]
+        fields['lo'] = ' / '.join(values)
     return fields
 
 
@@ -108,13 +155,33 @@ def standardize_author_keyword(value):
     return fields
 
 
+def standardize_fo(source, pages, publication_date, descriptive_information):
+    """Processa o campo source e retorna os campos derivados"""
+    fields = {}
+    if source:
+        fo = source
+        if pages:
+            fo += f": {pages}"
+        if publication_date:
+            fo += f", {publication_date}."
+        if descriptive_information:
+            values_di = [entry['_b'] for entry in descriptive_information if '_b' in entry and entry['_b']]
+            values_di = ". ".join(values_di)
+            fo += f" {values_di}"
+
+        fields['fo'] = fo
+    return fields
+
+
 def standardize_individual_authors(authors):
     """Processa o campo individual_author e retorna os campos derivados"""
     result = {
         'au': [],
         'afiliacao_autor': [],
         'af': [],
-        'instituicao_pais_afiliacao': []
+        'instituicao_pais_afiliacao': [],
+        'auid': [],
+        'email': []
     }
     
     if not isinstance(authors, list):
@@ -124,6 +191,8 @@ def standardize_individual_authors(authors):
         name = author.get('text', '')
         institution = author.get('_1', '')
         country = author.get('_p', '')
+        auid = author.get('_k', '')
+        email = author.get('_e', '')
         
         # Campo au
         if name:
@@ -137,12 +206,23 @@ def standardize_individual_authors(authors):
                 parts.append(f"; {institution}" if parts else institution)
             if country:
                 parts.append(f". {country}" if parts else country)
-            if parts:
+
+            if institution and parts:
                 result['afiliacao_autor'].append(''.join(parts).lstrip('; '))
+            else:
+                result['afiliacao_autor'].append('s.af')
         
         # Campo af
         if institution:
             result['af'].append(institution)
+        else:
+            result['af'].append('s.af')
+
+        if auid:
+            result['auid'].append(auid)
+
+        if email:
+            result['email'].append(email)
         
         # Campo instituicao_pais_afiliacao
         if institution and country:
@@ -160,10 +240,38 @@ def standardize_id(id_pk, lilacs_original_id):
     return {'id': id_value}
 
 
+def standardize_cp(publication_country, country_map):
+    fields = {}
+    if publication_country:
+        matched = country_map.get(publication_country.lower())
+        if matched:
+            fields['cp'] = set()
+
+            for lang in ['pt', 'en', 'es', 'fr', 'país_2']:
+                value = matched.get(lang)
+                if value:
+                    fields['cp'].add(value)
+
+            for synonym in matched.get('sinonimo', []):
+                if synonym:
+                    fields['cp'].add(synonym)
+
+            fields['cp'] = list(fields['cp'])
+    return fields
+
+
 def transform_and_migrate():
+    logger = logging.getLogger(__name__)
+    
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     source_col = mongo_hook.get_collection('01_landing_zone', 'data_governance')
     target_col = mongo_hook.get_collection('02_iahx_xml', 'data_governance')
+
+    tabpais_col = mongo_hook.get_collection('tabpais', 'TABS')
+    country_map = load_tabpais(tabpais_col)
+
+    decs_col = mongo_hook.get_collection('current', 'DECS')
+    decs_map = load_decs_descriptors(decs_col)
     
     batch = []
     for doc in source_col.find():
@@ -197,29 +305,77 @@ def transform_and_migrate():
         if 'author_keyword' in doc:
             author_keyword_fields = standardize_author_keyword(doc['author_keyword'])
 
+        # processa call_number
+        location_fields = {}
+        if 'call_number' in doc:
+            location_fields = standardize_location(doc['call_number'])
+
+        # processa fo
+        fo_fields = {}
+        if 'source' in doc:
+            fo_fields = standardize_fo(doc.get('source'), pg_value, doc.get('publication_date'), doc.get('descriptive_information'))
+
+        # processa cp
+        cp_fields = {}
+        if 'publication_country' in doc:
+            cp_fields = standardize_cp(doc.get('publication_country'), country_map)
+
+        # processa ct
+        ct_values = []
+        if 'check_tags' in doc and isinstance(doc['check_tags'], list):
+            for tag in doc['check_tags']:
+                formatted_mfn = decs_map.get(tag.strip().lower())
+                if formatted_mfn:
+                    ct_values.append(formatted_mfn)
+
         id_fields = standardize_id(doc.get('id'), doc.get('LILACS_original_id'))
+
+        descritores_locais = doc.get('local_descriptors', '')
+        descritores_locais = descritores_locais.splitlines() if isinstance(descritores_locais, str) else descritores_locais
 
         transformed = {
             '_id': doc['_id'],
-            'vi': doc.get('volume_serial'),
-            'ip': doc.get('issue_number'),
-            'ta': doc.get('title_serial'),
-            'fo': doc.get('source'),
-            'is': doc.get('issn'),
+            'ai': doc.get('corporate_author'),
+            'aid': doc.get('doi_number'),
+            'alternate_id': doc.get('alternate_ids'),
+            'book_title': doc.get('title_monographic'),
             'cc': doc.get('cooperative_center_code'),
-            'id_pk': doc.get('id'),
-            'nivel_tratamento': doc.get('treatment_level'),
-            'da': doc.get('publication_date_normalized'),
-            'la': doc.get('text_language'),
+            'cn_co': doc.get('conferente_country'),
+            'cn_cy': doc.get('conference_city'),
+            'cn_da': doc.get('conference_nomalized_date'),
+            'cn_dt': doc.get('conference_date'),
+            'cn_in': doc.get('conference_sponsoring_institution'),
+            'cn_na': doc.get('conference_name'),
+            'ct': ct_values,
+            'cy': doc.get('publication_city'),
+            'da': doc.get('publication_date_normalized', '')[:6] if doc.get('publication_date_normalized') else None,
             'db': doc.get('indexed_database'),
-            'dp': doc.get('publication_date_normalized', '')[:4] if doc.get('publication_date_normalized') else None,
+            'descritores_locais': descritores_locais,
+            'dp': doc.get('publication_date'),
+            'ec': 1 if doc.get('clinical_trial_registry_name') else None,
+            'ed': doc.get('edition'),
+            'entry_date': doc.get('created_time', doc.get('transfer_date_to_database')), 
+            'fo': doc.get('source'),
+            'id_pk': doc.get('id'),
+            'ip': doc.get('issue_number'),
+            'is': doc.get('issn'),
+            'isbn': doc.get('isbn'),
+            'la': doc.get('text_language'),
+            'license': doc.get('license'),
+            'nivel_tratamento': doc.get('treatment_level'),
+            'ot': descritores_locais,
             'pg': pg_value,
+            'ta': doc.get('title_serial'),
+            'vi': doc.get('volume_serial'),
             **id_fields,
             **title_fields,
             **abstract_fields,
             **eletronic_fields,
             **author_keyword_fields,
-            **individual_author_fields
+            **individual_author_fields,
+            **location_fields,
+            **fo_fields,
+            **cp_fields
         }
 
         # Remove campos com valor None, '', [], ou {}
@@ -241,7 +397,7 @@ def transform_and_migrate():
 
 default_args = {
     'owner': 'airflow',
-    'start_date': datetime(2025, 4, 15),
+    'start_date': datetime(2025, 4, 15, tz="America/Sao_Paulo"),
     'retries': 0
 }
 
@@ -250,7 +406,7 @@ with DAG(
     default_args=default_args,
     description='Data Governance - Transforma a coleção em formato XML para importar no iah-X',
     tags=["data_governance", "fi-admin", "mongodb", "iahx"],
-    schedule=None,
+    schedule="0 3 * * *",
     catchup=False,
     doc_md=__doc__
 ) as dag:

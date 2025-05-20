@@ -498,7 +498,7 @@ def _process_batch(collection, doc_map):
 
 default_args = {
     'owner': 'airflow',
-    'start_date': datetime(2025, 4, 15),
+    'start_date': datetime(2025, 4, 15, tz="America/Sao_Paulo"),
     'retries': 0
 }
 with DAG(
@@ -506,7 +506,7 @@ with DAG(
     default_args=default_args,
     description='Data Governance - Transforma a coleção com nomenclatura de XML do iah-X com novos campos enriquecidos',
     tags=["data_governance", "fi-admin", "mongodb", "iahx", "data enrichment"],
-    schedule=None,
+    schedule="0 4 * * *",
     catchup=False,
     doc_md=__doc__
 ) as dag:
