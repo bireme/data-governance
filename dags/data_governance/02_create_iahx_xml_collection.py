@@ -397,7 +397,7 @@ def transform_and_migrate():
 
 default_args = {
     'owner': 'airflow',
-    'start_date': datetime(2025, 4, 15, tz="America/Sao_Paulo"),
+    'start_date': datetime(2025, 4, 15),
     'retries': 0
 }
 
