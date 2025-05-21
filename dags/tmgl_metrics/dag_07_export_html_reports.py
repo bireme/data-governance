@@ -1,5 +1,5 @@
 """
-# TMGL - TMGL_06_export_html_reports
+# TMGL - TMGL_07_export_html_reports
 
 ## Visão Geral
 Este DAG gera relatórios HTML por país com métricas de documentos científicos, incluindo:
@@ -86,18 +86,20 @@ color: #fff!important;
 
 {dimention_types_section}
 
+{subject_types_section}
+
 </div>
 </div>
 
 <script>
-  function sendHeight() {
+  function sendHeight() {{
     const height = document.body.scrollHeight || document.documentElement.scrollHeight;
-    parent.postMessage({ type: "resize", height }, "*");
-  }
+    parent.postMessage({{ type: "resize", height }}, "*");
+  }}
 
   window.addEventListener("load", sendHeight);
   window.addEventListener("resize", sendHeight);
-  new MutationObserver(sendHeight).observe(document.body, { childList: true, subtree: true });
+  new MutationObserver(sendHeight).observe(document.body, {{ childList: true, subtree: true }});
 </script>
 </body>
 </html>
@@ -132,6 +134,25 @@ DIMENTION_TYPES_TEMPLATE = """
 </tbody>
 </table>
 </div>
+</div>
+"""
+
+SUBJECT_TYPES_TEMPLATE = """
+<div id="table5" class="col-12 mt-5">
+  <h5 class="mb-3 text-center title">Main Subjects</h5>
+  <div class="table-responsive">
+    <table class="table table-hover text-center">
+      <thead class="table-primary">
+        <tr>
+          <th>Subject</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {subject_types_table}
+      </tbody>
+    </table>
+  </div>
 </div>
 """
 
@@ -185,7 +206,12 @@ def generate_html_reports():
             'dimention_types': list(collection.find(
                 {'country': country, 'type': 'dimention_type'},
                 {'_id': 0, 'name': 1, 'count': 1}
-            ))
+            )),
+
+            'subject_types': list(collection.find(
+                {'country': country, 'type': 'subject_type'},
+                {'_id': 0, 'name': 1, 'count': 1}
+            )),
         }
 
         # Gerar conteúdo HTML para a seção de tipos de estudo
@@ -204,13 +230,22 @@ def generate_html_reports():
         else:
             dimention_types_section = ""
 
+        # Seção de subject_types
+        if metrics['subject_types']:
+            subject_types_table = generate_table_rows(metrics['subject_types'])
+            subject_types_section = SUBJECT_TYPES_TEMPLATE.format(subject_types_table=subject_types_table)
+        else:
+            subject_types_section = ""
+
+        print(subject_types_section)
         # Gerar conteúdo HTML principal
         html_content = HTML_TEMPLATE.format(
             total_docs=metrics['total_docs'].get('count', 0),
             total_fulltext=metrics['total_fulltext'].get('count', 0),
             doc_types_table=generate_table_rows(metrics['doc_types']),
             study_types_section=study_types_section,
-            dimention_types_section=dimention_types_section
+            dimention_types_section=dimention_types_section,
+            subject_types_section=subject_types_section
         )
 
         # Salvar arquivo
@@ -231,7 +266,7 @@ default_args = {
 }
 
 with DAG(
-    'TMGL_06_export_html_reports',
+    'TMGL_07_export_html_reports',
     default_args=default_args,
     description='TMGL - Exporta relatórios HTML com métricas de documentos por país',
     schedule_interval=None,
