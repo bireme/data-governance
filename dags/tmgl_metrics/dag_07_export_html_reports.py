@@ -237,7 +237,6 @@ def generate_html_reports():
         else:
             subject_types_section = ""
 
-        print(subject_types_section)
         # Gerar conteúdo HTML principal
         html_content = HTML_TEMPLATE.format(
             total_docs=metrics['total_docs'].get('count', 0),
