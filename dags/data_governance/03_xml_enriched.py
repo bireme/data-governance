@@ -135,6 +135,10 @@ enrichment_rules = {
         'instances': ['carpha'],
         'tags': ['carpha_geral']
     },
+       'conass': {
+        'instances': ['conass'],
+        'collections': ['collection_conass']
+    },
     'controlecancer': {
         'instances': ['controlecancer'],
         'collections': ['collection_controlecancer']
