@@ -351,7 +351,7 @@ def enrich_static_data():
     instance_values = [
         "regional", "bvsespana", "paraguay", "panama",
         "bvsms", "peru", "nicaragua", "bolivia",
-        "cns-br", "guatemala", "honduras", "costarica"
+        "cns-br", "guatemala", "honduras", "costarica","conass"
     ]
     
     collection_fields = {
@@ -365,6 +365,7 @@ def enrich_static_data():
         "collection_guatemala": "LILACS",
         "collection_honduras": "LILACS",
         "collection_costarica": "LILACS"
+        "collection_conass": "LILACS"
     }
 
     update_fields = {"instance": instance_values}
