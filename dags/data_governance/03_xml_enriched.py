@@ -364,7 +364,7 @@ def enrich_static_data():
         "collection_cns-br": "LILACS",
         "collection_guatemala": "LILACS",
         "collection_honduras": "LILACS",
-        "collection_costarica": "LILACS"
+        "collection_costarica": "LILACS",
         "collection_conass": "LILACS"
     }
 
