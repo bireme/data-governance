@@ -75,6 +75,10 @@ def load_tabpais(tabpais_col):
             for synonym in all_data.get('sinonimo', []):
                 country_map[synonym.lower().strip()] = all_data
 
+        if all_data.get('país_2'):
+            for country_iso in all_data.get('país_2', []):
+                country_map[country_iso.lower().strip()] = all_data
+
     return country_map
 
 
@@ -189,6 +193,7 @@ def standardize_fo(source, pages, publication_date, descriptive_information):
     if source:
         fo = source
         if pages:
+            pages = ', '.join(pages) if isinstance(pages, list) else pages
             fo += f": {pages}"
         if publication_date:
             fo += f", {publication_date}."
@@ -201,13 +206,14 @@ def standardize_fo(source, pages, publication_date, descriptive_information):
     return fields
 
 
-def standardize_individual_authors(authors):
+def standardize_individual_authors(authors, country_map):
     """Processa o campo individual_author e retorna os campos derivados"""
     result = {
         'au': [],
         'afiliacao_autor': [],
         'af': [],
         'instituicao_pais_afiliacao': [],
+        'pais_afiliacao': [],
         'auid': [],
         'email': []
     }
@@ -265,7 +271,12 @@ def standardize_individual_authors(authors):
 
         if email:
             result['email'].append(email)
-        
+
+        if country:
+            matched = country_map.get(country.lower())
+            if matched:
+                result['pais_afiliacao'].append(f'^i{matched.get("en")}^e{matched.get("es")}^p{matched.get("pt")}^f{matched.get("fr")}')
+
         # Campo instituicao_pais_afiliacao
         if institution and country:
             result['instituicao_pais_afiliacao'].append(f"{institution}+{country}")
@@ -299,6 +310,15 @@ def standardize_cp(publication_country, country_map):
                     fields['cp'].add(synonym)
 
             fields['cp'] = list(fields['cp'])
+    return fields
+
+
+def standardize_pais_publicacao(publication_country, country_map):
+    fields = {}
+    matched = country_map.get(publication_country.lower())
+    if matched:
+        fields['pais_publicacao'] = f'^i{matched.get("en")}^e{matched.get("es")}^p{matched.get("pt")}^f{matched.get("fr")}'
+
     return fields
 
 
@@ -441,11 +461,11 @@ def transform_and_migrate():
         # processa individual_author
         individual_author_fields = {}
         if 'individual_author' in doc:
-            individual_author_fields = standardize_individual_authors(doc['individual_author'])
+            individual_author_fields = standardize_individual_authors(doc['individual_author'], country_map)
         elif 'corporate_author' in doc:
-            individual_author_fields = standardize_individual_authors(doc['corporate_author'])
+            individual_author_fields = standardize_individual_authors(doc['corporate_author'], country_map)
         elif 'corporate_author_monographic' in doc:
-            individual_author_fields = standardize_individual_authors(doc['corporate_author_monographic'])
+            individual_author_fields = standardize_individual_authors(doc['corporate_author_monographic'], country_map)
 
         # processa author_keyword
         author_keyword_fields = {}
@@ -462,10 +482,12 @@ def transform_and_migrate():
         if 'source' in doc:
             fo_fields = standardize_fo(doc.get('source'), pg_value, doc.get('publication_date'), doc.get('descriptive_information'))
 
-        # processa cp
+        # processa cp e pais_publicacao
         cp_fields = {}
+        pais_publicacao_fields = {}
         if 'publication_country' in doc:
             cp_fields = standardize_cp(doc.get('publication_country'), country_map)
+            pais_publicacao_fields = standardize_pais_publicacao(doc.get('publication_country'), country_map)
 
         # processa ct
         ct_values = []
@@ -560,7 +582,8 @@ def transform_and_migrate():
             **individual_author_fields,
             **location_fields,
             **fo_fields,
-            **cp_fields
+            **cp_fields,
+            **pais_publicacao_fields
         }
 
         # Remove campos com valor None, '', [], ou {}
