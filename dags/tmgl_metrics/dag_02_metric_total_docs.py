@@ -40,12 +40,12 @@ utilizando dados armazenados no MongoDB. Ele gera duas métricas principais: o t
 - **MongoDB**: Armazenamento dos dados e métricas.
 """
 
-import re
 from datetime import datetime
 from pymongo import UpdateOne
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.mongo.hooks.mongo import MongoHook
+from data_governance.dags.tmgl_metrics.misc import get_tmgl_country_query
 
 
 def setup_collection_metric():
@@ -69,16 +69,7 @@ def create_metric_total_docs():
     batch = []
     for country in countries:
         country_name = country.strip().lower()
-        escaped_country = re.escape(country_name)
-        
-        # Construir query com regex case-insensitive
-        query = {
-            "$or": [
-                {"pais_afiliacao": {"$regex": f"\\^i.*{escaped_country}.*\\^", "$options": "i"}},
-                {"cp": {"$regex": f"^{escaped_country}$", "$options": "i"}},
-                {"who_regions": {"$regex": f"/{escaped_country}$", "$options": "i"}}
-            ]
-        }
+        query = get_tmgl_country_query(country_name)
         
         # Contagem eficiente usando aggregation pipeline
         pipeline = [
@@ -87,7 +78,7 @@ def create_metric_total_docs():
             {"$count": "total"}
         ]
         
-        count_result = list(source_collection.aggregate(pipeline))
+        count_result = list(source_collection.aggregate(pipeline, collation={'locale': 'en', 'strength': 1}))
         count = count_result[0]['total'] if count_result else 0
         
         batch.append(UpdateOne(
@@ -119,17 +110,7 @@ def create_metric_total_docs_fulltext():
     batch = []
     for country in countries:
         country_name = country.strip().lower()
-        escaped_country = re.escape(country_name)
-        
-        # Construir query com regex case-insensitive
-        query = {
-            "fulltext": "1",
-            "$or": [
-                {"pais_afiliacao": {"$regex": f"\\^i.*{escaped_country}.*\\^", "$options": "i"}},
-                {"cp": {"$regex": f"^{escaped_country}$", "$options": "i"}},
-                {"who_regions": {"$regex": f"/{escaped_country}$", "$options": "i"}}
-            ]
-        }
+        query = get_tmgl_country_query(country_name)
         
         # Contagem eficiente usando aggregation pipeline
         pipeline = [
@@ -138,7 +119,7 @@ def create_metric_total_docs_fulltext():
             {"$count": "total"}
         ]
         
-        count_result = list(source_collection.aggregate(pipeline))
+        count_result = list(source_collection.aggregate(pipeline, collation={'locale': 'en', 'strength': 1}))
         count = count_result[0]['total'] if count_result else 0
         
         batch.append(UpdateOne(

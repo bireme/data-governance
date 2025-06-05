@@ -5,12 +5,12 @@ TBD
 
 """
 
-import re
 from datetime import datetime
 from pymongo import UpdateOne
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.mongo.hooks.mongo import MongoHook
+from data_governance.dags.tmgl_metrics.misc import get_tmgl_country_query
 
 
 def load_descriptors(decs_col):
@@ -51,16 +51,7 @@ def create_metric_subjects():
     batch = []
     for country in countries:
         country_name = country.strip().lower()
-        escaped_country = re.escape(country_name)
-        
-        # Construir query com regex case-insensitive
-        query = {
-            "$or": [
-                {"pais_afiliacao": {"$regex": f"\\^i.*{escaped_country}.*\\^", "$options": "i"}},
-                {"cp": {"$regex": f"^{escaped_country}$", "$options": "i"}},
-                {"who_regions": {"$regex": f"/{escaped_country}$", "$options": "i"}}
-            ]
-        }
+        query = get_tmgl_country_query(country_name)
 
         pipeline = [
             {"$match": query},

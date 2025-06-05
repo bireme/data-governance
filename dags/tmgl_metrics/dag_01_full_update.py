@@ -92,45 +92,21 @@ from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.hooks.filesystem import FSHook
 
 
-XML_FILES = {
-    'wpr_regional.xml',
-    'lil_regional.xml',
-    'sea_regional.xml',
-    'ibc_regional.xml',
-    'cum_regional.xml',
-    'bde_regional.xml',
-    'who_regional.xml',
-    'bin_regional.xml',
-    'vti_regional.xml',
-    'mtc_regional.xml',
-    'psi_regional.xml',
-    'ijh_regional.xml',
-    'bbo_regional.xml',
-    'sus_regional.xml',
-    'ses_regional.xml',
-    'sms_regional.xml',
-    'lip_regional.xml',
-    'aim_regional.xml',
-    'med_regional.xml',
-    'phr_regional.xml',
-    'hom_regional.xml',
-    'bri_regional.xml',
-    'cid_regional.xml',
-    'pru_regional.xml',
-    'han_regional.xml',
-    'big_regional.xml',
-    'bdn_regional.xml',
-    'pie_regional.xml',
-    'rhs_regional.xml',
-    'arg_regional.xml'
-}
-
-
 def setup_collection():
     """Configura coleção e índices no MongoDB"""
     mongo_hook = MongoHook(mongo_conn_id='mongo')
+
+    # Deleta coleções a serem atualizadas
+    db = mongo_hook.get_conn()['tmgl_metrics']
+    db['01_landing_zone'].drop()
+    db['02_countries_metrics'].drop()
+
+    # Cria coleção de landing zone
     target_collection = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
     target_collection.create_index([('id', 1)], unique=True)
+    target_collection.create_index([('cp', 1)], collation={ 'locale': 'en', 'strength': 1 })
+    target_collection.create_index([('pais_afiliacao', 1)], collation={ 'locale': 'en', 'strength': 1 })
+    target_collection.create_index([('who_regions', 1)], collation={ 'locale': 'en', 'strength': 1 })
 
 
 def process_xml_files():
@@ -142,8 +118,7 @@ def process_xml_files():
     xml_folder_path = fs_hook.get_path()
 
     for filename in os.listdir(xml_folder_path):
-        if not (filename.endswith('.xml') and 
-               (fnmatch.fnmatch(filename, 'md*_regional_tmgl.xml') or filename in XML_FILES)):
+        if not filename.endswith('_regional_tmgl.xml'):
             continue
 
         logger.info(f"Iniciando processamento de {filename}")
