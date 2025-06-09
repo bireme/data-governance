@@ -437,10 +437,10 @@ def transform_and_migrate():
     for doc in source_col.find():
         # processa paginas
         pg_value = None
-        if 'pages_monographic' in doc:
-            pg_value = doc.get('pages_monographic')
-        elif 'pages' in doc:
+        if 'pages' in doc:
             pg_value = standardize_pages(doc['pages'])
+        elif 'pages_monographic' in doc:
+            pg_value = doc.get('pages_monographic')
 
         # processa títulos multilíngues
         title_fields = {}
