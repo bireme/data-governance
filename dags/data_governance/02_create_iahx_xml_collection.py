@@ -66,7 +66,7 @@ def load_tabpais(tabpais_col):
         all_data = country.get('all', {})
 
         # Mapeia todos os valores e sinônimos
-        for lang in ['pt', 'en', 'es', 'fr']:
+        for lang in ['pt', 'en', 'es', 'fr', 'país_2']:
             lang_value = all_data.get(lang, '')
             if lang_value:
                 country_map[lang_value.lower().strip()] = all_data
@@ -74,10 +74,6 @@ def load_tabpais(tabpais_col):
         if all_data.get('sinonimo'):
             for synonym in all_data.get('sinonimo', []):
                 country_map[synonym.lower().strip()] = all_data
-
-        if all_data.get('país_2'):
-            for country_iso in all_data.get('país_2', []):
-                country_map[country_iso.lower().strip()] = all_data
 
     return country_map
 
@@ -253,17 +249,18 @@ def standardize_individual_authors(authors, country_map):
         
         # Campo af
         if institution:
-            result['af'].append(institution)
+            if institution not in result['af']:
+                result['af'].append(institution)
         else:
             result['af'].append('s.af')
 
-        if institution2:
+        if institution2 and institution2 not in result['af']:
             result['af'].append(institution2)
 
-        if institution3:
+        if institution3 and institution3 not in result['af']:
             result['af'].append(institution3)
 
-        if city:
+        if city and city not in result['af']:
             result['af'].append(city)
 
         if auid:
@@ -275,12 +272,16 @@ def standardize_individual_authors(authors, country_map):
         if country:
             matched = country_map.get(country.lower())
             if matched:
-                result['pais_afiliacao'].append(f'^i{matched.get("en")}^e{matched.get("es")}^p{matched.get("pt")}^f{matched.get("fr")}')
+                pais_afiliacao = f'^i{matched.get("en")}^e{matched.get("es")}^p{matched.get("pt")}^f{matched.get("fr")}'
+                if pais_afiliacao not in result['pais_afiliacao']:
+                    result['pais_afiliacao'].append(pais_afiliacao)
 
         # Campo instituicao_pais_afiliacao
         if institution and country:
-            result['instituicao_pais_afiliacao'].append(f"{institution}+{country}")
-    
+            instituicao_pais_afiliacao = f"{institution}+{country}"
+            if instituicao_pais_afiliacao not in result['instituicao_pais_afiliacao']:
+                result['instituicao_pais_afiliacao'].append(instituicao_pais_afiliacao)
+
     return result
 
 
