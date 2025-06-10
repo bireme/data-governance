@@ -369,6 +369,7 @@ def enrich_static_data():
         "collection_economia": "LILACS",
         "collection_gim": "LILACS",
         "collection_ripsa": "LILACS",
+        "collection_mocambique": "LILACS",
         "collection_conass": "LILACS"
     }
 
