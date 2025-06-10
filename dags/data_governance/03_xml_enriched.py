@@ -365,6 +365,10 @@ def enrich_static_data():
         "collection_guatemala": "LILACS",
         "collection_honduras": "LILACS",
         "collection_costarica": "LILACS",
+        "collection_controlecancer": "LILACS",
+        "collection_economia": "LILACS",
+        "collection_gim": "LILACS",
+        "collection_ripsa": "LILACS",
         "collection_conass": "LILACS"
     }
 
