@@ -88,6 +88,8 @@ color: #fff!important;
 
 {subject_types_section}
 
+<p>Update: {today}</p>
+
 </div>
 </div>
 
@@ -244,7 +246,8 @@ def generate_html_reports():
             doc_types_table=generate_table_rows(metrics['doc_types']),
             study_types_section=study_types_section,
             dimention_types_section=dimention_types_section,
-            subject_types_section=subject_types_section
+            subject_types_section=subject_types_section,
+            today=datetime.now().strftime('%d/%m/%Y')
         )
 
         # Salvar arquivo
