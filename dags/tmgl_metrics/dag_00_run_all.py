@@ -92,14 +92,14 @@ with DAG(
     )
 
     run_dimentions = TriggerDagRunOperator(
-        task_id='run_TMGL_05_dimentions',
-        trigger_dag_id='TMGL_05_dimentions',
+        task_id='run_TMGL_05_create_metric_dimentions',
+        trigger_dag_id='TMGL_05_create_metric_dimentions',
         wait_for_completion=True,
     )
 
     run_subjects = TriggerDagRunOperator(
-        task_id='run_TMGL_06_subjects',
-        trigger_dag_id='TMGL_06_subjects',
+        task_id='run_TMGL_06_create_metric_main_subjects',
+        trigger_dag_id='TMGL_06_create_metric_main_subjects',
         wait_for_completion=True,
     )
 
