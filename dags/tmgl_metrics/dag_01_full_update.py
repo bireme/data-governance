@@ -92,14 +92,13 @@ from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.hooks.filesystem import FSHook
 
 
-def setup_collection():
+def setup_collection_landing_zone():
     """Configura coleção e índices no MongoDB"""
     mongo_hook = MongoHook(mongo_conn_id='mongo')
 
     # Deleta coleções a serem atualizadas
     db = mongo_hook.get_conn()['tmgl_metrics']
     db['01_landing_zone'].drop()
-    db['02_countries_metrics'].drop()
 
     # Cria coleção de landing zone
     target_collection = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
@@ -109,7 +108,20 @@ def setup_collection():
     target_collection.create_index([('who_regions', 1)], collation={ 'locale': 'en', 'strength': 1 })
 
 
-def process_xml_files():
+def list_xml_files():
+    logger = logging.getLogger(__name__)
+
+    fs_hook = FSHook(fs_conn_id='TMGL_INPUT_XML_FOLDER')
+    xml_folder_path = fs_hook.get_path()
+    files = [
+        [filename] for filename in os.listdir(xml_folder_path)
+        if filename.endswith('_regional_tmgl.xml')
+    ]
+    logger.info(f"Arquivos encontrados: {files}")
+    return files
+
+
+def process_xml_file(filename):
     """Processa arquivos XML de forma eficiente usando parsing iterativo"""
     logger = logging.getLogger(__name__)
     mongo_hook = MongoHook(mongo_conn_id='mongo')
@@ -117,85 +129,81 @@ def process_xml_files():
     fs_hook = FSHook(fs_conn_id='TMGL_INPUT_XML_FOLDER')
     xml_folder_path = fs_hook.get_path()
 
-    for filename in os.listdir(xml_folder_path):
-        if not filename.endswith('_regional_tmgl.xml'):
-            continue
+    logger.info(f"Iniciando processamento de {filename}")
+    file_path = os.path.join(xml_folder_path, filename)
+    
+    batch = []
+    batch_size = 1000
+    doc_count = 0
+    seen_ids = set()
 
-        logger.info(f"Iniciando processamento de {filename}")
-        file_path = os.path.join(xml_folder_path, filename)
-        
-        batch = []
-        batch_size = 1000
-        doc_count = 0
-        seen_ids = set()  # Track IDs in current batch [2]
+    context = ET.iterparse(
+        file_path,
+        events=('start', 'end'),
+        tag=['doc', 'field'],
+        huge_tree=True,
+        remove_blank_text=True
+    )
+    context = iter(context)
+    
+    current_fields = {}
+    in_relevant_doc = False
 
-        context = ET.iterparse(
-            file_path,
-            events=('start', 'end'),
-            tag=['doc', 'field'],
-            huge_tree=True,
-            remove_blank_text=True
-        )
-        context = iter(context)
-        
-        current_fields = {}
-        in_relevant_doc = False
+    for event, elem in context:
+        if event == 'start' and elem.tag == 'doc':
+            current_fields = {}
+            in_relevant_doc = False
 
-        for event, elem in context:
-            if event == 'start' and elem.tag == 'doc':
-                current_fields = {}
-                in_relevant_doc = False
+        elif event == 'end' and elem.tag == 'field':
+            field_name = elem.get('name')
+            field_value = elem.text.strip() if elem.text else None
+            
+            if field_name == 'instance' and field_value == 'tmgl':
+                in_relevant_doc = True
+            
+            if field_name and field_value:
+                if field_name in current_fields:
+                    if not isinstance(current_fields[field_name], list):
+                        current_fields[field_name] = [current_fields[field_name]]
+                    current_fields[field_name].append(field_value)
+                else:
+                    current_fields[field_name] = field_value
+            
+            elem.clear()
 
-            elif event == 'end' and elem.tag == 'field':
-                field_name = elem.get('name')
-                field_value = elem.text.strip() if elem.text else None
+        elif event == 'end' and elem.tag == 'doc':
+            if in_relevant_doc and 'id' in current_fields:
+                id_field = current_fields['id']
                 
-                if field_name == 'instance' and field_value == 'tmgl':
-                    in_relevant_doc = True
-                
-                if field_name and field_value:
-                    if field_name in current_fields:
-                        if not isinstance(current_fields[field_name], list):
-                            current_fields[field_name] = [current_fields[field_name]]
-                        current_fields[field_name].append(field_value)
-                    else:
-                        current_fields[field_name] = field_value
-                
-                elem.clear()
+                # Checa duplicatas
+                if id_field not in seen_ids:
+                    batch.append(ReplaceOne(
+                        {'id': id_field},
+                        current_fields.copy(),
+                        upsert=True
+                    ))
+                    seen_ids.add(id_field)
+                    doc_count += 1
 
-            elif event == 'end' and elem.tag == 'doc':
-                if in_relevant_doc and 'id' in current_fields:
-                    id_field = current_fields['id']
-                    
-                    # Checa duplicatas
-                    if id_field not in seen_ids:
-                        batch.append(ReplaceOne(
-                            {'id': id_field},
-                            current_fields.copy(),
-                            upsert=True
-                        ))
-                        seen_ids.add(id_field)
-                        doc_count += 1
+                if len(batch) >= batch_size:
+                    logger.info(f"Persistindo lote de {batch_size} documentos")
+                    collection.bulk_write(batch, ordered=False)
+                    batch = []
 
-                    if len(batch) >= batch_size:
-                        logger.info(f"Persistindo lote de {batch_size} documentos")
-                        collection.bulk_write(batch, ordered=False)
-                        batch = []
+            # Limpeza de memória
+            current_fields.clear()
+            elem.clear()
+            if elem.getparent() is not None:
+                elem.getparent().clear()
 
-                # Limpeza de memória
-                current_fields.clear()
-                elem.clear()
-                if elem.getparent() is not None:
-                    elem.getparent().clear()
+    # Processar último lote
+    if batch:
+        collection.bulk_write(batch, ordered=False)
+        logger.info(f"Arquivo {filename} processado. Total documentos: {doc_count}")
 
-        # Processar último lote
-        if batch:
-            collection.bulk_write(batch, ordered=False)
-            logger.info(f"Arquivo {filename} processado. Total documentos: {doc_count}")
-
-        # Limpeza final
-        del context
-        seen_ids.clear()
+    # Limpeza final
+    del context
+    seen_ids.clear()
 
 
 default_args = {
@@ -216,12 +224,18 @@ with DAG(
     doc_md=__doc__
 ) as dag:
     setup_task = PythonOperator(
-        task_id='setup_collection',
-        python_callable=setup_collection
-    )
-    process_task = PythonOperator(
-        task_id='process_xml_files',
-        python_callable=process_xml_files
+        task_id='setup_collection_landing_zone',
+        python_callable=setup_collection_landing_zone
     )
 
-    setup_task >> process_task
+    list_files_task = PythonOperator(
+        task_id='list_xml_files',
+        python_callable=list_xml_files
+    )
+
+    process_task = PythonOperator.partial(
+        task_id='process_xml_file',
+        python_callable=process_xml_file
+    ).expand(op_args=list_files_task.output)
+
+    setup_task >> list_files_task >> process_task
