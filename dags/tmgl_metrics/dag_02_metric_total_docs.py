@@ -72,15 +72,7 @@ def create_metric_total_docs():
         country_name = country.strip().lower()
         query = get_tmgl_country_query(country_name)
         
-        # Contagem eficiente usando aggregation pipeline
-        pipeline = [
-            {"$match": query},
-            {"$group": {"_id": "$id"}},  # Distinct grouping
-            {"$count": "total"}
-        ]
-        
-        count_result = list(source_collection.aggregate(pipeline, collation={'locale': 'en', 'strength': 1}))
-        count = count_result[0]['total'] if count_result else 0
+        count = source_collection.count_documents(query, collation={'locale': 'en', 'strength': 1})
         
         batch.append(UpdateOne(
             {"type": "total_docs", "country": country_name},
@@ -112,16 +104,9 @@ def create_metric_total_docs_fulltext():
     for country in countries:
         country_name = country.strip().lower()
         query = get_tmgl_country_query(country_name)
+        query["fulltext"] = "1"
         
-        # Contagem eficiente usando aggregation pipeline
-        pipeline = [
-            {"$match": query},
-            {"$group": {"_id": "$id"}},  # Distinct grouping
-            {"$count": "total"}
-        ]
-        
-        count_result = list(source_collection.aggregate(pipeline, collation={'locale': 'en', 'strength': 1}))
-        count = count_result[0]['total'] if count_result else 0
+        count = source_collection.count_documents(query, collation={'locale': 'en', 'strength': 1})
         
         batch.append(UpdateOne(
             {"type": "total_docs_fulltext", "country": country_name},
