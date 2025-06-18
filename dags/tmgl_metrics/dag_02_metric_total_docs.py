@@ -50,6 +50,11 @@ from data_governance.dags.tmgl_metrics.misc import get_tmgl_country_query
 
 def setup_collection_metric():
     mongo_hook = MongoHook(mongo_conn_id='mongo')
+
+    # Deleta coleções a serem atualizadas
+    db = mongo_hook.get_conn()['tmgl_metrics']
+    db['02_countries_metrics'].drop()
+
     target_collection = mongo_hook.get_collection('02_countries_metrics', 'tmgl_metrics')
     target_collection.create_index([('type', 1), ('country', 1), ('name', 1)], unique=True)
 
