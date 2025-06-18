@@ -1,12 +1,52 @@
 """
-# TMGL - TMGL_07_export_html_reports
+# DAG TMGL_07_export_html_reports
 
-## Visão Geral
-Este DAG gera relatórios HTML por país com métricas de documentos científicos, incluindo:
-- Total de documentos e full-texts disponíveis
-- Distribuição por tipos de documento
-- Tipos de estudo mais frequentes (se houver dados)
+Este módulo define um DAG do Apache Airflow responsável pela geração e exportação de relatórios HTML com métricas TMGL por país, utilizando dados armazenados no MongoDB. 
+O pipeline coleta métricas agregadas de documentos, tipos, dimensões, estudos e assuntos principais, e gera arquivos HTML formatados para cada país elegível.
+
+## Funcionalidades Principais
+
+- **Coleta de métricas agregadas:**  
+  Para cada país com pelo menos um documento (`total_docs > 0`), o DAG coleta métricas de diferentes tipos (total de documentos, fulltext, tipos de documento, tipos de estudo, dimensões e assuntos principais) 
+  a partir da coleção `02_countries_metrics` do banco `tmgl_metrics`.
+- **Geração de relatórios HTML:**  
+  Utiliza templates HTML customizados para criar relatórios visuais, organizando as métricas em tabelas e seções temáticas, com design responsivo e estilização baseada em Bootstrap.
+- **Exportação automatizada:**  
+  Os arquivos HTML são salvos em um diretório configurado via conexão Airflow (`TMGL_HTML_OUTPUT`), prontos para publicação ou distribuição.
+
+## Estrutura do Pipeline
+
+1. **generate_html_reports**  
+   - Identifica países elegíveis (com pelo menos um documento).
+   - Coleta métricas agregadas para cada país: total de documentos, total com fulltext, tipos de documento, tipos de estudo, dimensões e assuntos principais.
+   - Gera o conteúdo HTML usando templates e salva o arquivo no diretório de saída configurado.
+
+## Parâmetros e Conexões
+
+- **MongoDB:**  
+  Conexão definida via Airflow Connection `mongo`.
+- **Diretório de saída:**  
+  Definido via Airflow Connection `TMGL_HTML_OUTPUT`.
+- **Coleção utilizada:**  
+  - `02_countries_metrics` (métricas agregadas por país)
+
+## Exemplo de Uso
+
+1. Certifique-se de que as conexões e coleções do MongoDB estejam corretamente configuradas.
+2. Execute o DAG `TMGL_07_export_html_reports` via interface do Airflow para gerar e exportar os relatórios HTML por país.
+
+## Observações
+
+- As funções dependem da estrutura padronizada das métricas na coleção `02_countries_metrics`.
+
+## Dependências
+
+- Apache Airflow
+- pymongo
+- MongoDB
+
 """
+
 
 import os
 import logging

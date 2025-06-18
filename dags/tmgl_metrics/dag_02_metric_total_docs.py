@@ -1,44 +1,51 @@
 """
-# TMGL - TMGL_02_create_metric_total_docs
+# DAG TMGL_02_create_metric_total_docs
 
-## Visão Geral
+Este módulo define um DAG do Apache Airflow responsável pelo cálculo e armazenamento do total de documentos TMGL por país. 
+O pipeline executa duas métricas principais: a contagem total de documentos por país e a contagem total de documentos por país considerando critérios de fulltext, armazenando os resultados em uma coleção dedicada de métricas.
 
-Este DAG calcula e armazena métricas de total de documentos por país para o projeto TMGL, 
-utilizando dados armazenados no MongoDB. Ele gera duas métricas principais: o total geral de documentos por país e o total de documentos que possuem o campo `fulltext` marcado.
+## Funcionalidades Principais
 
-## Funcionamento
+- **Cálculo de métricas por país:**  
+  Para cada país listado na coleção `00_countries`, o DAG calcula o total de documentos distintos presentes na coleção `01_landing_zone`, agrupando por país e armazenando o resultado na coleção `02_countries_metrics`.
+- **Atualização:**  
+  Os resultados são armazenados via operações `UpdateOne` com `upsert=True`, garantindo que as métricas sejam atualizadas sem duplicidade.
 
-1. **Configuração da Coleção de Métricas**
-   - Garante que a coleção `tmgl_metrics` no banco `02_countries_metrics` exista e possua um índice único nos campos `type`, `country` e `name`.
+## Estrutura do Pipeline
 
-2. **Cálculo do Total de Documentos por País**
-   - Para cada país listado na coleção `00_countries.tmgl_metrics`, executa uma contagem de documentos na coleção `01_landing_zone.tmgl_metrics` que estejam associados ao país, 
-   considerando diferentes campos (`pais_afiliacao`, `cp`, `who_regions`) com busca case insensitive via regex.
-   - O resultado é salvo na coleção de métricas, com o tipo `total_docs`.
+1. **create_metric_total_docs**  
+   - Calcula o total de documentos distintos por país na coleção `01_landing_zone`.
+   - Armazena o resultado na coleção `02_countries_metrics` com o tipo `"total_docs"`.
 
-3. **Cálculo do Total de Documentos com Fulltext por País**
-   - Similar ao passo anterior, mas considera apenas documentos onde o campo `fulltext` é igual a "1".
-   - O resultado é salvo na coleção de métricas, com o tipo `total_docs_fulltext`.
+2. **create_metric_total_docs_fulltext**  
+   - Calcula o total de documentos distintos por país considerando critérios de fulltext.
+   - Armazena o resultado na coleção `02_countries_metrics` com o tipo `"total_docs_fulltext"`.
 
-4. **Execução em Lote**
-   - As operações de atualização/inserção são feitas em lote (bulk) para maior eficiência.
+## Parâmetros e Conexões
 
-## Coleções Utilizadas
+- **MongoDB:**  
+  Conexão definida via Airflow Connection `mongo`.
+- **Coleções utilizadas:**  
+  - `00_countries` (lista de países)
+  - `01_landing_zone` (documentos TMGL)
+  - `02_countries_metrics` (resultados das métricas)
 
-- **00_countries.tmgl_metrics**: Lista de países a serem considerados na métrica.
-- **01_landing_zone.tmgl_metrics**: Fonte dos documentos a serem contados.
-- **02_countries_metrics.tmgl_metrics**: Destino das métricas geradas.
+## Exemplo de Uso
 
-## Tarefas do DAG
+1. Certifique-se de que as conexões e coleções do MongoDB estejam corretamente configuradas.
+2. Execute o DAG `TMGL_02_create_metric_total_docs` via interface do Airflow para atualizar as métricas de documentos por país.
 
-- `setup_collection_metric`: Prepara a coleção de métricas e cria índices necessários.
-- `create_metric_total_docs`: Calcula o total de documentos por país.
-- `create_metric_total_docs_fulltext`: Calcula o total de documentos com fulltext por país.
+## Observações
+
+- As funções dependem do helper `get_tmgl_country_query` para construir as queries de filtragem por país.
 
 ## Dependências
 
-- **MongoDB**: Armazenamento dos dados e métricas.
+- Apache Airflow
+- pymongo
+- MongoDB
 """
+
 
 from datetime import datetime
 from pymongo import UpdateOne
@@ -46,17 +53,6 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from data_governance.dags.tmgl_metrics.misc import get_tmgl_country_query
-
-
-def setup_collection_metric():
-    mongo_hook = MongoHook(mongo_conn_id='mongo')
-
-    # Deleta coleções a serem atualizadas
-    db = mongo_hook.get_conn()['tmgl_metrics']
-    db['02_countries_metrics'].drop()
-
-    target_collection = mongo_hook.get_collection('02_countries_metrics', 'tmgl_metrics')
-    target_collection.create_index([('type', 1), ('country', 1), ('name', 1)], unique=True)
 
 
 def create_metric_total_docs():
@@ -158,11 +154,6 @@ with DAG(
     catchup=False,
     doc_md=__doc__
 ) as dag:
-    setup_collection_task = PythonOperator(
-        task_id='setup_collection_metric',
-        python_callable=setup_collection_metric
-    )
-
     create_metric_total_docs = PythonOperator(
         task_id='create_metric_total_docs',
         python_callable=create_metric_total_docs
@@ -172,6 +163,3 @@ with DAG(
         task_id='create_metric_total_docs_fulltext',
         python_callable=create_metric_total_docs_fulltext
     )
-
-    setup_collection_task >> create_metric_total_docs
-    setup_collection_task >> create_metric_total_docs_fulltext

@@ -1,9 +1,51 @@
 """
-# TMGL - TMGL_05_dimentions
+# DAG TMGL_05_create_metric_dimentions
 
-TBD
+Este módulo define um DAG do Apache Airflow responsável pelo cálculo e armazenamento do total de documentos TMGL por país, agrupados por dimensão temática. 
+O pipeline executa a métrica de contagem de documentos por dimensão para cada país, armazenando os resultados em uma coleção dedicada de métricas.
+
+## Funcionalidades Principais
+
+- **Cálculo de métricas por dimensão e país:**  
+  Para cada país listado na coleção `00_countries`, o DAG calcula o total de documentos distintos presentes na coleção `01_landing_zone`, agrupando por cada valor de dimensão temática (`tag_dimentions`). 
+  Os nomes das dimensões são normalizados para descrições legíveis.
+- **Execução eficiente:**  
+  Utiliza pipelines de agregação do MongoDB com unwinding e grouping para garantir performance e precisão nas contagens.
+- **Atualização:**  
+  Os resultados são armazenados via operações `UpdateOne` com `upsert=True`, garantindo que as métricas sejam atualizadas sem duplicidade.
+
+## Estrutura do Pipeline
+
+1. **create_metric_dimentions**  
+   - Para cada país, agrupa e conta os documentos por dimensão temática (`tag_dimentions`), normalizando os nomes das dimensões para descrições amigáveis.
+   - Armazena o resultado na coleção `02_countries_metrics` com o tipo `"dimention_type"`.
+
+## Parâmetros e Conexões
+
+- **MongoDB:**  
+  Conexão definida via Airflow Connection `mongo`.
+- **Coleções utilizadas:**  
+  - `00_countries` (lista de países)
+  - `01_landing_zone` (documentos TMGL)
+  - `02_countries_metrics` (resultados das métricas)
+
+## Exemplo de Uso
+
+1. Certifique-se de que as conexões e coleções do MongoDB estejam corretamente configuradas.
+2. Execute o DAG `TMGL_05_create_metric_dimentions` via interface do Airflow para atualizar as métricas de documentos por dimensão e país.
+
+## Observações
+
+- As funções dependem do helper `get_tmgl_country_query` para construir as queries de filtragem por país.
+
+## Dependências
+
+- Apache Airflow
+- pymongo
+- MongoDB
 
 """
+
 
 from datetime import datetime
 from pymongo import UpdateOne

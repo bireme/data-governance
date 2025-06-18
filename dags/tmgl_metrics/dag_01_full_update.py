@@ -1,82 +1,44 @@
 """
-# TMGL - TMGL_01_full_update
+# DAG TMGL_01_full_update
 
-## Visão Geral
+Este módulo define um pipeline de ETL utilizando Apache Airflow para processar arquivos XML contendo dados TMGL e armazená-los em uma coleção MongoDB. 
+O fluxo é projetado para realizar uma atualização completa ("full update"), processando todos os registros disponíveis.
 
-Este DAG executa uma **atualização completa** da coleção `tmgl_metrics` no MongoDB, processando arquivos XML específicos de uma pasta configurada no sistema de arquivos. 
-O fluxo foi desenvolvido para extrair, transformar e inserir dados de forma eficiente e com controle de memória para o projeto TMGL.
+## Funcionalidades Principais
 
-## Como Funciona
+- **Configuração da coleção MongoDB**: Criação e indexação da coleção de landing zone, garantindo unicidade e performance nas consultas.
+- **Listagem de arquivos XML**: Busca automática de arquivos XML em um diretório configurado via conexão Airflow.
+- **Processamento eficiente de XML**: Parsing iterativo dos arquivos XML, extraindo apenas documentos relevantes e realizando inserções em lote no MongoDB.
 
-1. **Configuração da Coleção**:  
-   Garante que a coleção `tmgl_metrics` (no banco `01_landing_zone`) exista no MongoDB e que possua um índice único no campo `id`.
+## Estrutura do Pipeline
 
-2. **Seleção dos Arquivos XML**:  
-   Apenas arquivos XML que atendam aos seguintes critérios serão processados:
-   - Arquivos com nomes exatamente iguais aos listados na seção abaixo
-   - Arquivos que correspondam ao padrão: `md*_regional_tmgl.xml`
+1. **setup_collection_landing_zone**  
+   - Remove a coleção de landing zone existente e recria com índices apropriados para os campos `id`, `cp`, `pais_afiliacao` e `who_regions`.
+   - Garante que a coleção esteja pronta para receber novos dados sem duplicidade.
 
-3. **Processamento e Inserção dos Dados**:
-   - Processamento iterativo de XML usando `lxml.etree` para controle de memória
-   - Apenas documentos onde o campo `instance` seja igual a `tmgl` são considerados
-   - Campos com múltiplos valores são transformados em arrays
-   - Verificação de duplicatas de `id` dentro do mesmo lote
-   - Inserção/atualização (upsert) no MongoDB em lotes de 1000 registros
-   - Limpeza de memória durante o parsing
+2. **list_xml_files**  
+   - Lista todos os arquivos XML no diretório configurado que terminam com `_regional_tmgl.xml`.
+   - Retorna a lista de arquivos para processamento subsequente.
 
-## Arquivos Processados
+3. **process_xml_file**  
+   - Realiza parsing iterativo dos arquivos XML, extraindo apenas documentos com o campo `instance` igual a `tmgl`.
+   - Garante que apenas documentos únicos (por `id`) sejam inseridos/atualizados na coleção.
+   - Utiliza operações em lote (`bulk_write`) para eficiência e menor uso de memória.
 
-- Padrão: `md*_regional_tmgl.xml`
-- Nomes exatos:
-    - `wpr_regional.xml`
-    - `lil_regional.xml`
-    - `sea_regional.xml` 
-    - `ibc_regional.xml`
-    - `cum_regional.xml`
-    - `bde_regional.xml`
-    - `who_regional.xml`
-    - `bin_regional.xml`
-    - `vti_regional.xml`
-    - `mtc_regional.xml`
-    - `psi_regional.xml`
-    - `ijh_regional.xml`
-    - `bbo_regional.xml`
-    - `sus_regional.xml`
-    - `ses_regional.xml`
-    - `sms_regional.xml`
-    - `lip_regional.xml`
-    - `aim_regional.xml`
-    - `med_regional.xml`
-    - `phr_regional.xml`
-    - `hom_regional.xml`
-    - `bri_regional.xml`
-    - `cid_regional.xml`
-    - `pru_regional.xml`
-    - `han_regional.xml`
-    - `big_regional.xml`
-    - `bdn_regional.xml`
-    - `pie_regional.xml`
-    - `rhs_regional.xml`
-    - `arg_regional.xml`
+## Exemplo de Uso
+
+1. Configure as conexões no Airflow (`mongo` e `TMGL_INPUT_XML_FOLDER`).
+2. Coloque os arquivos XML no diretório configurado.
+3. Execute o DAG `TMGL_01_full_update` via interface do Airflow.
 
 ## Dependências
 
-- **MongoDB**: Armazenamento dos dados
-- **lxml**: Processamento eficiente de XML
-- **Sistema de arquivos**: Pasta de entrada configurada via conexão Airflow `TMGL_INPUT_XML_FOLDER`
-
-## Tarefas
-
-- `setup_collection`:  
-  Garante a existência da coleção e do índice único no MongoDB
-
-- `process_xml_files`:  
-  Processamento otimizado com:
-  - Parsing iterativo do XML para controle de memória
-  - Detecção de duplicatas de registros em cada XML
-  - Inserção em massa no MongoDB
-  - Logs detalhados de progresso
+- Apache Airflow
+- pymongo
+- lxml
+- MongoDB
 """
+
 
 import json
 import os
@@ -92,20 +54,25 @@ from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.hooks.filesystem import FSHook
 
 
-def setup_collection_landing_zone():
+def setup_collections():
     """Configura coleção e índices no MongoDB"""
     mongo_hook = MongoHook(mongo_conn_id='mongo')
 
     # Deleta coleções a serem atualizadas
     db = mongo_hook.get_conn()['tmgl_metrics']
     db['01_landing_zone'].drop()
+    db['02_countries_metrics'].drop()
 
     # Cria coleção de landing zone
-    target_collection = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
-    target_collection.create_index([('id', 1)], unique=True)
-    target_collection.create_index([('cp', 1)], collation={ 'locale': 'en', 'strength': 1 })
-    target_collection.create_index([('pais_afiliacao', 1)], collation={ 'locale': 'en', 'strength': 1 })
-    target_collection.create_index([('who_regions', 1)], collation={ 'locale': 'en', 'strength': 1 })
+    collection_lz = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
+    collection_lz.create_index([('id', 1)], unique=True)
+    collection_lz.create_index([('cp', 1)], collation={ 'locale': 'en', 'strength': 1 })
+    collection_lz.create_index([('pais_afiliacao', 1)], collation={ 'locale': 'en', 'strength': 1 })
+    collection_lz.create_index([('who_regions', 1)], collation={ 'locale': 'en', 'strength': 1 })
+
+    # Cria coleção de métricas
+    collection_metrics = mongo_hook.get_collection('02_countries_metrics', 'tmgl_metrics')
+    collection_metrics.create_index([('type', 1), ('country', 1), ('name', 1)], unique=True)
 
 
 def list_xml_files():
@@ -217,15 +184,15 @@ default_args = {
 with DAG(
     'TMGL_01_full_update',
     default_args=default_args,
-    description='TMGL - Inicia o processamento em modo Full update, ou seja, coletará e processará todos os registros XML sem filtrar por update date',
+    description='TMGL - Inicia o processamento em modo Full update, ou seja, coletará e processará todos os registros XML',
     tags=["tmgl", "xml", "mongodb", "full_update"],
     schedule=None,
     catchup=False,
     doc_md=__doc__
 ) as dag:
     setup_task = PythonOperator(
-        task_id='setup_collection_landing_zone',
-        python_callable=setup_collection_landing_zone
+        task_id='setup_collections',
+        python_callable=setup_collections
     )
 
     list_files_task = PythonOperator(
