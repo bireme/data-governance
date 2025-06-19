@@ -66,6 +66,7 @@ def setup_collections():
     # Cria coleção de landing zone
     collection_lz = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
     collection_lz.create_index([('id', 1)], unique=True)
+    collection_lz.create_index([('fulltext', 1)], collation={ 'locale': 'en', 'strength': 1 })
     collection_lz.create_index([('cp', 1)], collation={ 'locale': 'en', 'strength': 1 })
     collection_lz.create_index([('pais_afiliacao', 1)], collation={ 'locale': 'en', 'strength': 1 })
     collection_lz.create_index([('who_regions', 1)], collation={ 'locale': 'en', 'strength': 1 })
