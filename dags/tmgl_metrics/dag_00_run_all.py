@@ -61,7 +61,7 @@ with DAG(
     'TMGL_00_run_all',
     default_args=default_args,
     description='TMGL - Orquestra todos os DAGs TMGL em ordem',
-    schedule="0 22 * * FRI",
+    schedule="0 22 * * 5",
     catchup=False,
     tags=["tmgl", "mongodb", "metrics"],
     doc_md=__doc__
