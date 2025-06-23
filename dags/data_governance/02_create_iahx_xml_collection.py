@@ -57,38 +57,9 @@ from airflow import DAG
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.operators.python import PythonOperator
 from pymongo import ReplaceOne
-
-
-def load_tabpais(tabpais_col):
-    country_map = {}
-    
-    for country in tabpais_col.find():
-        all_data = country.get('all', {})
-
-        # Mapeia todos os valores e sinônimos
-        for lang in ['pt', 'en', 'es', 'fr', 'país_2']:
-            lang_value = all_data.get(lang, '')
-            if lang_value:
-                country_map[lang_value.lower().strip()] = all_data
-
-        if all_data.get('sinonimo'):
-            for synonym in all_data.get('sinonimo', []):
-                country_map[synonym.lower().strip()] = all_data
-
-    return country_map
-
-
-def load_decs_descriptors(decs_col):    
-    descriptor_map = {}
-    for decs_doc in decs_col.find():
-        english_desc = decs_doc.get('Descritor Inglês', '').strip().lower()
-        if english_desc:
-            # Processa MFN: remove zeros à esquerda e adiciona prefixo
-            raw_mfn = decs_doc['Mfn'].lstrip('0')
-            formatted_mfn = f'^d{raw_mfn}' if raw_mfn else None
-            descriptor_map[english_desc] = formatted_mfn
-    
-    return descriptor_map
+from data_governance.dags.data_governance.misc import load_tabpais
+from data_governance.dags.data_governance.misc import load_decs_descriptors
+from data_governance.dags.data_governance.misc import load_title_current
 
 
 def standardize_pages(value):
@@ -323,6 +294,20 @@ def standardize_pais_publicacao(publication_country, country_map):
     return fields
 
 
+def standardize_ta_var(doc, issn_map, shortened_title_map):
+    ta_var = None
+
+    if doc.get('issn'):
+        issn_key = doc['issn'].lower().strip()
+        ta_var = issn_map.get(issn_key)
+    
+    if not ta_var and doc.get('shortened_title'):
+        title_key = doc['shortened_title'].lower().strip()
+        ta_var = shortened_title_map.get(title_key)
+
+    return ta_var
+
+
 def determine_document_type(doc):
     """Identifica os tipos de documento com base em literature_type e outros campos"""
     literature_type = doc.get('literature_type', '').lower()
@@ -432,6 +417,10 @@ def transform_and_migrate():
 
     decs_col = mongo_hook.get_collection('current', 'DECS')
     decs_map = load_decs_descriptors(decs_col)
+
+    # Carrega TITLE.current e cria mapeamentos
+    title_col = mongo_hook.get_collection('current', 'TITLE')
+    issn_map, shortened_title_map = load_title_current(title_col)
     
     batch = []
     for doc in source_col.find():
@@ -567,6 +556,7 @@ def transform_and_migrate():
             'related_resource': str(doc.get('related_resource')) if doc.get('related_resource') else None,
             'status_fiadmin': status_map.get(doc.get('status')),
             'ta': doc.get('title_serial'),
+            'ta_var': standardize_ta_var(doc, issn_map, shortened_title_map),
             'th_in': doc.get('thesis_dissertation_institution'),
             'th_le': [leader['text'] for leader in doc.get('thesis_dissertation_leader', []) if 'text' in leader],
             'th_ti': doc.get('thesis_dissertation_academic_title'),
