@@ -306,6 +306,21 @@ def standardize_ta_var(doc, issn_map, shortened_title_map):
         ta_var = shortened_title_map.get(title_key)
 
     return ta_var
+    
+
+def standardize_ta_fascic(ta_var, volume_serial, issue_number, year):
+    if not ta_var:
+        return []
+
+    # Monta o sufixo apenas com os campos presentes
+    suffix_parts = []
+    if volume_serial:
+        suffix_parts.append(volume_serial)
+    if issue_number:
+        suffix_parts.append(f"({issue_number})")
+    # Junta os campos presentes com separadores adequados, sem espaços extras
+    suffix = '; ' + ' '.join(suffix_parts) + ', ' + year
+    return ta_var + [item + suffix for item in ta_var]
 
 
 def determine_document_type(doc):
@@ -500,6 +515,8 @@ def transform_and_migrate():
         descritores_locais = doc.get('local_descriptors', '')
         descritores_locais = descritores_locais.splitlines() if isinstance(descritores_locais, str) else descritores_locais
 
+        ta_var = standardize_ta_var(doc, issn_map, shortened_title_map)
+
         status_map = {
             -3: "Migrado",
             -2: "Coletado",
@@ -556,7 +573,8 @@ def transform_and_migrate():
             'related_resource': str(doc.get('related_resource')) if doc.get('related_resource') else None,
             'status_fiadmin': status_map.get(doc.get('status')),
             'ta': doc.get('title_serial'),
-            'ta_var': standardize_ta_var(doc, issn_map, shortened_title_map),
+            'ta_fascic': standardize_ta_fascic(ta_var, doc.get('volume_serial'), doc.get('issue_number'), doc.get('publication_date_normalized', '')[:4]),
+            'ta_var': ta_var,
             'th_in': doc.get('thesis_dissertation_institution'),
             'th_le': [leader['text'] for leader in doc.get('thesis_dissertation_leader', []) if 'text' in leader],
             'th_ti': doc.get('thesis_dissertation_academic_title'),

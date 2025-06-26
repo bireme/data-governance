@@ -1,13 +1,25 @@
 def _get_title_values(title_doc):
     values = []
+
     if title_doc.get('title'):
         values.append(title_doc['title'])
+
     if title_doc.get('shortened_title'):
         values.append(title_doc['shortened_title'])
+
+    if title_doc.get('medline_shortened_title'):
+        values.append(title_doc['medline_shortened_title'])
+
     if title_doc.get('parallel_titles'):
         values.extend(title_doc['parallel_titles'])
+
     if title_doc.get('shortened_parallel_titles'):
         values.extend(title_doc['shortened_parallel_titles'])
+
+    if title_doc.get('other_titles'):
+        other_titles = [other_title.split('^i')[0] for other_title in title_doc.get('other_titles')]
+        values.extend(other_titles)
+
     return values
 
 
