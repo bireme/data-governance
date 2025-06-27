@@ -304,38 +304,38 @@ def create_union_view():
     # Verifica se a view já existe
     existing_views = db.list_collection_names(filter={"type": "view"})
     if view_name in existing_views:
-        logger.info(f"View '{view_name}' já existe. Nenhuma ação necessária.")
+        logger.info(f"View '{view_name}' já existe. Removendo-a.")
+        db[view_name].drop()
 
-    else:
-        all_collections = list(enrichment_rules.keys())
+    all_collections = list(enrichment_rules.keys())
 
-        # Pipeline para adicionar o campo '_source' e unir as collections
-        pipeline = []
-        
-        # Primeira collection: adiciona _source e define como base
-        first_coll = all_collections[0]
+    # Pipeline para adicionar o campo '_source' e unir as collections
+    pipeline = []
+    
+    # Primeira collection: adiciona _source e define como base
+    first_coll = all_collections[0]
+    pipeline.append({
+        '$addFields': {
+            '_source': first_coll  # Nome da collection de origem
+        }
+    })
+    
+    # Demais collections: união com adição de _source
+    for coll in all_collections[1:]:
         pipeline.append({
-            '$addFields': {
-                '_source': first_coll  # Nome da collection de origem
+            '$unionWith': {
+                'coll': coll,
+                'pipeline': [{
+                    '$addFields': {
+                        '_source': coll  # Nome da collection atual
+                    }
+                }]
             }
         })
-        
-        # Demais collections: união com adição de _source
-        for coll in all_collections[1:]:
-            pipeline.append({
-                '$unionWith': {
-                    'coll': coll,
-                    'pipeline': [{
-                        '$addFields': {
-                            '_source': coll  # Nome da collection atual
-                        }
-                    }]
-                }
-            })
 
-        # Cria a view usando a primeira collection como base
-        db.command('create', view_name, viewOn=first_coll, pipeline=pipeline)
-        logger.info(f"View '{view_name}' criada com sucesso.")
+    # Cria a view usando a primeira collection como base
+    db.command('create', view_name, viewOn=first_coll, pipeline=pipeline)
+    logger.info(f"View '{view_name}' criada com sucesso.")
 
 
 def enrich_static_data():
