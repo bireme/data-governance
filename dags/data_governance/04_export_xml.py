@@ -1,0 +1,90 @@
+"""
+# Data Governance - DG_04_export_xml
+
+Resumo:
+-------
+Este DAG do Airflow exporta documentos de uma coleção MongoDB (`03_xml_enriched` no banco de dados `data_governance`)
+e grava cada documento como um arquivo XML enriquecido separado em um diretório do sistema de arquivos especificado.
+Os arquivos XML são formatados para importação no sistema iah-X.
+
+Principais Características:
+---------------------------
+- Exporta dinamicamente todos os campos de cada documento MongoDB, tratando listas como campos XML repetidos.
+- Os arquivos XML de saída são nomeados de acordo com o campo `id_pk` de cada documento.
+- O diretório de saída é configurado via uma conexão Filesystem do Airflow (`DG_EXPORT_XML_FOLDER`).
+- Desenvolvido para interoperabilidade com o iah-X.
+
+Configuração:
+-------------
+- Conexão MongoDB: Configure uma conexão no Airflow com o Conn ID `mongo` apontando para sua instância do MongoDB.
+- Conexão Filesystem: Configure uma conexão Filesystem no Airflow com o Conn ID `DG_EXPORT_XML_FOLDER` para especificar o diretório de saída.
+"""
+
+import os
+import logging
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
+from datetime import datetime
+from xml.sax.saxutils import escape
+from airflow import DAG
+from airflow.providers.mongo.hooks.mongo import MongoHook
+from airflow.operators.python import PythonOperator
+from airflow.hooks.filesystem import FSHook
+
+
+def export_mongo_to_xml():
+    logger = logging.getLogger(__name__)
+
+    mongo_hook = MongoHook(mongo_conn_id='mongo')
+    collection = mongo_hook.get_collection('03_xml_enriched', 'data_governance')
+    
+    # Get filesystem output path from Airflow connection
+    fs_hook = FSHook(fs_conn_id='DG_EXPORT_XML_FOLDER')
+    output_dir = fs_hook.get_path()
+
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
+    for doc in collection.find():
+        id_pk = doc.get('id_pk')
+
+        boost_value = str(doc.get('weight', ''))
+        root = ET.Element("doc", boost=boost_value)
+
+        # Process all document fields dynamically
+        for key, value in doc.items():
+            if key == '_id':
+                continue
+            
+            if isinstance(value, list):
+                for item in value:
+                    ET.SubElement(root, 'field', name=key).text = escape(str(item))
+            else:
+                ET.SubElement(root, 'field', name=key).text = escape(str(value))
+
+        # Write individual XML file
+        ET.indent(root, space='  ', level=0)
+        xml_bytes = ET.tostring(root, encoding='utf-8', xml_declaration=True)
+
+        with open(f"{output_dir}/{id_pk}.xml", 'wb') as f:
+            f.write(xml_bytes)
+
+
+default_args = {
+    'owner': 'airflow',
+    'start_date': datetime(2025, 4, 15),
+    'retries': 0
+}
+with DAG(
+    'DG_04_export_xml',
+    default_args=default_args,
+    description='Data Governance - Exporta a coleção com nomenclatura de XML enriquecido em XML para importação no iah-X',
+    tags=["data_governance", "mongodb", "iahx", "xml", "export"],
+    schedule=None,
+    catchup=False,
+    doc_md=__doc__
+) as dag:
+    export_task = PythonOperator(
+        task_id='export_mongo_to_xml',
+        python_callable=export_mongo_to_xml
+    )
