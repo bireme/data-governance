@@ -456,16 +456,8 @@ def transform_and_migrate():
     batch = []
 
     query = {
-        "$nor": [
-            {
-                "literature_type": "S",
-                "$or": [
-                    {"treatment_level": {"$exists": False}},
-                    {"treatment_level": ""},
-                    {"treatment_level": None}
-                ]
-            }
-        ]
+        "status": {"$in": [0, 1, -2, -3]},
+        "treatment_level": {"$exists": True, "$nin": [None, ""]}
     }
     for doc in source_col.find(query):
         # processa paginas
