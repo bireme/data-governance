@@ -41,9 +41,4 @@ with DAG(
         update_mode='INCREMENTAL'
     )
 
-    create_iahx_xml_collection = TriggerDagRunOperator(
-        task_id='02_create_iahx_xml_collection',
-        trigger_dag_id='DG_02_create_iahx_xml_collection'
-    )
-
-    harvest_fiadmin_and_store_in_mongodb_task >> create_iahx_xml_collection
+    harvest_fiadmin_and_store_in_mongodb_task

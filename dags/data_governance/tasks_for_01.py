@@ -77,7 +77,6 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode):
     url = fiadmin_conn.host
     limit = 100
     offset = 0
-    status = 1
     extra_params = {}
     headers = {'apikey': fiadmin_conn.password}
     session = get_requests_session()
@@ -95,7 +94,6 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode):
         params = {
             "limit": limit,
             "offset": offset,
-            "status": status,
             "format": "json",
             **extra_params
         }
