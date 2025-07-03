@@ -420,6 +420,22 @@ def calculate_weight(doc):
     return max(score, 0)
 
 
+def setup_iahx_xml_collection():
+    mongo_hook = MongoHook(mongo_conn_id='mongo')
+    db = mongo_hook.get_conn()
+    collection_name = '02_iahx_xml'
+    db_name = 'data_governance'
+
+    # Deleta a coleção se existir
+    if collection_name in db[db_name].list_collection_names():
+        db[db_name].drop_collection(collection_name)
+
+    # Cria a coleção
+    new_collection = db[db_name][collection_name]
+    new_collection.create_index([('id', 1)])
+    new_collection.create_index([('id_pk', 1)])
+
+
 def transform_and_migrate():
     logger = logging.getLogger(__name__)
     
@@ -438,7 +454,20 @@ def transform_and_migrate():
     issn_map, shortened_title_map = load_title_current(title_col)
     
     batch = []
-    for doc in source_col.find():
+
+    query = {
+        "$nor": [
+            {
+                "literature_type": "S",
+                "$or": [
+                    {"treatment_level": {"$exists": False}},
+                    {"treatment_level": ""},
+                    {"treatment_level": None}
+                ]
+            }
+        ]
+    }
+    for doc in source_col.find(query):
         # processa paginas
         pg_value = None
         if 'pages' in doc:
@@ -627,8 +656,13 @@ with DAG(
     catchup=False,
     doc_md=__doc__
 ) as dag:
-    
+    setup_iahx_xml_collection_task = PythonOperator(
+        task_id='setup_iahx_xml_collection',
+        python_callable=setup_iahx_xml_collection
+    )
     migration_task = PythonOperator(
         task_id='transform_and_migrate',
         python_callable=transform_and_migrate
     )
+
+    setup_iahx_xml_collection_task >> migration_task
