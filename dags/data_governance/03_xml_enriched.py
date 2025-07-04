@@ -402,7 +402,7 @@ def enrich_join_database():
             db_list = doc.get("db", [])
             instances = set()
             collections = set()
-            collection_instances = []
+            collection_instances = {}
             for db_name in db_list:              
                 if db_name in databases_data:
                     db_data = databases_data[db_name]
@@ -423,10 +423,11 @@ def enrich_join_database():
 
                     # Tratamento para collection_instance
                     if 'collection_instance' in db_data:
-                        if isinstance(db_data['collection_instance'], list):
-                            collection_instances.extend(db_data['collection_instance'])
-                        else:
-                            collection_instances.append(str(db_data['collection_instance']))
+                        for collection_instance in db_data['collection_instance']:
+                            if collection_instance:
+                                if collection_instance not in collection_instances:
+                                    collection_instances[collection_instance] = set()
+                                collection_instances[collection_instance].add(db_name)
 
             # Preparar operação de atualização
             update_fields = {}
@@ -444,14 +445,13 @@ def enrich_join_database():
                         list(collections)
                     ]
                 }
-            for collection_instance in collection_instances:
-                if collection_instance:
-                    update_fields[collection_instance] = {
-                        "$setUnion": [
-                            {"$ifNull": [f"${collection_instance}", []]},
-                            db_list
-                        ]
-                    }
+            for collection_instance, dbs in collection_instances.items():
+                update_fields[collection_instance] = {
+                    "$setUnion": [
+                        {"$ifNull": [f"${collection_instance}", []]},
+                        list(dbs)
+                    ]
+                }
             
             if update_fields:
                 bulk_ops.append(
