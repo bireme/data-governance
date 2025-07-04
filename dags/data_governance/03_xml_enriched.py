@@ -91,6 +91,7 @@ from airflow import DAG
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.operators.python import PythonOperator
 from pymongo import UpdateOne
+from data_governance.dags.data_governance.misc import load_instanceEcollection
 
 
 enrichment_rules = {
@@ -338,50 +339,132 @@ def create_union_view():
     logger.info(f"View '{view_name}' criada com sucesso.")
 
 
-def enrich_static_data():
-    mongo_hook = MongoHook(mongo_conn_id='mongo')
-    source_col = mongo_hook.get_collection('02_iahx_xml', 'data_governance')
-    target_col = mongo_hook.get_collection('03_xml_enriched', 'data_governance')
+def setup_03_xml_enriched():
+    """
+    Duplica a coleção 02_iahx_xml para 03_xml_enriched e cria índices nos campos:
+    - id (ascendente)
+    - db (ascendente)
+    - id_pk (ascendente)
+    """
+    logger = logging.getLogger(__name__)
+    hook = MongoHook(mongo_conn_id='mongo')
+    client = hook.get_conn()
+    db = client["data_governance"]
     
-    # Copia a coleção original para a nova
-    pipeline = [{"$out": "03_xml_enriched"}]
-    source_col.aggregate(pipeline)
+    source_collection = "02_iahx_xml"
+    target_collection = "03_xml_enriched"
     
-    # Define os novos campos
-    instance_values = [
-        "regional", "bvsespana", "paraguay", "panama",
-        "bvsms", "peru", "nicaragua", "bolivia",
-        "cns-br", "guatemala", "honduras", "costarica", "conass",
-    ]
+    logger.info(f"Duplicando coleção: {source_collection} -> {target_collection}")
     
-    collection_fields = {
-        "collection": "01-internacional",
-        "collection_enfermeria": "LILACS",
-        "collection_hanseniase": "LILACS",
-        "collection_peru": "LILACS",
-        "collection_nicaragua": "LILACS",
-        "collection_bolivia": "LILACS",
-        "collection_cns-br": "LILACS",
-        "collection_guatemala": "LILACS",
-        "collection_honduras": "LILACS",
-        "collection_costarica": "LILACS",
-        "collection_controlecancer": "LILACS",
-        "collection_economia": "LILACS",
-        "collection_gim": "LILACS",
-        "collection_ripsa": "LILACS",
-        "collection_mocambique": "LILACS",
-        "collection_conass": "LILACS"
-    }
+    # Remove a coleção de destino se já existir
+    if target_collection in db.list_collection_names():
+        db[target_collection].drop()
+        logger.info(f"Coleção {target_collection} foi removida")
+    
+    # Duplica a coleção usando aggregation $out
+    pipeline = [{"$out": target_collection}]
+    db[source_collection].aggregate(pipeline)
+    
+    logger.info(f"Criando índices na coleção {target_collection}")
+    db[target_collection].create_index([("id", 1)])
+    db[target_collection].create_index([("db", 1)])
+    db[target_collection].create_index([("id_pk", 1)])
+    
+    logger.info("Operação concluída: coleção duplicada e índices criados")
 
-    update_fields = {"instance": instance_values}
-    update_fields.update(collection_fields)
+
+def enrich_join_database():
+    logger = logging.getLogger(__name__)
+
+    mongo_hook = MongoHook(mongo_conn_id='mongo')
+    mongo_client = mongo_hook.get_conn()
+    enriched_collection = mongo_hook.get_collection('03_xml_enriched', 'data_governance')
+
+    instanceEcollection = mongo_hook.get_collection('instanceEcollection', 'TABS')
+    databases_data = load_instanceEcollection(instanceEcollection)
+
+    # Consulta para documentos com campo 'db' não vazio
+    query = {"db": {"$exists": True, "$not": {"$size": 0}}}
+    total_docs = enriched_collection.count_documents(query)
+    logger.info(f"Encontrados {total_docs} documentos para processamento")
     
-    # Atualiza todos os documentos na nova coleção
-    target_col.update_many(
-        {},
-        {"$set": update_fields}
-    )
-    target_col.create_index("id")
+    # Processamento em lotes
+    batch_size = 1000
+    for offset in range(0, total_docs, batch_size):
+        # Busca lote atual
+        cursor = enriched_collection.find(query).skip(offset).limit(batch_size)
+        current_batch = list(cursor)
+        
+        bulk_ops = []
+        for doc in current_batch:
+            doc_id = doc["_id"]
+
+            db_list = doc.get("db", [])
+            instances = set()
+            collections = set()
+            collection_instances = []
+            for db_name in db_list:              
+                if db_name in databases_data:
+                    db_data = databases_data[db_name]
+
+                    # Tratamento para instâncias
+                    if 'instance' in db_data:
+                        if isinstance(db_data['instance'], list):
+                            instances.update(db_data['instance'])
+                        else:
+                            instances.add(str(db_data['instance']))
+                    
+                    # Tratamento para coleções
+                    if 'collection' in db_data:
+                        if isinstance(db_data['collection'], list):
+                            collections.update(db_data['collection'])
+                        else:
+                            collections.add(str(db_data['collection']))
+
+                    # Tratamento para collection_instance
+                    if 'collection_instance' in db_data:
+                        if isinstance(db_data['collection_instance'], list):
+                            collection_instances.extend(db_data['collection_instance'])
+                        else:
+                            collection_instances.append(str(db_data['collection_instance']))
+
+            # Preparar operação de atualização
+            update_fields = {}
+            if instances:
+                update_fields["instance"] = {
+                    "$setUnion": [
+                        {"$ifNull": ["$instance", []]},
+                        list(instances)
+                    ]
+                }
+            if collections:
+                update_fields["collection"] = {
+                    "$setUnion": [
+                        {"$ifNull": ["$collection", []]},
+                        list(collections)
+                    ]
+                }
+            for collection_instance in collection_instances:
+                if collection_instance:
+                    update_fields[collection_instance] = {
+                        "$setUnion": [
+                            {"$ifNull": [f"${collection_instance}", []]},
+                            db_list
+                        ]
+                    }
+            
+            if update_fields:
+                bulk_ops.append(
+                    UpdateOne(
+                        {"_id": doc_id},
+                        [{"$set": update_fields}]
+                    )
+                )
+
+        # Executa as operações em lote
+        if bulk_ops:
+            enriched_collection.bulk_write(bulk_ops, ordered=False)
+            logger.info(f"Lote {offset//batch_size} atualizado com {len(bulk_ops)} documentos")
 
 
 def enrich_instancia():
@@ -449,12 +532,6 @@ def enrich_instancia():
             logger.info("Enviando batch de %i para o MongoDB" % (batch_size, ))
             _process_batch(enriched_collection, doc_map)
             doc_map.clear()
-
-    # 4. Processar restante
-    if doc_map:
-        logger.info("Enviando batch de menos de %i para o MongoDB" % (batch_size, ))
-        _process_batch(enriched_collection, doc_map)
-        doc_map.clear()
     
 
 def _process_batch(collection, doc_map):
@@ -512,20 +589,24 @@ with DAG(
     catchup=False,
     doc_md=__doc__
 ) as dag:
-    enrich_static_data_task = PythonOperator(
-        task_id='enrich_static_data',
-        python_callable=enrich_static_data
+    create_union_view_task = PythonOperator(
+        task_id='create_union_view',
+        python_callable=create_union_view
     )
-
+    setup_03_xml_enriched_task = PythonOperator(
+        task_id='setup_03_xml_enriched',
+        python_callable=setup_03_xml_enriched
+    )
+    enrich_join_database_task = PythonOperator(
+        task_id='enrich_join_database',
+        python_callable=enrich_join_database
+    )
     enrich_instancia_task = PythonOperator(
         task_id='enrich_instancia',
         python_callable=enrich_instancia
     )
 
-    create_union_view_task = PythonOperator(
-        task_id='create_union_view',
-        python_callable=create_union_view
-    )
-
-    enrich_static_data_task >> enrich_instancia_task
+    setup_03_xml_enriched_task >> enrich_join_database_task 
+    setup_03_xml_enriched_task >> enrich_instancia_task
+    enrich_join_database_task >> enrich_instancia_task
     create_union_view_task >> enrich_instancia_task

@@ -71,3 +71,31 @@ def load_decs_descriptors(decs_col):
             descriptor_map[english_desc] = formatted_mfn
     
     return descriptor_map
+
+
+def load_instanceEcollection(collection):
+    """
+    Carrega em memória os campos 'instance', 'collection' e 'collection_instance'
+    da coleção 'instanceEcollection' (database TABS), retornando um dicionário
+    com chave pelo campo 'db' e valores dos campos não vazios.
+    """    
+    data = {}
+    for doc in collection.find({}):
+        db_key = doc.get("db")
+        if not db_key:
+            continue
+        
+        entry = {}
+        if doc.get("instance"):
+            entry["instance"] = doc["instance"]
+        
+        if doc.get("collection"):
+            entry["collection"] = doc["collection"]
+        
+        if doc.get("collection_instance"):
+            entry["collection_instance"] = doc["collection_instance"]
+        
+        if entry:  # Apenas adiciona se houver campos não vazios
+            data[db_key] = entry
+    
+    return data
