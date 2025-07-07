@@ -84,10 +84,10 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode):
     if update_mode == "INCREMENTAL":
         incremental_update_date = (datetime.today() - timedelta(days=5)).strftime('%Y-%m-%d')
         extra_params = {'updated_time__gte': incremental_update_date}
-    elif update_mode == "FULL":
-        total_records = mongo_collection.count_documents({})
-        offset = math.floor(total_records / limit) * limit
-        logger.info(f"Há {total_records} registros na coleção. Ativando offset {offset}.")
+    #elif update_mode == "FULL":
+        #total_records = mongo_collection.count_documents({})
+        #offset = math.floor(total_records / limit) * limit
+        #logger.info(f"Há {total_records} registros na coleção. Ativando offset {offset}.")
     
     has_more_data = True
     while has_more_data:
