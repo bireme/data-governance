@@ -147,29 +147,184 @@ def standardize_location(value):
     return fields
 
 
+def standardize_fo(doc):
+    def format_fo_as(doc):
+        parts = []
+        if doc.get('title_serial'):
+            parts.append(doc['title_serial'])
+        if doc.get('volume_serial'):
+            parts.append(f"; {doc['volume_serial']}")
+        if doc.get('issue_number'):
+            parts.append(f"({doc['issue_number']})")
+
+        # páginas
+        pages_f, pages_l = None, None
+        if doc.get('pages'):
+            for page in doc['pages']:
+                if '_f' in page and page['_f']:
+                    pages_f = page['_f']
+                if '_l' in page and page['_l']:
+                    pages_l = page['_l']
+        if pages_f:
+            parts.append(f": {pages_f}")
+        if pages_l:
+            parts.append(f"-{pages_l}")
+        if doc.get('publication_date'):
+            parts.append(f", {doc['publication_date']}.")
+
+        # descriptive_information _b
+        if doc.get('descriptive_information'):
+            desc_b = [entry['_b'] for entry in doc['descriptive_information'] if '_b' in entry and entry['_b']]
+            if desc_b:
+                parts.append(' ' + ', '.join(desc_b))
+        return ''.join(parts)
+
+    def format_fo_am(doc):
+        parts = []
+
+        has_individual_author = 'individual_author' in doc and doc['individual_author']
+        has_corporate_author_monographic = 'corporate_author_monographic' in doc and doc['corporate_author_monographic']
+        if has_individual_author or has_corporate_author_monographic:
+            parts.append('In. ')
+            if has_individual_author:
+                authors = [a['text'] for a in doc['individual_author'] if 'text' in a]
+                if authors:
+                    parts.append('; '.join(authors) + '. ')
+            elif has_corporate_author_monographic:
+                authors = [a['text'] for a in doc['corporate_author_monographic'] if 'text' in a]
+                if authors:
+                    parts.append('; '.join(authors) + '. ')
+        
+        if 'title_monographic' in doc:
+            titles = [t['text'] for t in doc['title_monographic'] if 'text' in t]
+            if titles:
+                parts.append(' / '.join(titles) + '.')
+        if doc.get('publication_city'):
+            parts.append(f" {doc['publication_city']}, ")
+        if doc.get('publisher'):
+            publishers = doc['publisher'] if isinstance(doc['publisher'], list) else doc['publisher'].splitlines()
+            parts.append('; '.join(publishers) + ', ')
+        if doc.get('edition'):
+            editions = doc['edition'] if isinstance(doc['edition'], list) else doc['edition'].splitlines()
+            parts.append('; '.join(editions) + ', ')
+        if doc.get('publication_date'):
+            parts.append(doc['publication_date'] + '.')
+
+        # páginas
+        pages_f, pages_l = None, None
+        if doc.get('pages'):
+            for page in doc['pages']:
+                if '_f' in page and page['_f']:
+                    pages_f = page['_f']
+                if '_l' in page and page['_l']:
+                    pages_l = page['_l']
+        if pages_f and pages_l:
+            parts.append(f" p. {pages_f}-{pages_l}")
+
+        if doc.get('descriptive_information'):
+            desc_b = [entry['_b'] for entry in doc['descriptive_information'] if '_b' in entry and entry['_b']]
+            if desc_b:
+                parts.append(', ' + ', '.join(desc_b) + '. ')
+        if doc.get('title_serial'):
+            parts.append('(' + doc['title_serial'])
+        if doc.get('volume_serial'):
+            parts.append(', ' + doc['volume_serial'])
+        if doc.get('issue_number'):
+            parts.append(', ' + doc['issue_number'])
+        if doc.get('title_serial'):
+            parts.append(').')
+        if doc.get('symbol'):
+            parts.append(' (' + doc['symbol'] + ').')
+        return ''.join(parts)
+
+    def format_fo_m(doc):
+        parts = []
+        has_pub_city = bool(doc.get('publication_city'))
+        has_edition = bool(doc.get('edition'))
+        has_publisher = bool(doc.get('publisher'))
+        if has_pub_city or has_edition or has_publisher:
+            if doc.get('publication_city'):
+                parts.append(doc['publication_city'] + '; ')
+            if doc.get('publisher'):
+                publishers = doc['publisher'] if isinstance(doc['publisher'], list) else doc['publisher'].splitlines()
+                parts.append('; '.join(publishers) + '; ')
+            if doc.get('edition'):
+                editions = doc['edition'] if isinstance(doc['edition'], list) else doc['edition'].splitlines()
+                parts.append('; '.join(editions) + '; ')
+            if doc.get('publication_date'):
+                parts.append(doc['publication_date'] + '. ')
+            if doc.get('pages_monographic'):
+                pages_m = doc['pages_monographic']
+                if 'p' in pages_m:
+                    parts.append(pages_m + ' ')
+                else:
+                    parts.append(pages_m + ' p. ')
+            if doc.get('descriptive_information'):
+                desc_b = [entry['_b'] for entry in doc['descriptive_information'] if '_b' in entry and entry['_b']]
+                if desc_b:
+                    parts.append(', '.join(desc_b) + '. ')
+            if doc.get('title_serial'):
+                parts.append('(' + doc['title_serial'])
+            if doc.get('volume_serial'):
+                parts.append(', ' + doc['volume_serial'])
+            if doc.get('issue_number'):
+                parts.append(', ' + doc['issue_number'])
+            if doc.get('title_serial'):
+                parts.append(').')
+            if doc.get('symbol'):
+                parts.append(' (' + doc['symbol'] + ').')
+        else:
+            if doc.get('title_serial'):
+                parts.append('(' + doc['title_serial'])
+            if doc.get('volume_serial'):
+                parts.append(', ' + doc['volume_serial'])
+            if doc.get('issue_number'):
+                parts.append(', ' + doc['issue_number'])
+            if doc.get('title_serial'):
+                parts.append(').')
+            if doc.get('symbol'):
+                parts.append(' (' + doc['symbol'] + ').')
+        return ''.join(parts)
+
+    def format_fo_c(doc):
+        parts = []
+        if doc.get('publication_city'):
+            parts.append(doc['publication_city'] + '; ')
+            if doc.get('publisher'):
+                publishers = doc['publisher'] if isinstance(doc['publisher'], list) else doc['publisher'].splitlines()
+                parts.append('; '.join(publishers) + '; ')
+            if doc.get('edition'):
+                editions = doc['edition'] if isinstance(doc['edition'], list) else doc['edition'].splitlines()
+                parts.append('; '.join(editions) + '; ')
+            if doc.get('pages_monographic'):
+                pages_m = doc['pages_monographic']
+                if 'p' in pages_m:
+                    parts.append(pages_m + ' ')
+                else:
+                    parts.append(pages_m + ' p. ')
+            if doc.get('descriptive_information'):
+                desc_b = [entry['_b'] for entry in doc['descriptive_information'] if '_b' in entry and entry['_b']]
+                if desc_b:
+                    parts.append(', '.join(desc_b) + '.')
+        return ''.join(parts)
+
+    treatment_level = doc.get('treatment_level', '').lower()
+    if treatment_level == 'as':
+        return {'fo': format_fo_as(doc)}
+    elif treatment_level == 'am':
+        return {'fo': format_fo_am(doc)}
+    elif treatment_level.startswith('m'):
+        return {'fo': format_fo_m(doc)}
+    elif treatment_level == 'c':
+        return {'fo': format_fo_c(doc)}
+    else:
+        return {}
+
+
 def standardize_author_keyword(value):
     fields = {}
     if isinstance(value, list):
         fields['kw'] = [entry['text'] for entry in value if 'text' in entry]
-    return fields
-
-
-def standardize_fo(source, pages, publication_date, descriptive_information):
-    """Processa o campo source e retorna os campos derivados"""
-    fields = {}
-    if source:
-        fo = source
-        if pages:
-            pages = ', '.join(pages) if isinstance(pages, list) else pages
-            fo += f": {pages}"
-        if publication_date:
-            fo += f", {publication_date}."
-        if descriptive_information:
-            values_di = [entry['_b'] for entry in descriptive_information if '_b' in entry and entry['_b']]
-            values_di = ". ".join(values_di)
-            fo += f" {values_di}"
-
-        fields['fo'] = fo
     return fields
 
 
@@ -355,32 +510,27 @@ def determine_document_type(doc):
     audio_extensions = {'.wma', '.mp3', '.mp4', '.wav'}
     
     for entry in electronic_address:
-        # Verificação de vídeo
-        y_val = entry.get('_y', '').lower()
-        z_val = entry.get('_z', '').lower()
-        u_val = entry.get('_u', '').lower()
-        
-        if any((
-            'multim' in y_val,
-            'deo' in z_val,
-            any(ext in u_val for ext in video_extensions)
-        )):
-            types.add('video')
-            break
-    
-    for entry in electronic_address:
-        # Verificação de podcast
-        y_val = entry.get('_y', '').upper()
-        q_val = entry.get('_q', '').lower()
-        u_val = entry.get('_u', '').lower()
-        
-        if any((
-            'UDIO' in y_val,
-            any(ext in q_val for ext in audio_extensions),
-            any(ext in u_val for ext in audio_extensions)
-        )):
-            types.add('podcast')
-            break
+        if isinstance(entry, dict):
+            y_val = entry.get('_y', '').lower()
+            z_val = entry.get('_z', '').lower()
+            u_val = entry.get('_u', '').lower()
+            q_val = entry.get('_q', '').lower()
+            
+            # Verificação de vídeo
+            if any((
+                'multim' in y_val,
+                'deo' in z_val,
+                any(ext in u_val for ext in video_extensions)
+            )):
+                types.add('video')
+
+            # Verificação de podcast
+            if any((
+                'UDIO' in y_val,
+                any(ext in q_val for ext in audio_extensions),
+                any(ext in u_val for ext in audio_extensions)
+            )):
+                types.add('podcast')
     
     return list(types)
 
@@ -504,9 +654,7 @@ def transform_and_migrate():
             location_fields = standardize_location(doc['call_number'])
 
         # processa fo
-        fo_fields = {}
-        if 'source' in doc:
-            fo_fields = standardize_fo(doc.get('source'), pg_value, doc.get('publication_date'), doc.get('descriptive_information'))
+        fo_fields = standardize_fo(doc)
 
         # processa cp e pais_publicacao
         cp_fields = {}
@@ -570,7 +718,6 @@ def transform_and_migrate():
             'ec': 1 if doc.get('clinical_trial_registry_name') else None,
             'ed': doc.get('edition'),
             'entry_date': doc.get('created_time', doc.get('transfer_date_to_database', ''))[:10].replace('-', ''), 
-            'fo': doc.get('source'),
             'id_pk': doc.get('id'),
             'ip': doc.get('issue_number'),
             'is': doc.get('issn'),
