@@ -16,8 +16,24 @@ Executar carga completa de todos os registros disponíveis no FI-Admin para o Mo
 """
 
 from airflow import DAG
-from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from airflow.operators.python import PythonOperator
+from airflow.providers.mongo.hooks.mongo import MongoHook
 from data_governance.dags.data_governance.tasks_for_01 import harvest_fiadmin_and_store_in_mongodb
+
+
+def setup_error_tracking_collection():
+    mongo_hook = MongoHook(mongo_conn_id='mongo')
+    db = mongo_hook.get_conn()
+    collection_name = '01_fiadmin_error_tracking'
+    db_name = 'data_governance'
+
+    # Deleta a coleção se existir
+    if collection_name in db[db_name].list_collection_names():
+        db[db_name].drop_collection(collection_name)
+
+    # Cria a coleção
+    new_collection = db[db_name][collection_name]
+    new_collection.create_index([('error_type', 1)])
 
 
 # Configuração do DAG
@@ -38,8 +54,12 @@ with DAG(
     catchup=False,
     doc_md=__doc__
 ) as dag:
+    setup_error_tracking_collection_task = PythonOperator(
+        task_id='setup_error_tracking_collection',
+        python_callable=setup_error_tracking_collection
+    )
     harvest_fiadmin_and_store_in_mongodb_task = harvest_fiadmin_and_store_in_mongodb(
         update_mode='FULL'
     )
 
-    harvest_fiadmin_and_store_in_mongodb_task
+    setup_error_tracking_collection_task >> harvest_fiadmin_and_store_in_mongodb_task

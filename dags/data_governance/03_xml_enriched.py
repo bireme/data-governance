@@ -175,10 +175,6 @@ enrichment_rules = {
         'instances': ['mtc', 'tmgl'],
         'collections': ['collection_mtc', 'collection_tmgl']
     },
-    'mtc': {
-        'instances': ['mtc', 'tmgl'],
-        'collections': ['collection_mtc', 'collection_tmgl']
-    },
     'mtc_elementos': {
         'instances': ['mtc', 'tmgl'],
         'collections': ['collection_mtc', 'collection_tmgl'],

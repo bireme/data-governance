@@ -40,5 +40,3 @@ with DAG(
     harvest_fiadmin_and_store_in_mongodb_task = harvest_fiadmin_and_store_in_mongodb(
         update_mode='INCREMENTAL'
     )
-
-    harvest_fiadmin_and_store_in_mongodb_task

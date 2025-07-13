@@ -72,7 +72,8 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode):
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     mongo_client = mongo_hook.get_conn()
     mongo_db = mongo_client["data_governance"]
-    mongo_collection = mongo_db["01_landing_zone"]
+    lz_collection = mongo_db["01_landing_zone"]
+    error_collection = mongo_db["01_fiadmin_error_tracking"]
 
     url = fiadmin_conn.host
     limit = 100
@@ -81,16 +82,15 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode):
     headers = {'apikey': fiadmin_conn.password}
     session = get_requests_session()
 
+    total_records = None
+    max_erronous_loops = 50
+    erronous_loops = 0
+
     if update_mode == "INCREMENTAL":
         incremental_update_date = (datetime.today() - timedelta(days=5)).strftime('%Y-%m-%d')
         extra_params = {'updated_time__gte': incremental_update_date}
-    #elif update_mode == "FULL":
-        #total_records = mongo_collection.count_documents({})
-        #offset = math.floor(total_records / limit) * limit
-        #logger.info(f"Há {total_records} registros na coleção. Ativando offset {offset}.")
     
-    has_more_data = True
-    while has_more_data:
+    while total_records is None or offset < total_records:
         params = {
             "limit": limit,
             "offset": offset,
@@ -99,7 +99,25 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode):
         }
         logger.info(f"Coletando offset {offset} no FI-Admin com os parametros {params}")
         with Timer() as t:
-            response = session.get(url, params=params, headers=headers)
+            try:
+                response = session.get(url, params=params, headers=headers)
+                response.raise_for_status()
+            except Exception as e:
+                error_collection.insert_one({
+                    "error": str(e),
+                    "url": url,
+                    "params": params,
+                    "error_type": "SKIP",
+                    "timestamp": datetime.now()
+                })
+                logger.error(f"Erro {response.status_code} na coleta do batch de offset {offset} e limit {limit}. Pulando para o próximo batch.")
+
+                # Limitar o número de loops errôneos caso nao saibamos o total de registros (condicao de loop infinito)
+                erronous_loops += 1
+                if erronous_loops >= max_erronous_loops and total_records is None:
+                    logger.error(f"Máximo de loops errôneos ({max_erronous_loops}) atingido. Encerrando coleta.")
+                    break
+
         logger.info(f"Tempo de coleta de dados no FI-Admin: {t.interval:.4f} segundos")
 
         if response.status_code == 200:
@@ -107,20 +125,17 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode):
             
             # Se a resposta estiver vazia, não há mais dados
             if not json_data or (json_data and not json_data['objects']):
-                has_more_data = False
+                logger.info(f"Batch vazio recebido para offset {offset}. Encerrando coleta.")
+                break
             else:
+                if total_records is None:
+                    total_records = json_data['meta']['total_count']
+                    logger.info(f"Total de registros encontrados: {total_records}")
+
                 results = json_data['objects']
-                with Timer() as t:
-                    send_json_to_mongodb(results, mongo_collection)
-                logger.info(f"Tempo de inserção de dados no MongoDB: {t.interval:.4f} segundos")
+                send_json_to_mongodb(results, lz_collection)
                 
-                offset += limit
-        elif response.status_code == 502:
-            logger.error(f"Erro {response.status_code} na coleta do batch de offset {offset} e limit {limit}. Pulando para o próximo batch.")
-            offset += limit
-        else:
-            raise Exception(f"Erro ao obter dados do FI-Admin: Status code {response.status_code}")
-            has_more_data = False
+        offset += limit
 
 
 # Função para enviar JSON para o MongoDB
