@@ -38,6 +38,7 @@ from urllib3.util.retry import Retry
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.hooks.base import BaseHook
 from airflow.decorators import task
+from pymongo import UpdateOne
 
 
 class Timer:
@@ -60,6 +61,29 @@ def get_requests_session():
     session.mount('http://', adapter)
     session.mount('https://', adapter)
     return session
+
+
+def retry_error_records(error_collection, lz_collection, session, url, headers):
+    logger = logging.getLogger(__name__)
+
+    errors = list(error_collection.find({}))
+    for error in errors:
+        params = error.get("params")
+        try:
+            response = session.get(url, params=params, headers=headers)
+            response.raise_for_status()
+
+            json_data = response.json()
+            results = json_data.get('objects', [])
+
+            # Persistir novamente os registros obtidos
+            send_json_to_mongodb(results, lz_collection)
+
+            # Remover o erro da coleção após sucesso
+            error_collection.delete_one({'_id': error['_id']})
+            logger.info(f"Registro de erro com params {params} reprocessado com sucesso.")
+        except Exception as e:
+            logger.error(f"Falha ao reprocessar erro com params {params}: {str(e)}")
 
 
 # Função para obter JSON da API de forma paginada e enviar para o MongoDB
@@ -132,35 +156,25 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode):
                     total_records = json_data['meta']['total_count']
                     logger.info(f"Total de registros encontrados: {total_records}")
 
-                results = json_data['objects']
+                results = json_data.get('objects', [])
                 send_json_to_mongodb(results, lz_collection)
                 
         offset += limit
 
+    if update_mode == "INCREMENTAL":
+        retry_error_records(error_collection, lz_collection, session, url, headers)
 
-# Função para enviar JSON para o MongoDB
+
 def send_json_to_mongodb(json_data, collection):
-    # Extrai todos os IDs do lote atual
-    batch_ids = [doc['id'] for doc in json_data if 'id' in doc]
-    
-    # Consulta os IDs existentes no MongoDB
-    existing_ids = collection.distinct('id', {'id': {'$in': batch_ids}})
-    
-    # Filtra documentos novos
-    new_docs = [
-        doc for doc in json_data 
-        if doc.get('id') not in existing_ids
-    ]
-
-    if new_docs:
-        try:
-            collection.insert_many(new_docs, ordered=False)
-        except pymongo.errors.BulkWriteError as e:
-            # Check if the error is a duplicate key error
-            for err in e.details['writeErrors']:
-                if err['code'] == 11000:  # Duplicate key error code
-                    # Ignore this error
-                    continue
-                else:
-                    # Handle other errors
-                    raise Exception(f"Error code {err['code']}: {err['errmsg']}")
+    batch = []
+    for doc in json_data:
+        if 'id' in doc:
+            batch.append(
+                UpdateOne(
+                    {'id': doc['id']},    # Filtro para identificar o documento
+                    {'$set': doc},        # Atualiza todos os campos do documento
+                    upsert=True           # Insere se não existir
+                )
+            )
+    if batch:
+        collection.bulk_write(batch, ordered=False)
