@@ -581,7 +581,7 @@ with DAG(
     default_args=default_args,
     description='Data Governance - Transforma a coleção com nomenclatura de XML do iah-X com novos campos enriquecidos',
     tags=["data_governance", "fi-admin", "mongodb", "iahx", "data enrichment"],
-    schedule="0 4 * * *",
+    schedule=None,
     catchup=False,
     doc_md=__doc__
 ) as dag:

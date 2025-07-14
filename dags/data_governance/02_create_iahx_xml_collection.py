@@ -791,7 +791,7 @@ with DAG(
     default_args=default_args,
     description='Data Governance - Transforma a coleção em formato XML para importar no iah-X',
     tags=["data_governance", "fi-admin", "mongodb", "iahx"],
-    schedule="0 3 * * *",
+    schedule=None,
     catchup=False,
     doc_md=__doc__
 ) as dag:
