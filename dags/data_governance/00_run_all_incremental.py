@@ -1,3 +1,22 @@
+"""
+# DAG DG_00_run_all_incremental
+
+Este módulo define uma DAG responsável por orquestrar a execução
+sequencial de outras DAGs do pipeline de Data Governance, relacionadas ao processo
+de atualização incremental das coleções MongoDB e geração de arquivos XML para o IAHx.
+
+Objetivo:
+    Orquestrar a execução encadeada das seguintes DAGs:
+        1. DG_01_incremental_update
+        2. DG_02_create_iahx_xml_collection
+        3. DG_03_enrich_xml
+        4. DG_04_export_xml
+
+    Cada etapa depende da anterior e será executada apenas após o sucesso da execução
+    anterior. Isso garante que os dados foram atualizados e processados corretamente
+    antes do próximo passo iniciar.
+"""
+
 from airflow import DAG
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from datetime import datetime

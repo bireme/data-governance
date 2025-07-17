@@ -86,6 +86,45 @@ def standardize_title(value):
     return fields
 
 
+def standardize_multilingual_title(doc):
+    fields = {}
+    treatment_level = doc.get('treatment_level', '').lower()
+
+    def has_en_title(title_list):
+        if not isinstance(title_list, list):
+            return False
+        for entry in title_list:
+            if entry.get('_i', '').lower() == 'en':
+                return True
+        return False
+
+    if treatment_level.startswith('a'):
+        title_list = doc.get('title', [])
+        fields = standardize_title(title_list)
+        if not has_en_title(title_list):
+            english_title = doc.get('english_translated_title')
+            if english_title:
+                fields['ti_en'] = english_title
+
+    elif treatment_level.startswith('m'):
+        title_list = doc.get('title_monographic', [])
+        fields = standardize_title(title_list)
+        if not has_en_title(title_list):
+            english_title = doc.get('english_title_monographic')
+            if english_title:
+                fields['ti_en'] = english_title
+
+    elif treatment_level == 'c':
+        title_list = doc.get('title_collection', [])
+        fields = standardize_title(title_list)
+        if not has_en_title(title_list):
+            english_title = doc.get('english_title_collection')
+            if english_title:
+                fields['ti_en'] = english_title
+
+    return fields
+
+
 def standardize_abstract(value):
     """Processa abstracts com ou sem especificação de idioma"""
     fields = {}
@@ -153,7 +192,7 @@ def standardize_fo(doc):
         if doc.get('title_serial'):
             parts.append(doc['title_serial'])
         if doc.get('volume_serial'):
-            parts.append(f"; {doc['volume_serial']}")
+            parts.append(f";{doc['volume_serial']}")
         if doc.get('issue_number'):
             parts.append(f"({doc['issue_number']})")
 
@@ -165,10 +204,14 @@ def standardize_fo(doc):
                     pages_f = page['_f']
                 if '_l' in page and page['_l']:
                     pages_l = page['_l']
+                if 'text' in page and page['text']:
+                    pages_text = page['text']
         if pages_f:
             parts.append(f": {pages_f}")
         if pages_l:
             parts.append(f"-{pages_l}")
+        if not parts and pages_text:
+            parts.append(f"{pages_text}")
         if doc.get('publication_date'):
             parts.append(f", {doc['publication_date']}.")
 
@@ -177,7 +220,7 @@ def standardize_fo(doc):
             desc_b = [entry['_b'] for entry in doc['descriptive_information'] if '_b' in entry and entry['_b']]
             if desc_b:
                 parts.append(' ' + ', '.join(desc_b))
-        return ''.join(parts)
+        return ''.join(parts).strip()
 
     def format_fo_am(doc):
         parts = []
@@ -235,7 +278,7 @@ def standardize_fo(doc):
             parts.append(').')
         if doc.get('symbol'):
             parts.append(' (' + doc['symbol'] + ').')
-        return ''.join(parts)
+        return ''.join(parts).strip()
 
     def format_fo_m(doc):
         parts = []
@@ -262,7 +305,7 @@ def standardize_fo(doc):
             if doc.get('descriptive_information'):
                 desc_b = [entry['_b'] for entry in doc['descriptive_information'] if '_b' in entry and entry['_b']]
                 if desc_b:
-                    parts.append(', '.join(desc_b) + '. ')
+                    parts.append(', '.join(desc_b) + '.')
             if doc.get('title_serial'):
                 parts.append('(' + doc['title_serial'])
             if doc.get('volume_serial'):
@@ -284,7 +327,7 @@ def standardize_fo(doc):
                 parts.append(').')
             if doc.get('symbol'):
                 parts.append(' (' + doc['symbol'] + ').')
-        return ''.join(parts)
+        return ''.join(parts).strip()
 
     def format_fo_c(doc):
         parts = []
@@ -296,6 +339,8 @@ def standardize_fo(doc):
             if doc.get('edition'):
                 editions = doc['edition'] if isinstance(doc['edition'], list) else doc['edition'].splitlines()
                 parts.append('; '.join(editions) + '; ')
+            if doc.get('publication_date'):
+                parts.append(doc['publication_date'] + '. ')
             if doc.get('pages_monographic'):
                 pages_m = doc['pages_monographic']
                 if 'p' in pages_m:
@@ -306,12 +351,12 @@ def standardize_fo(doc):
                 desc_b = [entry['_b'] for entry in doc['descriptive_information'] if '_b' in entry and entry['_b']]
                 if desc_b:
                     parts.append(', '.join(desc_b) + '.')
-        return ''.join(parts)
+        return ''.join(parts).strip()
 
     treatment_level = doc.get('treatment_level', '').lower()
     if treatment_level == 'as':
         return {'fo': format_fo_as(doc)}
-    elif treatment_level == 'am':
+    elif treatment_level.startswith('am'):
         return {'fo': format_fo_am(doc)}
     elif treatment_level.startswith('m'):
         return {'fo': format_fo_m(doc)}
@@ -350,7 +395,7 @@ def standardize_individual_authors(authors, country_map):
         institution3 = author.get('_3', '')
         country = author.get('_p', '')
         city = author.get('_c', '')
-        auid = author.get('_k', '')
+        auid = author.get('_k', author.get('_w', ''))
         email = author.get('_e', '')
         
         # Campo au
@@ -539,15 +584,15 @@ def calculate_weight(doc):
     """Calcula o score baseado em múltiplos critérios do documento"""
     score = 0
     
-    # 1. Valor base pelo tipo de documento
-    tipo_documento = doc.get('treatment_level', '').lower()
-    if 's' in tipo_documento:
+    # 1. Valor base pelo tipo
+    tipo = doc.get('literature_type', '').lower()
+    if tipo.startswith('s'):
         score += 15
-    if 't' in tipo_documento:
+    elif tipo.startswith('t'):
         score += 10
-    if 'm' in tipo_documento:
+    elif tipo.startswith('m'):
         score += 5
-    if 'n' in tipo_documento:
+    elif tipo.startswith('n'):
         score += 2
 
     # 2. Diferença de anos (20 - (ano_atual - ano_publicacao))
@@ -618,11 +663,7 @@ def transform_and_migrate():
             pg_value = doc.get('pages_monographic')
 
         # processa títulos multilíngues
-        title_fields = {}
-        if 'title' in doc:
-            title_fields = standardize_title(doc['title'])
-        elif 'title_monographic' in doc:
-            title_fields = standardize_title(doc['title_monographic'])
+        title_fields = standardize_multilingual_title(doc)
 
         # processa abstracts multilíngues
         abstract_fields = {}
@@ -635,13 +676,19 @@ def transform_and_migrate():
             eletronic_fields = standardize_eletronic_address(doc['electronic_address'])
 
         # processa individual_author
-        individual_author_fields = {}
+        author_fields = {}
         if 'individual_author' in doc:
-            individual_author_fields = standardize_individual_authors(doc['individual_author'], country_map)
+            author_fields = standardize_individual_authors(doc['individual_author'], country_map)
         elif 'corporate_author' in doc:
-            individual_author_fields = standardize_individual_authors(doc['corporate_author'], country_map)
+            author_fields = standardize_individual_authors(doc['corporate_author'], country_map)
+        elif 'individual_author_monographic' in doc:
+            author_fields = standardize_individual_authors(doc['individual_author_monographic'], country_map)
         elif 'corporate_author_monographic' in doc:
-            individual_author_fields = standardize_individual_authors(doc['corporate_author_monographic'], country_map)
+            author_fields = standardize_individual_authors(doc['corporate_author_monographic'], country_map)
+        elif 'individual_author_collection' in doc:
+            author_fields = standardize_individual_authors(doc['individual_author_collection'], country_map)
+        elif 'corporate_author_collection' in doc:
+            author_fields = standardize_individual_authors(doc['corporate_author_collection'], country_map)
 
         # processa author_keyword
         author_keyword_fields = {}
@@ -756,7 +803,7 @@ def transform_and_migrate():
             **abstract_fields,
             **eletronic_fields,
             **author_keyword_fields,
-            **individual_author_fields,
+            **author_fields,
             **location_fields,
             **fo_fields,
             **cp_fields,
