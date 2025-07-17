@@ -21,6 +21,7 @@ Configuração:
 """
 
 import os
+import re
 import logging
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
@@ -32,42 +33,60 @@ from airflow.operators.python import PythonOperator
 from airflow.hooks.filesystem import FSHook
 
 
+def remove_invalid_xml_chars(text):
+    # Remove caracteres de controle não permitidos pelo XML 1.0
+    return re.sub(
+        r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', 
+        text if isinstance(text, str) else str(text)
+    )
+
+
 def export_mongo_to_xml():
     logger = logging.getLogger(__name__)
 
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     collection = mongo_hook.get_collection('03_xml_enriched', 'data_governance')
     
-    # Get filesystem output path from Airflow connection
     fs_hook = FSHook(fs_conn_id='DG_EXPORT_XML_FOLDER')
     output_dir = fs_hook.get_path()
-
-    # Ensure output directory exists
     os.makedirs(output_dir, exist_ok=True)
 
-    for doc in collection.find():
-        id_pk = doc.get('id_pk')
+    # Geração do nome do arquivo com timestamp
+    timestamp = datetime.now().strftime('%Y%m%dT%H%M%S')
+    output_filename = f"data_governance_{timestamp}.xml"
+    output_file = os.path.join(output_dir, output_filename)
 
-        boost_value = str(doc.get('weight', ''))
-        root = ET.Element("doc", boost=boost_value)
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+        f.write('<docs>\n')
 
-        # Process all document fields dynamically
-        for key, value in doc.items():
-            if key == '_id':
-                continue
-            
-            if isinstance(value, list):
-                for item in value:
-                    ET.SubElement(root, 'field', name=key).text = escape(str(item))
-            else:
-                ET.SubElement(root, 'field', name=key).text = escape(str(value))
+        for doc in collection.find():
+            id_pk = doc.get('id_pk')
 
-        # Write individual XML file
-        ET.indent(root, space='  ', level=0)
-        xml_bytes = ET.tostring(root, encoding='utf-8', xml_declaration=True)
+            boost_value = str(doc.get('weight', ''))
+            root = ET.Element("doc", boost=boost_value)
 
-        with open(f"{output_dir}/{id_pk}.xml", 'wb') as f:
-            f.write(xml_bytes)
+            # Process all document fields dynamically
+            for key, value in doc.items():
+                if key == '_id':
+                    continue
+                
+                if isinstance(value, list):
+                    for item in value:
+                        clean_item = remove_invalid_xml_chars(item)
+                        ET.SubElement(root, 'field', name=key).text = clean_item
+                else:
+                    clean_value = remove_invalid_xml_chars(value)
+                    ET.SubElement(root, 'field', name=key).text = clean_value
+
+            # Write individual XML file
+            ET.indent(root, space='  ', level=0)
+            xml_str = ET.tostring(root, encoding='unicode')
+            f.write(xml_str + '\n')
+
+        f.write('</docs>')
+    
+    logger.info(f"Arquivo XML exportado com sucesso: {output_file}")
 
 
 default_args = {
