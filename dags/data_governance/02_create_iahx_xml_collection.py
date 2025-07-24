@@ -51,6 +51,7 @@ Esta DAG realiza a transformação e padronização dos dados coletados do FI-Ad
 """
 
 
+import re
 import logging
 from datetime import datetime
 from airflow import DAG
@@ -60,6 +61,7 @@ from pymongo import ReplaceOne
 from data_governance.dags.data_governance.misc import load_tabpais
 from data_governance.dags.data_governance.misc import load_decs_descriptors
 from data_governance.dags.data_governance.misc import load_title_current
+from data_governance.dags.data_governance.misc import remove_diacritics
 
 
 def standardize_pages(value):
@@ -133,39 +135,37 @@ def standardize_abstract(value):
             if 'text' in entry:
                 lang_code = entry.get('_i', '').lower()
                 key = f'ab_{lang_code}' if lang_code else 'ab'
-                fields[key] = entry['text']
+
+                abstract_text = entry['text'].replace('\r\n', ' ')
+                abstract_text = re.sub(r'[\x00-\x08\x0B-\x0C\x0E-\x1F]', ' ', abstract_text)
+                fields[key] = abstract_text
     return fields
 
 
 def standardize_eletronic_address(value):
     fields = {}
     if isinstance(value, list):
-        values = [
-            entry['_u'] for entry in value
-            if isinstance(entry, dict) and '_u' in entry and entry['_u'] and isinstance(entry['_u'], str)
-        ]
-        fields['ur'] = values
+        fields['ur'] = []
+        fields['ur_MULTIMEDIA'] = []
+        fields['ur_AUDIO'] = []
+        fields['ur_meta'] = []
 
-        multi_values = [
-            entry['_u'] for entry in value
-            if isinstance(entry, dict) and '_u' in entry and entry['_u'] and isinstance(entry['_u'], str) and '_y' in entry and 'MULTIM' in entry['_y']
-        ]
-        fields['ur_MULTIMEDIA'] = multi_values
+        for entry in value:
+            if isinstance(entry, dict) and '_u' in entry and entry['_u'] and isinstance(entry['_u'], str):
+                if entry['_u'] and any(part in entry['_u'].lower() for part in ["www", "internet", "http"]):
+                    fields['fulltext'] = 1
 
-        audio_values = [
-            entry['_u'] for entry in value
-            if isinstance(entry, dict) and '_u' in entry and entry['_u'] and isinstance(entry['_u'], str) and '_y' in entry and 'UDIO' in entry['_y']
-        ]
-        fields['ur_AUDIO'] = audio_values
+                fields['ur'].append(entry['_u'])
 
-        meta_values = [
-            entry['_u'] for entry in value
-            if isinstance(entry, dict) and '_u' in entry and entry['_u'] and isinstance(entry['_u'], str) and '_x' in entry and entry['_x']
-        ]
-        fields['ur_meta'] = meta_values
+                if '_y' in entry and 'MULTIM' in entry['_y']:
+                    fields['ur_MULTIMEDIA'].append(entry['_u'])
 
-        if fields['ur']:
-            fields['fulltext'] = 1
+                if '_y' in entry and 'UDIO' in entry['_y']:
+                    fields['ur_AUDIO'].append(entry['_u'])
+
+                if '_x' in entry and entry['_x']:
+                    fields['ur_meta'].append(entry['_u'])
+
     return fields
 
 
@@ -583,7 +583,7 @@ def determine_document_type(doc):
 def calculate_weight(doc):
     """Calcula o score baseado em múltiplos critérios do documento"""
     score = 0
-    
+
     # 1. Valor base pelo tipo
     tipo = doc.get('literature_type', '').lower()
     if tipo.startswith('s'):
@@ -597,7 +597,7 @@ def calculate_weight(doc):
 
     # 2. Diferença de anos (20 - (ano_atual - ano_publicacao))
     try:
-        publication_year = int(doc.get('publication_date', '')[:4])
+        publication_year = int(doc.get('publication_date_normalized', '')[:4])
         current_year = datetime.now().year
         diff_anos = current_year - publication_year
         score += (20 - diff_anos)
@@ -714,7 +714,8 @@ def transform_and_migrate():
         ct_values = []
         if 'check_tags' in doc and isinstance(doc['check_tags'], list):
             for tag in doc['check_tags']:
-                formatted_mfn = decs_map.get(tag.strip().lower())
+                clean_tag = remove_diacritics(tag.strip().lower())
+                formatted_mfn = decs_map.get(clean_tag)
                 if formatted_mfn:
                     ct_values.append(formatted_mfn)
 
@@ -722,9 +723,38 @@ def transform_and_migrate():
         pt_values = []
         if 'publication_type' in doc and isinstance(doc['publication_type'], list):
             for tag in doc['publication_type']:
-                formatted_mfn = decs_map.get(tag.strip().lower())
+                clean_tag = remove_diacritics(tag.strip().lower())
+                formatted_mfn = decs_map.get(clean_tag)
                 if formatted_mfn:
                     pt_values.append(formatted_mfn)
+
+        # processa mj
+        mj_values = []
+        if 'descriptors_primary' in doc and isinstance(doc['descriptors_primary'], list):
+            for tag in doc['descriptors_primary']:
+                if 'text' in tag:
+                    tag = tag['text']
+
+                    clean_tag = remove_diacritics(tag.replace('^d', '').strip().lower())
+                    formatted_mfn = decs_map.get(clean_tag)
+                    if formatted_mfn:
+                        mj_values.append(formatted_mfn)
+                    else:
+                        mj_values.append(tag)
+
+        # processa mh
+        mh_values = []
+        if 'descriptors_secondary' in doc and isinstance(doc['descriptors_secondary'], list):
+            for tag in doc['descriptors_secondary']:
+                if 'text' in tag:
+                    tag = tag['text']
+
+                    clean_tag = remove_diacritics(tag.replace('^d', '').strip().lower())
+                    formatted_mfn = decs_map.get(clean_tag)
+                    if formatted_mfn:
+                        mh_values.append(formatted_mfn)
+                    else:
+                        mh_values.append(tag)
 
         id_fields = standardize_id(doc.get('id'), doc.get('LILACS_original_id'))
 
@@ -771,8 +801,8 @@ def transform_and_migrate():
             'isbn': doc.get('isbn'),
             'la': doc.get('text_language'),
             'license': doc.get('license'),
-            'mh': [mh['text'] for mh in doc.get('descriptors_secondary', []) if 'text' in mh],
-            'mj': [mj['text'] for mj in doc.get('descriptors_primary', []) if 'text' in mj],
+            'mh': mh_values,
+            'mj': mj_values,
             'nivel_tratamento': doc.get('treatment_level'),
             'no_indexing': 1 if not doc.get('descriptors_primary') and not doc.get('descriptors_secondary') else None,
             'non_decs_region': doc.get('non_decs_region'),

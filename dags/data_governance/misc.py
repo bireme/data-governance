@@ -1,3 +1,6 @@
+import unicodedata
+
+
 def _get_title_values(title_doc):
     values = []
 
@@ -21,6 +24,11 @@ def _get_title_values(title_doc):
         values.extend(other_titles)
 
     return values
+
+
+def remove_diacritics(s):
+    nfkd = unicodedata.normalize('NFKD', s)
+    return ''.join([c for c in nfkd if not unicodedata.combining(c)])
 
 
 def load_title_current(title_col):
@@ -63,13 +71,21 @@ def load_tabpais(tabpais_col):
 def load_decs_descriptors(decs_col):    
     descriptor_map = {}
     for decs_doc in decs_col.find():
-        english_desc = decs_doc.get('Descritor Inglês', '').strip().lower()
-        if english_desc:
-            # Processa MFN: remove zeros à esquerda e adiciona prefixo
-            raw_mfn = decs_doc['Mfn'].lstrip('0')
-            formatted_mfn = f'^d{raw_mfn}' if raw_mfn else None
-            descriptor_map[english_desc] = formatted_mfn
-    
+        # Processa MFN: remove zeros à esquerda e adiciona prefixo
+        raw_mfn = decs_doc['Mfn'].lstrip('0')
+        formatted_mfn = f'^d{raw_mfn}' if raw_mfn else None
+        
+        descriptors = [
+            decs_doc.get('Descritor Inglês', ''),
+            decs_doc.get('Descritor Português', ''),
+            decs_doc.get('Descritor Espanhol', ''),
+            decs_doc.get('Descritor Francês', '')
+        ]
+        descriptors = [remove_diacritics(desc.strip().lower()) for desc in descriptors if desc]
+
+        for desc in descriptors:
+            descriptor_map[desc] = formatted_mfn
+
     return descriptor_map
 
 
