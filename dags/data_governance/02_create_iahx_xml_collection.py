@@ -408,6 +408,10 @@ def standardize_individual_authors(authors, country_map):
                 parts.append(name)
             if institution:
                 parts.append(f"; {institution}" if parts else institution)
+            if institution2:
+                parts.append(f". {institution2}")
+            if institution3:
+                parts.append(f". {institution3}")
             if city:
                 parts.append(f". {city}" if parts else city)
             if country:
