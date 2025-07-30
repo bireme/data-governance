@@ -821,8 +821,16 @@ def transform_and_migrate():
             'pr_nu': doc.get('project_number'),
             'pt': pt_values,
             'pu': doc.get('publisher').splitlines() if doc.get('publisher') else None,
-            'related_research': str(doc.get('related_research')) if doc.get('related_research') else None,
-            'related_resource': str(doc.get('related_resource')) if doc.get('related_resource') else None,
+            #'related_research': str(doc.get('related_research')) if doc.get('related_research') else None,
+            #'related_resource': str(doc.get('related_resource')) if doc.get('related_resource') else None,
+            'related_research': doc.get('related_research')[0] if isinstance(doc.get('related_research'), list) and len(doc.get('related_research')) == 1 else str(doc.get('related_research')) if doc.get('related_research') else None,
+            'related_resource': (
+                 doc['related_resource']
+                 if isinstance(doc.get('related_resource'), list)
+                 else [doc['related_resource']]
+                 if doc.get('related_resource')
+                 else []
+            ),
             'status_fiadmin': status_map.get(doc.get('status')),
             'ta': doc.get('title_serial'),
             'ta_fascic': standardize_ta_fascic(ta_var, doc.get('volume_serial'), doc.get('issue_number'), doc.get('publication_date_normalized', '')[:4]),
