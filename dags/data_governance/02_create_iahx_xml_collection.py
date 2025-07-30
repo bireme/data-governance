@@ -791,7 +791,7 @@ def transform_and_migrate():
                   if 'm' in doc.get('treatment_level', '').lower()
                   and doc.get('literature_type', '').upper() not in ['S', 'T', 'N']
                   else None
-             ),
+            ),
             'cc': doc.get('cooperative_center_code'),
             'cn_co': doc.get('conferente_country'),
             'cn_cy': doc.get('conference_city'),
