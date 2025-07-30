@@ -785,7 +785,13 @@ def transform_and_migrate():
             'ai': doc.get('corporate_author', doc.get('corporate_author_monographic')),
             'aid': doc.get('doi_number'),
             'alternate_id': [alternate_id for alternate_id in doc.get('alternate_ids', []) if alternate_id and alternate_id != id_fields['id']],
-            'book_title': doc.get('reference_title') if 'm' in doc.get('treatment_level') else None,
+            #'book_title': doc.get('reference_title') if 'm' in doc.get('treatment_level') else None,
+            'book_title': (
+                  doc.get('reference_title')
+                  if 'm' in doc.get('treatment_level', '').lower()
+                  and doc.get('literature_type', '').upper() not in ['S', 'T', 'N']
+                  else None
+             ),
             'cc': doc.get('cooperative_center_code'),
             'cn_co': doc.get('conferente_country'),
             'cn_cy': doc.get('conference_city'),
