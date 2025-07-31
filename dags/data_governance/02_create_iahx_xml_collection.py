@@ -570,9 +570,6 @@ def standardize_ta_var(doc, issn_map, shortened_title_map):
     if not ta_var and doc.get('shortened_title'):
         title_key = doc['shortened_title'].lower().strip()
         ta_var = shortened_title_map.get(title_key)
-        
-    if ta_var and isinstance(ta_var, list):
-        ta_var = [t.split('^')[0].strip() for t in ta_var if isinstance(t, str) and t.strip()]
 
     return ta_var
     
