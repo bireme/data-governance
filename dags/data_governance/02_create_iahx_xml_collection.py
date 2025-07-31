@@ -170,19 +170,81 @@ def standardize_eletronic_address(value):
 
 
 def standardize_location(value):
+    def process_entry(entry):
+        subfields = [
+            ('_d', ', '), ('_e', ', '), ('_f', ', '), ('_g', ', '),
+            ('_h', '. '), ('_i', ','), ('_j', '. '), ('_k', '. '),
+            ('_l', '. '), ('_m', '. '), ('_n', '. '), ('_o', '. '),
+            ('_p', '. '), ('_q', '. '), ('_r', '. '), ('_s', '. '),
+            ('_t', '. '), ('_u', '. '), ('_v', '. '), ('_w', '. '),
+            ('_x', '. '), ('_y', '. '), ('_z', '. '), ('_0', '. '),
+            ('_1', '. '), ('_2', '. '), ('_3', '. '), ('_4', '. '),
+            ('_5', '. ')
+        ]  # _a, _b, _c tratados abaixo
+        last_fields = [
+            ('_7', '. '), ('_8', '. '), ('_9', '. ')
+        ]  # _6 tratado abaixo
+
+        result = ''
+        text = entry.get('text', '').strip()
+        if text:
+            result = text + ';'
+
+        used_a = False
+        used_b = False
+
+        # _a
+        a = entry.get('_a', '').strip()
+        if a:
+            result += (' ' if text else '') + a
+            used_a = True
+
+        # _b
+        b = entry.get('_b', '').strip()
+        if b:
+            result += (', ' if used_a else '') + b
+            used_b = True
+
+        # _c
+        c = entry.get('_c', '').strip()
+        if c:
+            result += (', ' if used_a or used_b else '') + c
+
+        for key, sep in subfields:
+            val = entry.get(key, '').strip()
+            if val:
+                result += sep + val
+
+        # _6 (antes de _7/_8/_9)
+        six = entry.get('_6', '').strip()
+        if six:
+            if not text:
+                result += '. ' + six
+            else:
+                result += ' ' + six
+
+        # _7, _8, _9
+        for key, sep in last_fields:
+            val = entry.get(key, '').strip()
+            if val:
+                result += sep + val
+
+        # Remove o ; final caso ele fique isolado
+        if result.strip().endswith(';'):
+            result = result.strip()[:-1].rstrip()
+
+        return result.strip()
+
     fields = {}
     if isinstance(value, list):
+        parts = []
         for entry in value:
             if isinstance(entry, dict):
-                main_text = entry.get('text', '')
-                a = entry.get('_a', '').strip()
-                b = entry.get('_b', '').strip()
-                extras = ', '.join(filter(None, [a, b]))
-                if extras:
-                    result = f"{main_text}; {extras}"
-                else:
-                    result = main_text
-                fields['lo'] = result
+                phrase = process_entry(entry)
+                if phrase:
+                    parts.append(phrase)
+        if parts:
+            fields['lo'] = ' / '.join(parts)
     return fields
 
 
@@ -408,6 +470,10 @@ def standardize_individual_authors(authors, country_map):
                 parts.append(name)
             if institution:
                 parts.append(f"; {institution}" if parts else institution)
+            if institution2:
+                parts.append(f". {institution2}" if parts else institution2)
+            if institution3:
+                parts.append(f". {institution3}" if parts else institution3)
             if city:
                 parts.append(f". {city}" if parts else city)
             if country:
@@ -775,7 +841,7 @@ def transform_and_migrate():
 
         transformed = {
             '_id': doc['_id'],
-            'ai': doc.get('corporate_author', doc.get('corporate_author_monographic')),
+            'ai': [corp.get('text') for corp in doc.get('corporate_author', []) + doc.get('corporate_author_monographic', [])],
             'aid': doc.get('doi_number'),
             'alternate_id': [alternate_id for alternate_id in doc.get('alternate_ids', []) if alternate_id and alternate_id != id_fields['id']],
             'book_title': doc.get('reference_title') if 'm' in doc.get('treatment_level') else None,
@@ -789,6 +855,7 @@ def transform_and_migrate():
             'ct': ct_values,
             'cy': doc.get('publication_city'),
             'da': doc.get('publication_date_normalized', '')[:6] if doc.get('publication_date_normalized') else None,
+            'database': doc.get('database'),
             'db': doc.get('indexed_database'),
             'descritores_locais': descritores_locais,
             'dp': doc.get('publication_date'),
@@ -814,8 +881,8 @@ def transform_and_migrate():
             'pr_nu': doc.get('project_number'),
             'pt': pt_values,
             'pu': doc.get('publisher').splitlines() if doc.get('publisher') else None,
-            'related_research': str(doc.get('related_research')) if doc.get('related_research') else None,
-            'related_resource': str(doc.get('related_resource')) if doc.get('related_resource') else None,
+            'related_research': str(doc.get('related_research')[0] if isinstance(doc.get('related_research'), list) else doc.get('related_research')) if doc.get('related_research') else None,
+            'related_resource': str(doc.get('related_resource')[0] if isinstance(doc.get('related_resource'), list) else doc.get('related_resource')) if doc.get('related_resource') else None,
             'status_fiadmin': status_map.get(doc.get('status')),
             'ta': doc.get('title_serial'),
             'ta_fascic': standardize_ta_fascic(ta_var, doc.get('volume_serial'), doc.get('issue_number'), doc.get('publication_date_normalized', '')[:4]),

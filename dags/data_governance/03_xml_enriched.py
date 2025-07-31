@@ -92,6 +92,7 @@ from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.operators.python import PythonOperator
 from pymongo import UpdateOne
 from data_governance.dags.data_governance.misc import load_instanceEcollection
+from data_governance.dags.data_governance.misc import load_DBinstanceEcollection
 
 
 BATCH_SIZE = 1000
@@ -175,12 +176,13 @@ def setup_03_xml_enriched():
     logger.info(f"Criando índices na coleção {target_collection}")
     db[target_collection].create_index([("id", 1)])
     db[target_collection].create_index([("db", 1)])
+    db[target_collection].create_index([("database", 1)])
     db[target_collection].create_index([("id_pk", 1)])
     
     logger.info("Operação concluída: coleção duplicada e índices criados")
 
 
-def list_join_database_batches():
+def list_join_db_batches():
     logger = logging.getLogger(__name__)
 
     mongo_hook = MongoHook(mongo_conn_id='mongo')
@@ -192,7 +194,19 @@ def list_join_database_batches():
     return [[i] for i in range(0, total_docs, BATCH_SIZE)]
 
 
-def enrich_join_database(offset):
+def list_join_database_batches():
+    logger = logging.getLogger(__name__)
+
+    mongo_hook = MongoHook(mongo_conn_id='mongo')
+    enriched_collection = mongo_hook.get_collection('03_xml_enriched', 'data_governance')
+    query = {"database": {"$exists": True, "$not": {"$size": 0}}}
+    total_docs = enriched_collection.count_documents(query)
+    logger.info(f"Encontrados {total_docs} documentos para processamento")
+
+    return [[i] for i in range(0, total_docs, BATCH_SIZE)]
+
+
+def enrich_join_instanceEcollection(offset):
     logger = logging.getLogger(__name__)
 
     mongo_hook = MongoHook(mongo_conn_id='mongo')
@@ -244,6 +258,109 @@ def enrich_join_database(offset):
 
         # Preparar operação de atualização
         update_fields = {}
+        if instances:
+            update_fields["instance"] = {
+                "$setUnion": [
+                    {"$ifNull": ["$instance", []]},
+                    list(instances)
+                ]
+            }
+        if collections:
+            update_fields["collection"] = {
+                "$setUnion": [
+                    {"$ifNull": ["$collection", []]},
+                    list(collections)
+                ]
+            }
+        for collection_instance, dbs in collection_instances.items():
+            update_fields[collection_instance] = {
+                "$setUnion": [
+                    {"$ifNull": [f"${collection_instance}", []]},
+                    list(dbs)
+                ]
+            }
+        
+        if update_fields:
+            bulk_ops.append(
+                UpdateOne(
+                    {"_id": doc_id},
+                    [{"$set": update_fields}]
+                )
+            )
+
+    # Executa as operações em lote
+    if bulk_ops:
+        enriched_collection.bulk_write(bulk_ops, ordered=False)
+        logger.info(f"Lote {offset//BATCH_SIZE} atualizado com {len(bulk_ops)} documentos")
+
+
+def enrich_join_DBinstanceEcollection(offset):
+    logger = logging.getLogger(__name__)
+
+    mongo_hook = MongoHook(mongo_conn_id='mongo')
+    mongo_client = mongo_hook.get_conn()
+    enriched_collection = mongo_hook.get_collection('03_xml_enriched', 'data_governance')
+
+    DBinstanceEcollection = mongo_hook.get_collection('DBinstanceEcollection', 'TABS')
+    databases_data = load_DBinstanceEcollection(DBinstanceEcollection)
+    
+    query = {"database": {"$exists": True, "$not": {"$size": 0}}}
+    offset = int(offset)
+
+    cursor = enriched_collection.find(query).skip(offset).limit(BATCH_SIZE)
+    current_batch = list(cursor)
+    
+    bulk_ops = []
+    for doc in current_batch:
+        doc_id = doc["_id"]
+
+        db_list = doc.get("database", [])
+        dbs = set()
+        instances = set()
+        collections = set()
+        collection_instances = {}
+        for db_name in db_list:              
+            if db_name in databases_data:
+                db_data = databases_data[db_name]
+
+                # Tratamento para dbs
+                if 'db' in db_data:
+                    if isinstance(db_data['db'], list):
+                        dbs.update(db_data['db'])
+                    else:
+                        dbs.add(str(db_data['db']))
+
+                # Tratamento para instâncias
+                if 'instance' in db_data:
+                    if isinstance(db_data['instance'], list):
+                        instances.update(db_data['instance'])
+                    else:
+                        instances.add(str(db_data['instance']))
+                
+                # Tratamento para coleções
+                if 'collection' in db_data:
+                    if isinstance(db_data['collection'], list):
+                        collections.update(db_data['collection'])
+                    else:
+                        collections.add(str(db_data['collection']))
+
+                # Tratamento para collection_instance
+                if 'collection_instance' in db_data:
+                    for collection_instance in db_data['collection_instance']:
+                        if collection_instance:
+                            if collection_instance not in collection_instances:
+                                collection_instances[collection_instance] = set()
+                            collection_instances[collection_instance].add(db_name)
+
+        # Preparar operação de atualização
+        update_fields = {}
+        if dbs:
+            update_fields["db"] = {
+                "$setUnion": [
+                    {"$ifNull": ["$db", []]},
+                    list(dbs)
+                ]
+            }
         if instances:
             update_fields["instance"] = {
                 "$setUnion": [
@@ -420,13 +537,22 @@ with DAG(
         python_callable=setup_03_xml_enriched
     )
 
+    list_join_db_batches_task = PythonOperator(
+        task_id='list_join_db_batches',
+        python_callable=list_join_db_batches
+    )
+    enrich_join_instanceEcollection_task = PythonOperator.partial(
+        task_id='enrich_join_instanceEcollection',
+        python_callable=enrich_join_instanceEcollection
+    ).expand(op_args=list_join_db_batches_task.output)
+
     list_join_database_batches_task = PythonOperator(
         task_id='list_join_database_batches',
         python_callable=list_join_database_batches
     )
-    enrich_join_database_task = PythonOperator.partial(
-        task_id='enrich_join_database',
-        python_callable=enrich_join_database
+    enrich_join_DBinstanceEcollection_task = PythonOperator.partial(
+        task_id='enrich_join_DBinstanceEcollection',
+        python_callable=enrich_join_DBinstanceEcollection
     ).expand(op_args=list_join_database_batches_task.output)
 
     enrich_instancia_task = PythonOperator(
@@ -434,10 +560,12 @@ with DAG(
         python_callable=enrich_instancia
     )
 
-    setup_03_xml_enriched_task >> list_join_database_batches_task 
-    setup_03_xml_enriched_task >> enrich_instancia_task
+    setup_03_xml_enriched_task >> list_join_db_batches_task
+    setup_03_xml_enriched_task >> list_join_database_batches_task
 
-    list_join_database_batches_task >> enrich_join_database_task
+    list_join_db_batches_task >> enrich_join_instanceEcollection_task
+    list_join_database_batches_task >> enrich_join_DBinstanceEcollection_task
 
-    enrich_join_database_task >> enrich_instancia_task
+    enrich_join_instanceEcollection_task >> enrich_join_DBinstanceEcollection_task
+    enrich_join_DBinstanceEcollection_task >> enrich_instancia_task
     create_union_view_task >> enrich_instancia_task

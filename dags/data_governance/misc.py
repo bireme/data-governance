@@ -5,22 +5,26 @@ def _get_title_values(title_doc):
     values = []
 
     if title_doc.get('title'):
-        values.append(title_doc['title'])
+        values.append(title_doc['title'].split('^')[0])
 
     if title_doc.get('shortened_title'):
-        values.append(title_doc['shortened_title'])
+        values.append(title_doc['shortened_title'].split('^')[0])
 
     if title_doc.get('medline_shortened_title'):
-        values.append(title_doc['medline_shortened_title'])
+        values.append(title_doc['medline_shortened_title'].split('^')[0])
 
     if title_doc.get('parallel_titles'):
-        values.extend(title_doc['parallel_titles'])
+        # Aplica split em cada título da lista
+        parallel_titles = [title.split('^')[0] for title in title_doc['parallel_titles']]
+        values.extend(parallel_titles)
 
     if title_doc.get('shortened_parallel_titles'):
-        values.extend(title_doc['shortened_parallel_titles'])
+        # Aplica split em cada título da lista
+        shortened_parallel_titles = [title.split('^')[0] for title in title_doc['shortened_parallel_titles']]
+        values.extend(shortened_parallel_titles)
 
     if title_doc.get('other_titles'):
-        other_titles = [other_title.split('^i')[0] for other_title in title_doc.get('other_titles')]
+        other_titles = [other_title.split('^')[0] for other_title in title_doc.get('other_titles')]
         values.extend(other_titles)
 
     return values
@@ -111,7 +115,33 @@ def load_instanceEcollection(collection):
         if doc.get("collection_instance"):
             entry["collection_instance"] = doc["collection_instance"]
         
-        if entry:  # Apenas adiciona se houver campos não vazios
+        if entry:
+            data[db_key] = entry
+    
+    return data
+
+
+def load_DBinstanceEcollection(collection):
+    data = {}
+    for doc in collection.find({}):
+        db_key = doc.get("database_campo4")
+        if not db_key:
+            continue
+        
+        entry = {}
+        if doc.get("instance"):
+            entry["instance"] = doc["instance"]
+        
+        if doc.get("collection"):
+            entry["collection"] = doc["collection"]
+        
+        if doc.get("collection_instance"):
+            entry["collection_instance"] = doc["collection_instance"]
+
+        if doc.get("db"):
+            entry["db"] = doc["db"]
+        
+        if entry:
             data[db_key] = entry
     
     return data
