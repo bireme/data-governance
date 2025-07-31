@@ -570,6 +570,9 @@ def standardize_ta_var(doc, issn_map, shortened_title_map):
     if not ta_var and doc.get('shortened_title'):
         title_key = doc['shortened_title'].lower().strip()
         ta_var = shortened_title_map.get(title_key)
+        
+    if ta_var and isinstance(ta_var, list):
+        ta_var = [t.split('^')[0].strip() for t in ta_var if isinstance(t, str) and t.strip()]
 
     return ta_var
     
@@ -844,7 +847,13 @@ def transform_and_migrate():
             'ai': [corp.get('text') for corp in doc.get('corporate_author', []) + doc.get('corporate_author_monographic', [])],
             'aid': doc.get('doi_number'),
             'alternate_id': [alternate_id for alternate_id in doc.get('alternate_ids', []) if alternate_id and alternate_id != id_fields['id']],
-            'book_title': doc.get('reference_title') if 'm' in doc.get('treatment_level') else None,
+            #'book_title': doc.get('reference_title') if 'm' in doc.get('treatment_level') else None,
+            'book_title': (
+                  doc.get('reference_title')
+                  if 'm' in doc.get('treatment_level', '').lower()
+                  and doc.get('literature_type', '').upper() not in ['S', 'T', 'N']
+                  else None
+            ),
             'cc': doc.get('cooperative_center_code'),
             'cn_co': doc.get('conferente_country'),
             'cn_cy': doc.get('conference_city'),
