@@ -425,7 +425,7 @@ def enrich_instancia():
             instances = doc.get('instance_iahx', [])
             collections = doc.get('collection_iahx', [])
             contextos = doc.get('projeto', [])
-            tags = doc.get('tema_subtema', [])
+            tags = doc.get('tema_subtema', []) + doc.get('tema', [])
             database = [doc.get('db', '')]
 
             key = doc['id_iahx']
