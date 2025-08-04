@@ -539,7 +539,7 @@ with DAG(
         python_callable=setup_03_xml_enriched
     )
 
-    """list_join_db_batches_task = PythonOperator(
+    list_join_db_batches_task = PythonOperator(
         task_id='list_join_db_batches',
         python_callable=list_join_db_batches
     )
@@ -555,21 +555,21 @@ with DAG(
     enrich_join_DBinstanceEcollection_task = PythonOperator.partial(
         task_id='enrich_join_DBinstanceEcollection',
         python_callable=enrich_join_DBinstanceEcollection
-    ).expand(op_args=list_join_database_batches_task.output)"""
+    ).expand(op_args=list_join_database_batches_task.output)
 
     enrich_instancia_task = PythonOperator(
         task_id='enrich_instancia',
         python_callable=enrich_instancia
     )
 
-    #setup_03_xml_enriched_task >> list_join_db_batches_task
-    #setup_03_xml_enriched_task >> list_join_database_batches_task
+    setup_03_xml_enriched_task >> list_join_db_batches_task
+    setup_03_xml_enriched_task >> list_join_database_batches_task
 
-    #list_join_db_batches_task >> enrich_join_instanceEcollection_task
-    #list_join_database_batches_task >> enrich_join_DBinstanceEcollection_task
+    list_join_db_batches_task >> enrich_join_instanceEcollection_task
+    list_join_database_batches_task >> enrich_join_DBinstanceEcollection_task
 
-    #enrich_join_instanceEcollection_task >> enrich_join_DBinstanceEcollection_task
-    #enrich_join_DBinstanceEcollection_task >> enrich_instancia_task
+    enrich_join_instanceEcollection_task >> enrich_join_DBinstanceEcollection_task
+    enrich_join_DBinstanceEcollection_task >> enrich_instancia_task
     create_union_view_task >> enrich_instancia_task
 
     setup_03_xml_enriched_task >> enrich_instancia_task
