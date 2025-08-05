@@ -53,6 +53,18 @@ def load_title_current(title_col):
     return issn_map, shortened_title_map
 
 
+def load_title_current_country(title_col):
+    shortened_title_map = {}
+    
+    for title_doc in title_col.find():
+        # Mapeamento por título serial (shortened_title)
+        if 'shortened_title' in title_doc and title_doc['shortened_title']:
+            title_key = title_doc['shortened_title'].lower().strip()
+            shortened_title_map[title_key] = title_doc.get('country', [])
+    
+    return shortened_title_map
+
+
 def load_tabpais(tabpais_col):
     country_map = {}
     

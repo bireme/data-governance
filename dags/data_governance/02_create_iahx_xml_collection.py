@@ -61,6 +61,7 @@ from pymongo import ReplaceOne
 from data_governance.dags.data_governance.misc import load_tabpais
 from data_governance.dags.data_governance.misc import load_decs_descriptors
 from data_governance.dags.data_governance.misc import load_title_current
+from data_governance.dags.data_governance.misc import load_title_current_country
 from data_governance.dags.data_governance.misc import remove_diacritics
 
 
@@ -272,7 +273,7 @@ def standardize_fo(doc):
             parts.append(f": {pages_f}")
         if pages_l:
             parts.append(f"-{pages_l}")
-        if not parts and pages_text:
+        if pages_text:
             parts.append(f"{pages_text}")
         if doc.get('publication_date'):
             parts.append(f", {doc['publication_date']}.")
@@ -287,12 +288,12 @@ def standardize_fo(doc):
     def format_fo_am(doc):
         parts = []
 
-        has_individual_author = 'individual_author' in doc and doc['individual_author']
+        has_individual_author = 'individual_author_monographic' in doc and doc['individual_author_monographic']
         has_corporate_author_monographic = 'corporate_author_monographic' in doc and doc['corporate_author_monographic']
         if has_individual_author or has_corporate_author_monographic:
             parts.append('In. ')
             if has_individual_author:
-                authors = [a['text'] for a in doc['individual_author'] if 'text' in a]
+                authors = [a['text'] for a in doc['individual_author_monographic'] if 'text' in a]
                 if authors:
                     parts.append('; '.join(authors) + '. ')
             elif has_corporate_author_monographic:
@@ -713,7 +714,8 @@ def transform_and_migrate():
     # Carrega TITLE.current e cria mapeamentos
     title_col = mongo_hook.get_collection('current', 'TITLE')
     issn_map, shortened_title_map = load_title_current(title_col)
-    
+    shortened_title_country = load_title_current_country(title_col)
+
     batch = []
 
     query = {
@@ -773,8 +775,15 @@ def transform_and_migrate():
         cp_fields = {}
         pais_publicacao_fields = {}
         if 'publication_country' in doc:
-            cp_fields = standardize_cp(doc.get('publication_country'), country_map)
-            pais_publicacao_fields = standardize_pais_publicacao(doc.get('publication_country'), country_map)
+            publication_country = doc.get('publication_country')
+        elif 'title_serial' in doc:
+            publication_country = shortened_title_country.get(doc.get('title_serial').lower().strip(), [])
+            if publication_country:
+                publication_country = publication_country[0]
+
+        if publication_country:
+            cp_fields = standardize_cp(publication_country, country_map)
+            pais_publicacao_fields = standardize_pais_publicacao(publication_country, country_map)
 
         # processa ct
         ct_values = []
@@ -844,7 +853,6 @@ def transform_and_migrate():
             'ai': [corp.get('text') for corp in doc.get('corporate_author', []) + doc.get('corporate_author_monographic', [])],
             'aid': doc.get('doi_number'),
             'alternate_id': [alternate_id for alternate_id in doc.get('alternate_ids', []) if alternate_id and alternate_id != id_fields['id']],
-            #'book_title': doc.get('reference_title') if 'm' in doc.get('treatment_level') else None,
             'book_title': (
                   doc.get('reference_title')
                   if 'm' in doc.get('treatment_level', '').lower()
