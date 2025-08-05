@@ -260,7 +260,7 @@ def standardize_fo(doc):
             parts.append(f"({doc['issue_number']})")
 
         # páginas
-        pages_f, pages_l = None, None
+        pages_f, pages_l, pages_text = None, None, None
         if doc.get('pages'):
             for page in doc['pages']:
                 if '_f' in page and page['_f']:
@@ -895,8 +895,8 @@ def transform_and_migrate():
             'pr_nu': doc.get('project_number'),
             'pt': pt_values,
             'pu': doc.get('publisher').splitlines() if doc.get('publisher') else None,
-            'related_research': str(doc.get('related_research')[0] if isinstance(doc.get('related_research'), list) else doc.get('related_research')) if doc.get('related_research') else None,
-            'related_resource': str(doc.get('related_resource')[0] if isinstance(doc.get('related_resource'), list) else doc.get('related_resource')) if doc.get('related_resource') else None,
+            'related_research': [str(related) for related in doc.get('related_research', [])] if isinstance(doc.get('related_research', []), list) else doc.get('related_research', ''),
+            'related_resource': [str(related) for related in doc.get('related_resource', [])] if isinstance(doc.get('related_resource', []), list) else doc.get('related_resource', ''),
             'status_fiadmin': status_map.get(doc.get('status')),
             'ta': doc.get('title_serial'),
             'ta_fascic': standardize_ta_fascic(ta_var, doc.get('volume_serial'), doc.get('issue_number'), doc.get('publication_date_normalized', '')[:4]),
