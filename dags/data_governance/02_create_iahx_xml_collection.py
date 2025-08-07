@@ -85,13 +85,17 @@ def standardize_title(value):
             if 'text' in entry:
                 lang_code = entry.get('_i', '').lower()
                 key = f'ti_{lang_code}' if lang_code else 'ti'
-                fields[key] = entry['text']
+
+                if key not in fields:
+                    fields[key] = []
+                fields[key].append(entry['text'])
     return fields
 
 
 def standardize_multilingual_title(doc):
     fields = {}
     treatment_level = doc.get('treatment_level', '').lower()
+    literature_type = doc.get('literature_type', '').lower()
 
     def has_en_title(title_list):
         if not isinstance(title_list, list):
@@ -107,15 +111,23 @@ def standardize_multilingual_title(doc):
         if not has_en_title(title_list):
             english_title = doc.get('english_translated_title')
             if english_title:
-                fields['ti_en'] = english_title
+                if 'ti_en' not in fields:
+                    fields['ti_en'] = []
+                fields['ti_en'].append(english_title)
 
     elif treatment_level.startswith('m'):
         title_list = doc.get('title_monographic', [])
+
+        if treatment_level == 'mc' and literature_type in ('mc', 'm'):
+            title_list += doc.get('title_collection', [])
+
         fields = standardize_title(title_list)
         if not has_en_title(title_list):
             english_title = doc.get('english_title_monographic')
             if english_title:
-                fields['ti_en'] = english_title
+                if 'ti_en' not in fields:
+                    fields['ti_en'] = []
+                fields['ti_en'].append(english_title)
 
     elif treatment_level == 'c':
         title_list = doc.get('title_collection', [])
@@ -123,7 +135,9 @@ def standardize_multilingual_title(doc):
         if not has_en_title(title_list):
             english_title = doc.get('english_title_collection')
             if english_title:
-                fields['ti_en'] = english_title
+                if 'ti_en' not in fields:
+                    fields['ti_en'] = []
+                fields['ti_en'].append(english_title)
 
     return fields
 
@@ -317,15 +331,19 @@ def standardize_fo(doc):
             parts.append(doc['publication_date'] + '.')
 
         # páginas
-        pages_f, pages_l = None, None
+        pages_f, pages_l, pages_text = None, None, None
         if doc.get('pages'):
             for page in doc['pages']:
                 if '_f' in page and page['_f']:
                     pages_f = page['_f']
                 if '_l' in page and page['_l']:
                     pages_l = page['_l']
+                if 'text' in page and page['text']:
+                    pages_text = page['text']
         if pages_f and pages_l:
             parts.append(f" p. {pages_f}-{pages_l}")
+        if pages_text:
+            parts.append(f" p. {pages_text}")
 
         if doc.get('descriptive_information'):
             desc_b = [entry['_b'] for entry in doc['descriptive_information'] if '_b' in entry and entry['_b']]
