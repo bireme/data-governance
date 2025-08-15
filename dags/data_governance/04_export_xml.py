@@ -58,7 +58,7 @@ def export_mongo_to_xml():
 
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-        f.write('<docs>\n')
+        f.write('<add>\n')
 
         for doc in collection.find():
             id_pk = doc.get('id_pk')
@@ -84,7 +84,7 @@ def export_mongo_to_xml():
             xml_str = ET.tostring(root, encoding='unicode')
             f.write(xml_str + '\n')
 
-        f.write('</docs>')
+        f.write('</add>')
     
     logger.info(f"Arquivo XML exportado com sucesso: {output_file}")
 
