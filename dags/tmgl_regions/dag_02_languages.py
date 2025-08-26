@@ -4,7 +4,7 @@ from pymongo import UpdateOne
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.mongo.hooks.mongo import MongoHook
-from data_governance.dags.tmgl_metrics.misc import get_tmgl_country_query_no_subject
+from data_governance.dags.tmgl_metrics.misc import get_tmgl_countries_query
 
 
 def create_metric_languages():
@@ -16,13 +16,17 @@ def create_metric_languages():
     target_collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
     
     # Obter lista de países
-    countries = list(countries_collection.find({}, {'name': 1}).distinct('name'))
-    
-    for country in countries:
+    regions = {
+        'Americas': ['brazil', 'argentina', 'chile'],
+        'Africa': ['nigeria', 'south africa', 'kenya'],
+        'Europe': ['france', 'germany', 'spain']
+    }
+
+    for region, countries in regions.items():
         batch = []
-        country_name = country.strip().lower()
-        query = get_tmgl_country_query_no_subject(country_name)
-        
+        query = get_tmgl_countries_query(countries)
+        logger.info(query)
+
         # Agrupa por idioma + ano extraído de dp
         pipeline = [
             {"$match": query},
@@ -59,7 +63,7 @@ def create_metric_languages():
         for result in source_collection.aggregate(pipeline):
             lang = result["_id"]["language"]
             year = result["_id"]["year"]
-            logger.info(f"{country_name}, {lang}, {year}")
+            logger.info(f"{region}, {lang}, {year}")
             
             # Ignora se não conseguiu extrair ano
             if year is None:
@@ -68,7 +72,7 @@ def create_metric_languages():
             batch.append(UpdateOne(
                 {
                     "type": "language",
-                    "country": country_name,
+                    "region": region,
                     "name": lang,
                     "year": year
                 },
@@ -96,7 +100,7 @@ default_args = {
 }
 
 with DAG(
-    'TMGL_REGION_03_create_metric_languages',
+    'TMGL_REGION_02_create_metric_languages',
     description='TMGL REGION - Calcula o total de documentos por idioma e ano',
     tags=["tmgl", "metrics", "mongodb", "language", "year"],
     schedule=None,

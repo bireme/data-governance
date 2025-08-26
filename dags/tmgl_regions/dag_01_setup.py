@@ -13,7 +13,7 @@ def setup_collections():
 
     # Cria coleção de métricas
     collection_metrics = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
-    collection_metrics.create_index([('type', 1), ('country', 1), ('name', 1), ('year', 1)], unique=True)
+    collection_metrics.create_index([('type', 1), ('region', 1), ('name', 1), ('year', 1)], unique=True)
 
 
 

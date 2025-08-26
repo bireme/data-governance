@@ -22,21 +22,20 @@ def get_tmgl_country_query(country_name):
     return query
 
 
-def get_tmgl_country_query_no_subject(country_name):
+def get_tmgl_countries_query(countries):
     """
-    Gera uma query MongoDB para buscar documentos de um país específico.
+    Gera uma query MongoDB para buscar documentos para vários países.
     
-    :param country_name: Nome do país a ser buscado.
+    :param countries: Lista de nomes de países.
     :return: Query MongoDB.
     """
-    escaped_country = re.escape(country_name)
-    escaped_country_underscore = country_name.replace(" ", "_")
+    or_clauses = []
+    for country_name in countries:
+        escaped_country = re.escape(country_name)
+        escaped_country_underscore = country_name.replace(" ", "_")
+        
+        or_clauses.append({"pais_afiliacao": {"$regex": f"^{escaped_country}", "$options": "i"}})
+        or_clauses.append({"cp": {"$regex": f"^{escaped_country}$", "$options": "i"}})
     
-    # Construir query com regex case-insensitive
-    query = {
-        "$or": [
-            {"pais_afiliacao": {"$regex": f"\\^i{escaped_country}", "$options": "i"}},
-            {"cp": escaped_country}
-        ]
-    }
+    query = {"$or": or_clauses}
     return query
