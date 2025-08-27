@@ -197,8 +197,6 @@ def generate_html_reports():
         year = int(doc["year"])
         lang = doc["name"]
         count = doc.get("count", 0)
-        logger.info(doc["year"])
-        logger.info(year)
         years.append(year)
 
         if region not in aggregated_data:
@@ -218,9 +216,6 @@ def generate_html_reports():
 
     min_year = min(years)
     max_year = max(years)
-    logger.info(years)
-    logger.info(min_year)
-    logger.info(max_year)
 
     dynamic_data_json = json.dumps(aggregated_data, ensure_ascii=False)
 

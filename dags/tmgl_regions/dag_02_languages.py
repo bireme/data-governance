@@ -12,7 +12,6 @@ def create_metric_languages():
     logger = logging.getLogger(__name__)
 
     mongo_hook = MongoHook(mongo_conn_id='mongo')
-    countries_collection = mongo_hook.get_collection('00_countries', 'tmgl_metrics')
     source_collection = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
     target_collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
     
