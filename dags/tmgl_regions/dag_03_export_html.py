@@ -1,10 +1,10 @@
 import os
 import logging
-import json
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.hooks.filesystem import FSHook
+from data_governance.dags.tmgl_regions.tasks_for_export.language import generate_html_language
+
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -79,155 +79,23 @@ HTML_TEMPLATE = """
       }},
     }});
 
-    const dataJSON = {data_json};
-
-    let chart = Highcharts.chart("container", {{
-      chart: {{ type: "bar" }},
-      title: {{ text: "Comparativo de Idiomas" }},
-      legend: {{ enabled: false }},
-      xAxis: {{ 
-        title: {{ text: null }},
-        labels: {{
-          rotation: 0,
-          step: 1,
-          style: {{
-            fontSize: '11px'
-          }}
-        }}
-      }},
-      yAxis: {{
-        min: 0,
-        title: {{ text: "Documentos" }},
-      }},
-      tooltip: {{
-        valueSuffix: " registros",
-      }},
-      plotOptions: {{
-        bar: {{
-          dataLabels: {{ enabled: true }},
-        }},
-      }},
-      series: [{{ name: "Documentos", data: [] }}],
-    }});
-
-    function updateChart() {{
-      const year_range = slider.noUiSlider.get(true);
-      const yearFrom = parseInt(year_range[0]);
-      const yearTo = parseInt(year_range[1]);
-      if (yearFrom > yearTo) return;
-
-      const selectedRegion = regionSelect.value;
-
-      let filtered;
-
-      if (selectedRegion === "Todas") {{
-        filtered = Object.values(dataJSON)
-          .flat()
-          .filter((d) => d.ano >= yearFrom && d.ano <= yearTo);
-      }} else {{
-        filtered = dataJSON[selectedRegion].filter(
-          (d) => d.ano >= yearFrom && d.ano <= yearTo
-        );
-      }}
-
-      if (!filtered || filtered.length === 0) {{
-        const langs = Object.keys(Object.values(dataJSON)[0][0]).filter((key) => key !== "ano");
-        chart.series[0].setData(langs.map(() => 0));
-        chart.update({{ xAxis: {{ categories: langs }} }});
-        return;
-      }}
-
-      const langs = Object.keys(filtered[0]).filter((key) => key !== "ano" && filtered.some(d => d[key] > 0));
-
-      const total = {{}};
-      langs.forEach((lang) => (total[lang] = 0));
-
-      filtered.forEach((d) => {{
-        langs.forEach((lang) => {{
-          total[lang] += d[lang] || 0;
-        }});
-      }});
-
-      // Monta pares idioma/valor
-      let sorted = langs.map((lang) => ({{
-        name: lang,
-        value: total[lang]
-      }}));
-
-      // Ordena do maior para o menor
-      sorted.sort((a, b) => b.value - a.value);
-      sorted = sorted.slice(0, 10);
-
-      // Atualiza gráfico com dados ordenados
-      chart.series[0].setData(sorted.map(item => item.value));
-      chart.update({{ xAxis: {{ categories: sorted.map(item => item.name) }} }});
-
-      const titleRegionText = selectedRegion === "Todas" ? "Todas as Regiões" : selectedRegion;
-
-      chart.setTitle({{
-        text: `Distribuição de documentos por idiomas`,
-      }});
-    }}
-
-    slider.noUiSlider.on("update", updateChart);
-    regionSelect.addEventListener("change", updateChart);
-
-    updateChart();
+    {html_language}
   </script>
 </body>
 </html>
 """
 
-def generate_html_reports():
+
+def generate_html_reports(ti):
     logger = logging.getLogger(__name__)
-    mongo_hook = MongoHook(mongo_conn_id='mongo')
-    collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
 
-    documents = list(collection.find({"type": "language"}))
-    all_langs = set(doc["name"] for doc in documents)
-
-    aggregated_data = {}
-    years = []
-    regions = set()
-
-    for doc in documents:
-        region = doc["region"]
-        regions.add(region)
-
-        year = int(doc["year"])
-        lang = doc["name"]
-        count = doc.get("count", 0)
-        years.append(year)
-
-        if region not in aggregated_data:
-            aggregated_data[region] = []
-
-        year_data = next((item for item in aggregated_data[region] if item["ano"] == year), None)
-        if not year_data:
-            year_data = {"ano": year}
-            for l in all_langs:
-                year_data[l] = 0
-            aggregated_data[region].append(year_data)
-
-        year_data[lang] = count
-
-    for reg in aggregated_data:
-        aggregated_data[reg] = sorted(aggregated_data[reg], key=lambda x: x["ano"])
-
-    min_year = min(years)
-    max_year = max(years)
-
-    dynamic_data_json = json.dumps(aggregated_data, ensure_ascii=False)
-
-    region_options = "\n".join(
-        f'<option value="{r}">{r}</option>' for r in sorted(regions)
-    )
+    language_data = ti.xcom_pull(task_ids='generate_html_language')
 
     html_with_data = HTML_TEMPLATE.format(
-        data_json=dynamic_data_json,
-        region_options=region_options,
-        year_range_min=min_year,
-        year_range_max=max_year,
+        html_language=language_data['html'],
+        region_options=language_data['region_options'],
+        year_range_min=language_data['min_year'],
+        year_range_max=language_data['max_year'],
     )
 
     fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
@@ -238,6 +106,7 @@ def generate_html_reports():
         f.write(html_with_data)
 
     logger.info(f"HTML report gerado e salvo em {output_file}")
+
 
 default_args = {
     'owner': 'airflow',
@@ -255,7 +124,14 @@ with DAG(
     catchup=False,
     tags=['tmgl', 'report', 'html']
 ) as dag:
+    generate_html_language_task = PythonOperator(
+        task_id='generate_html_language',
+        python_callable=generate_html_language,
+    )
+
     generate_reports_task = PythonOperator(
         task_id='generate_html_reports',
         python_callable=generate_html_reports
     )
+
+    generate_html_language_task >> generate_reports_task
