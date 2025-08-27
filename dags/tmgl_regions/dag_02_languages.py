@@ -5,6 +5,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from data_governance.dags.tmgl_metrics.misc import get_tmgl_countries_query
+from data_governance.dags.tmgl_regions.misc import get_regions
 
 
 def create_metric_languages():
@@ -15,12 +16,9 @@ def create_metric_languages():
     source_collection = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
     target_collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
     
-    # Obter lista de países
-    regions = {
-        'Americas': ['brazil', 'argentina', 'chile'],
-        'Africa': ['nigeria', 'south africa', 'kenya'],
-        'Europe': ['france', 'germany', 'spain']
-    }
+    who_region_collection = mongo_hook.get_collection('who_region', 'TABS')
+    regions = get_regions(who_region_collection)
+    logger.info(f"Regioes carregadas: {regions.keys()}")
 
     for region, countries in regions.items():
         batch = []
@@ -33,23 +31,32 @@ def create_metric_languages():
             {"$unwind": "$la"},
             {"$addFields": {
                 "year": {
-                    "$getField": {
-                        "field": "match",
-                        "input": {
-                            "$regexFind": {
-                                "input": {
-                                    "$cond": [
-                                        {"$eq": [{"$type": "$dp"}, "string"]},
-                                        "$dp",
-                                        ""
-                                    ]
-                                },
-                                "regex": r"\d{4}"
-                            }
-                        }
+                    "$toInt": {
+                        "$ifNull": [
+                            {
+                                "$getField": {
+                                    "field": "match",
+                                    "input": {
+                                        "$regexFind": {
+                                            "input": {
+                                                "$cond": [
+                                                    {"$eq": [{"$type": "$dp"}, "string"]},
+                                                    "$dp",
+                                                    ""
+                                                ]
+                                            },
+                                            "regex": r"\d{4}"
+                                        }
+                                    }
+                                }
+                            },
+                            "0"  # valor default quando não encontra \d{4}
+                        ]
                     }
                 }
             }},
+            # Filtra apenas anos encontrados e maiores ou iguais a 1500
+            {"$match": {"year": {"$gte": 1500}}},
             {"$group": {
                 "_id": {
                     "language": {"$toLower": "$la"},

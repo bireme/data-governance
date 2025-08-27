@@ -50,12 +50,10 @@ HTML_TEMPLATE = """
   <h2>TM Research Analytics</h2>
 
   <div class="slider-control">
-    <label for="regionSelect">Região:</label>
+    <label for="regionSelect">WHO Region</label>
     <select id="regionSelect">
       <option value="Todas">Todas</option>
-      <option value="Americas">Americas</option>
-      <option value="Africa">Africa</option>
-      <option value="Europe">Europe</option>
+      {region_options}
     </select>
   </div>
 
@@ -139,7 +137,7 @@ HTML_TEMPLATE = """
         return;
       }}
 
-      const langs = Object.keys(filtered[0]).filter((key) => key !== "ano");
+      const langs = Object.keys(filtered[0]).filter((key) => key !== "ano" && filtered.some(d => d[key] > 0));
 
       const total = {{}};
       langs.forEach((lang) => (total[lang] = 0));
@@ -158,6 +156,7 @@ HTML_TEMPLATE = """
 
       // Ordena do maior para o menor
       sorted.sort((a, b) => b.value - a.value);
+      sorted = sorted.slice(0, 10);
 
       // Atualiza gráfico com dados ordenados
       chart.series[0].setData(sorted.map(item => item.value));
@@ -189,9 +188,12 @@ def generate_html_reports():
 
     aggregated_data = {}
     years = []
+    regions = set()
 
     for doc in documents:
         region = doc["region"]
+        regions.add(region)
+
         year = int(doc["year"])
         lang = doc["name"]
         count = doc.get("count", 0)
@@ -222,8 +224,13 @@ def generate_html_reports():
 
     dynamic_data_json = json.dumps(aggregated_data, ensure_ascii=False)
 
+    region_options = "\n".join(
+        f'<option value="{r}">{r}</option>' for r in sorted(regions)
+    )
+
     html_with_data = HTML_TEMPLATE.format(
         data_json=dynamic_data_json,
+        region_options=region_options,
         year_range_min=min_year,
         year_range_max=max_year,
     )
