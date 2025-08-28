@@ -111,7 +111,7 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode):
     erronous_loops = 0
 
     if update_mode == "INCREMENTAL":
-        incremental_update_date = (datetime.today() - timedelta(days=5)).strftime('%Y-%m-%d')
+        incremental_update_date = (datetime.today() - timedelta(days=10)).strftime('%Y-%m-%d')
         extra_params = {'updated_time__gte': incremental_update_date}
     
     while total_records is None or offset < total_records:
