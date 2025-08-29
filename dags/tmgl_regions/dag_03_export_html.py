@@ -4,6 +4,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.hooks.filesystem import FSHook
 from data_governance.dags.tmgl_regions.tasks_for_export.language import generate_html_language
+from data_governance.dags.tmgl_regions.tasks_for_export.timeline import generate_html_timeline
 
 
 HTML_TEMPLATE = """
@@ -63,7 +64,17 @@ HTML_TEMPLATE = """
 
   <div id="container"></div>
 
+  <div id="timeline_container"></div>
+
   <script>
+    function debounce(fn, delay) {{
+      let timer = null;
+      return function(...args) {{
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+      }};
+    }}
+
     const slider = document.getElementById("yearRangeSlider");
     const regionSelect = document.getElementById("regionSelect");
 
@@ -80,6 +91,8 @@ HTML_TEMPLATE = """
     }});
 
     {html_language}
+
+    {html_timeline}
   </script>
 </body>
 </html>
@@ -90,12 +103,14 @@ def generate_html_reports(ti):
     logger = logging.getLogger(__name__)
 
     language_data = ti.xcom_pull(task_ids='generate_html_language')
+    timeline_data = ti.xcom_pull(task_ids='generate_html_timeline')
 
     html_with_data = HTML_TEMPLATE.format(
         html_language=language_data['html'],
         region_options=language_data['region_options'],
         year_range_min=language_data['min_year'],
         year_range_max=language_data['max_year'],
+        html_timeline=timeline_data['html']
     )
 
     fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
@@ -128,6 +143,10 @@ with DAG(
         task_id='generate_html_language',
         python_callable=generate_html_language,
     )
+    generate_html_timeline_task = PythonOperator(
+        task_id='generate_html_timeline',
+        python_callable=generate_html_timeline,
+    )
 
     generate_reports_task = PythonOperator(
         task_id='generate_html_reports',
@@ -135,3 +154,4 @@ with DAG(
     )
 
     generate_html_language_task >> generate_reports_task
+    generate_html_timeline_task >> generate_reports_task

@@ -8,31 +8,28 @@ const lang_json = {lang_json};
 
 let lang_chart = Highcharts.chart("container", {{
     chart: {{ type: "bar" }},
-    title: {{ text: "Comparativo de Idiomas" }},
+    title: {{ text: "Publications by Language" }},
     legend: {{ enabled: false }},
     xAxis: {{ 
-    title: {{ text: null }},
-    labels: {{
-        rotation: 0,
-        step: 1,
-        style: {{
-        fontSize: '11px'
+        title: {{ text: null }},
+        labels: {{
+            rotation: 0,
+            step: 1,
+            style: {{
+                fontSize: '11px'
+            }}
         }}
-    }}
     }},
     yAxis: {{
-    min: 0,
-    title: {{ text: "Documentos" }},
-    }},
-    tooltip: {{
-    valueSuffix: " registros",
+        min: 0,
+        title: {{ text: "Number of documents" }},
     }},
     plotOptions: {{
-    bar: {{
-        dataLabels: {{ enabled: true }},
+        bar: {{
+            dataLabels: {{ enabled: true }},
+        }},
     }},
-    }},
-    series: [{{ name: "Documentos", data: [] }}],
+    series: [{{ name: "Number of documents", data: [] }}],
 }});
 
 function updateLangChart() {{
@@ -46,20 +43,20 @@ function updateLangChart() {{
     let filtered;
 
     if (selectedRegion === "Todas") {{
-    filtered = Object.values(lang_json)
-        .flat()
-        .filter((d) => d.ano >= yearFrom && d.ano <= yearTo);
+        filtered = Object.values(lang_json)
+            .flat()
+            .filter((d) => d.ano >= yearFrom && d.ano <= yearTo);
     }} else {{
-    filtered = lang_json[selectedRegion].filter(
-        (d) => d.ano >= yearFrom && d.ano <= yearTo
-    );
+        filtered = lang_json[selectedRegion].filter(
+            (d) => d.ano >= yearFrom && d.ano <= yearTo
+        );
     }}
 
     if (!filtered || filtered.length === 0) {{
-    const langs = Object.keys(Object.values(lang_json)[0][0]).filter((key) => key !== "ano");
-    lang_chart.series[0].setData(langs.map(() => 0));
-    lang_chart.update({{ xAxis: {{ categories: langs }} }});
-    return;
+        const langs = Object.keys(Object.values(lang_json)[0][0]).filter((key) => key !== "ano");
+        lang_chart.series[0].setData(langs.map(() => 0));
+        lang_chart.update({{ xAxis: {{ categories: langs }} }});
+        return;
     }}
 
     const langs = Object.keys(filtered[0]).filter((key) => key !== "ano" && filtered.some(d => d[key] > 0));
@@ -68,15 +65,15 @@ function updateLangChart() {{
     langs.forEach((lang) => (total[lang] = 0));
 
     filtered.forEach((d) => {{
-    langs.forEach((lang) => {{
-        total[lang] += d[lang] || 0;
-    }});
+        langs.forEach((lang) => {{
+            total[lang] += d[lang] || 0;
+        }});
     }});
 
     // Monta pares idioma/valor
     let sorted = langs.map((lang) => ({{
-    name: lang,
-    value: total[lang]
+        name: lang,
+        value: total[lang]
     }}));
 
     // Ordena do maior para o menor
@@ -86,16 +83,11 @@ function updateLangChart() {{
     // Atualiza gráfico com dados ordenados
     lang_chart.series[0].setData(sorted.map(item => item.value));
     lang_chart.update({{ xAxis: {{ categories: sorted.map(item => item.name) }} }});
-
-    const titleRegionText = selectedRegion === "Todas" ? "Todas as Regiões" : selectedRegion;
-
-    lang_chart.setTitle({{
-        text: `Distribuição de documentos por idiomas`,
-    }});
 }}
 
-slider.noUiSlider.on("update", updateLangChart);
-regionSelect.addEventListener("change", updateLangChart);
+const debouncedUpdateLang = debounce(updateLangChart, 100);
+slider.noUiSlider.on("update", debouncedUpdateLang);
+regionSelect.addEventListener("change", debouncedUpdateLang);
 
 updateLangChart();
 """

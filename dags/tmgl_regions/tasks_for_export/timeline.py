@@ -1,0 +1,130 @@
+import logging
+import json
+from airflow.providers.mongo.hooks.mongo import MongoHook
+
+
+HTML_TEMPLATE = """
+const timeline_json = {timeline_json};
+
+let timeline_chart = Highcharts.chart("timeline_container", {{
+    chart: {{ type: "line" }},
+    title: {{ text: "Total Publications and Full-Text Availability over time" }},
+    xAxis: {{ 
+        title: {{ text: "Year" }}
+    }},
+    yAxis: {{
+        min: 0,
+        title: {{ text: "Total" }},
+    }},
+    plotOptions: {{
+        line: {{
+            dataLabels: {{ enabled: true }},
+        }},
+    }},
+    series: [
+        {{ name: "Total Documents", data: [] }},
+        {{ name: "Full Texts", data: [] }}
+    ]
+}});
+
+function updateTimelineChart() {{
+    const year_range = slider.noUiSlider.get(true);
+    const yearFrom = parseInt(year_range[0]);
+    const yearTo = parseInt(year_range[1]);
+    if (yearFrom > yearTo) return;
+
+    const selectedRegion = regionSelect.value;
+
+    let filtered;
+
+    if (selectedRegion === "Todas") {{
+        // Junta dados de todas as regiões
+        filtered = Object.values(timeline_json)
+            .flat()
+            .filter((d) => d.ano >= yearFrom && d.ano <= yearTo);
+
+        // Agrupa por ano somando os valores
+        const grouped = {{}};
+        filtered.forEach(d => {{
+            if (!grouped[d.ano]) {{
+                grouped[d.ano] = {{ 
+                    ano: d.ano, 
+                    total_documents: 0, 
+                    total_fulltext: 0 
+                }};
+            }}
+            grouped[d.ano].total_documents += d.total_documents || 0;
+            grouped[d.ano].total_fulltext += d.total_fulltext || 0;
+        }});
+
+        // Converte para array
+        filtered = Object.values(grouped);
+    }} else {{
+        filtered = timeline_json[selectedRegion]?.filter(
+            (d) => d.ano >= yearFrom && d.ano <= yearTo
+        ) ?? [];
+    }}
+
+    if (!filtered || filtered.length === 0) {{
+        timeline_chart.series[0].setData([]);
+        timeline_chart.series[1].setData([]);
+        timeline_chart.update({{ xAxis: {{ categories: [] }} }});
+        return;
+    }}
+
+    // Ordena pelos anos
+    filtered.sort((a, b) => a.ano - b.ano);
+
+    const anos = filtered.map(d => d.ano);
+    const total_documents = filtered.map(d => d.total_documents);
+    const total_fulltext = filtered.map(d => d.total_fulltext);
+
+    timeline_chart.series[0].setData(total_documents);
+    timeline_chart.series[1].setData(total_fulltext);
+    timeline_chart.update({{ xAxis: {{ categories: anos }} }});
+}}
+
+const debouncedUpdateTimeline = debounce(updateTimelineChart, 100);
+slider.noUiSlider.on("update", debouncedUpdateTimeline);
+regionSelect.addEventListener("change", debouncedUpdateTimeline);
+
+updateTimelineChart();
+"""
+
+
+def generate_html_timeline():
+    logger = logging.getLogger(__name__)
+    mongo_hook = MongoHook(mongo_conn_id='mongo')
+    collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
+
+    documents = list(collection.find({"type": "timeline"}))
+
+    aggregated_data = {}
+
+    for doc in documents:
+        region = doc["region"]
+
+        year = int(doc["year"])
+        total_documents = doc.get("total", 0)
+        total_fulltext = doc.get("with_fulltext", 0)
+
+        if region not in aggregated_data:
+            aggregated_data[region] = []
+
+        year_data = {
+            "ano": year,
+            "total_documents": total_documents,
+            "total_fulltext": total_fulltext
+        }
+        aggregated_data[region].append(year_data)
+
+    for reg in aggregated_data:
+        aggregated_data[reg] = sorted(aggregated_data[reg], key=lambda x: x["ano"])
+
+    data_json = json.dumps(aggregated_data, ensure_ascii=False)
+
+    html_with_data = HTML_TEMPLATE.format(timeline_json=data_json)
+
+    return { 
+        'html': html_with_data
+    }
