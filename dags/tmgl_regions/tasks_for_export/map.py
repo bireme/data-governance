@@ -15,16 +15,17 @@ const map_json = {map_json};
     let map = Highcharts.mapChart('map_container', {
         chart: {
             map: topology,
-            backgroundColor: '#D9D9D9',
+            backgroundColor: '#F7F7F8',
             borderRadius: 16,
             borderColor: '#C7C6C0',
-            borderWidth: 2
+            borderWidth: 2,
+            spacingTop: 20
         },
         exporting: {
             buttons: {
                 contextButton: {
                     theme: {
-                        fill: '#D9D9D9'
+                        fill: '#F7F7F8'
                     }
                 }
             }
@@ -40,8 +41,8 @@ const map_json = {map_json};
         },
         colorAxis: {
             min: 0,
-            minColor: '#d1d1ff',
-            maxColor: '#002266',
+            minColor: '#a7d3ff',
+            maxColor: '#001523',
             labels: {
                 format: '{value}'
             }

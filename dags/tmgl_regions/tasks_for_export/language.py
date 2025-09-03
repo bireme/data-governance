@@ -9,16 +9,17 @@ const lang_json = {lang_json};
 let lang_chart = Highcharts.chart("lang_container", {
     chart: { 
         type: "bar",
-        backgroundColor: '#D9D9D9',
+        backgroundColor: '#F7F7F8',
         borderRadius: 16,
         borderColor: '#C7C6C0',
-        borderWidth: 2
+        borderWidth: 2,
+        spacingTop: 20
     },
     exporting: {
         buttons: {
             contextButton: {
                 theme: {
-                    fill: '#D9D9D9'
+                    fill: '#F7F7F8'
                 }
             }
         }
@@ -39,14 +40,14 @@ let lang_chart = Highcharts.chart("lang_container", {
     },
     yAxis: {
         min: 0,
-        title: { text: "Number of documents" },
+        title: { text: "Number of documents" }
     },
     plotOptions: {
         bar: {
             dataLabels: { enabled: true },
         },
     },
-    series: [{ name: "Number of documents", data: [] }],
+    series: [{ name: "Number of documents", data: [], color: "#0093d5" }],
 });
 
 function updateLangChart() {

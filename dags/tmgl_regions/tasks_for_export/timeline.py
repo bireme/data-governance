@@ -9,10 +9,20 @@ const timeline_json = {timeline_json};
 let timeline_chart = Highcharts.chart("timeline_container", {
     chart: { 
         type: "line",
-        backgroundColor: '#D9D9D9',
+        backgroundColor: '#F7F7F8',
         borderRadius: 16,
         borderColor: '#C7C6C0',
-        borderWidth: 2
+        borderWidth: 2,
+        spacingTop: 30
+    },
+    exporting: {
+        buttons: {
+            contextButton: {
+                theme: {
+                    fill: '#F7F7F8'
+                }
+            }
+        }
     },
     title: { 
         text: ""
@@ -30,8 +40,8 @@ let timeline_chart = Highcharts.chart("timeline_container", {
         },
     },
     series: [
-        { name: "Total Documents", data: [] },
-        { name: "Full Texts", data: [] }
+        { name: "Total Documents", data: [], color: "#0093d5" },
+        { name: "Full Texts", data: [], color: "#005881" }
     ]
 });
 

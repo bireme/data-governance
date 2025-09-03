@@ -23,8 +23,12 @@ HTML_TEMPLATE = """
       padding: 20px;
     }}
     h2 {{
-      font-size: 24px;
-      font-weight: 900;
+      font-size: 26px;
+      font-weight: 800;
+    }}
+    h2 img {{
+      height: 28px;
+      vertical-align: top;
     }}
     h3 {{
       font-weight: 700 !important;
@@ -49,6 +53,21 @@ HTML_TEMPLATE = """
       width: 300px;
       margin-bottom: 8px;
     }}
+    .custom-nav {{
+      background: #F3F3F2;
+      border-radius: 16px;
+      font-size: 20px !important;
+      padding: 8px 0;
+    }}
+    .custom-nav .nav-link {{
+      color: #222;
+      border-radius: 16px;
+      text-align: center;
+    }}
+    .custom-nav .selected {{
+      color: #0093d5;
+      font-weight: 800;
+    }}
   </style>
 
   <script src="./highcharts.js"></script>
@@ -62,7 +81,29 @@ HTML_TEMPLATE = """
   <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.js"></script>
 </head>
 <body>
-  <h2>TM Research Analytics</h2>
+  <h2><img src="icone_tmgl.svg"> TM Research Analytics</h2>
+
+  <ul class="nav nav-pills nav-justified custom-nav my-3">
+    <li class="nav-item">
+      <a class="nav-link selected" href="#">Global Scientific Output</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Study Type and Sources</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Topics & Countries focus</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">TCIM areas</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">About</a>
+    </li>
+  </ul>
+
+  <div class="slider-control">
+    <div id="yearRangeSlider"></div>
+  </div>
 
   <div class="slider-control">
     <label for="regionSelect">WHO Region</label>
@@ -70,10 +111,6 @@ HTML_TEMPLATE = """
       <option value="Todas">Todas</option>
       {region_options}
     </select>
-  </div>
-
-  <div class="slider-control">
-    <div id="yearRangeSlider"></div>
   </div>
 
   <div class="row">
