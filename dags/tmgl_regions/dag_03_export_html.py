@@ -3,6 +3,7 @@ import logging
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.hooks.filesystem import FSHook
+from data_governance.dags.tmgl_regions.tasks_for_export.map import generate_html_map
 from data_governance.dags.tmgl_regions.tasks_for_export.language import generate_html_language
 from data_governance.dags.tmgl_regions.tasks_for_export.timeline import generate_html_timeline
 
@@ -13,17 +14,20 @@ HTML_TEMPLATE = """
 <head>
   <meta charset="UTF-8" />
   <title>TM Research Analytics</title>
-  <script src="https://code.highcharts.com/highcharts.js"></script>
-  <script src="https://code.highcharts.com/modules/exporting.js"></script>
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.css"
-  />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.js"></script>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <style>@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');</style>
   <style>
     body {{
-      font-family: Arial, sans-serif;
+      font-family: "Roboto", sans-serif !important;
       padding: 20px;
+    }}
+    h2 {{
+      font-size: 24px;
+      font-weight: 900;
+    }}
+    h3 {{
+      font-weight: 700 !important;
     }}
     #container {{
       width: 100%;
@@ -46,6 +50,16 @@ HTML_TEMPLATE = """
       margin-bottom: 8px;
     }}
   </style>
+
+  <script src="./highcharts.js"></script>
+  <script src="./map.js"></script>
+  <script src="./accessibility.js"></script>
+  <script src="./exporting.js"></script>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.css"
+  />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.js"></script>
 </head>
 <body>
   <h2>TM Research Analytics</h2>
@@ -62,9 +76,26 @@ HTML_TEMPLATE = """
     <div id="yearRangeSlider"></div>
   </div>
 
-  <div id="container"></div>
+  <div class="row">
+    <div class="col-lg-6 col-xs-12">
+      <div class="mt-3">
+        <h3 class="h4">Total Publications and Full-Text Availability by Country</h3>
+        <div id="map_container"></div>
+      </div>
 
-  <div id="timeline_container"></div>
+      <div class="mt-3">
+        <h3 class="h4">Publications by Language</h3>
+        <div id="lang_container"></div>
+      </div>
+    </div>
+
+    <div class="col-lg-6 col-xs-12">
+      <div class="mt-3">
+        <h3 class="h4">Total Publications and Full-Text Availability over time</h3>
+        <div id="timeline_container"></div>
+      </div>
+    </div>
+  </div>
 
   <script>
     function debounce(fn, delay) {{
@@ -90,6 +121,8 @@ HTML_TEMPLATE = """
       }},
     }});
 
+    {html_map}
+
     {html_language}
 
     {html_timeline}
@@ -104,13 +137,15 @@ def generate_html_reports(ti):
 
     language_data = ti.xcom_pull(task_ids='generate_html_language')
     timeline_data = ti.xcom_pull(task_ids='generate_html_timeline')
+    map_data = ti.xcom_pull(task_ids='generate_html_map')
 
     html_with_data = HTML_TEMPLATE.format(
         html_language=language_data['html'],
         region_options=language_data['region_options'],
         year_range_min=language_data['min_year'],
         year_range_max=language_data['max_year'],
-        html_timeline=timeline_data['html']
+        html_timeline=timeline_data['html'],
+        html_map=map_data['html']
     )
 
     fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
@@ -147,6 +182,10 @@ with DAG(
         task_id='generate_html_timeline',
         python_callable=generate_html_timeline,
     )
+    generate_html_map_task = PythonOperator(
+        task_id='generate_html_map',
+        python_callable=generate_html_map,
+    )
 
     generate_reports_task = PythonOperator(
         task_id='generate_html_reports',
@@ -155,3 +194,4 @@ with DAG(
 
     generate_html_language_task >> generate_reports_task
     generate_html_timeline_task >> generate_reports_task
+    generate_html_map_task >> generate_reports_task

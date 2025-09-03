@@ -6,33 +6,50 @@ from airflow.providers.mongo.hooks.mongo import MongoHook
 HTML_TEMPLATE = """
 const lang_json = {lang_json};
 
-let lang_chart = Highcharts.chart("container", {{
-    chart: {{ type: "bar" }},
-    title: {{ text: "Publications by Language" }},
-    legend: {{ enabled: false }},
-    xAxis: {{ 
-        title: {{ text: null }},
-        labels: {{
+let lang_chart = Highcharts.chart("lang_container", {
+    chart: { 
+        type: "bar",
+        backgroundColor: '#D9D9D9',
+        borderRadius: 16,
+        borderColor: '#C7C6C0',
+        borderWidth: 2
+    },
+    exporting: {
+        buttons: {
+            contextButton: {
+                theme: {
+                    fill: '#D9D9D9'
+                }
+            }
+        }
+    },
+    title: { 
+        text: ""
+    },
+    legend: { enabled: false },
+    xAxis: { 
+        title: { text: null },
+        labels: {
             rotation: 0,
             step: 1,
-            style: {{
+            style: {
                 fontSize: '11px'
-            }}
-        }}
-    }},
-    yAxis: {{
+            }
+        }
+    },
+    yAxis: {
         min: 0,
-        title: {{ text: "Number of documents" }},
-    }},
-    plotOptions: {{
-        bar: {{
-            dataLabels: {{ enabled: true }},
-        }},
-    }},
-    series: [{{ name: "Number of documents", data: [] }}],
-}});
+        title: { text: "Number of documents" },
+    },
+    plotOptions: {
+        bar: {
+            dataLabels: { enabled: true },
+        },
+    },
+    series: [{ name: "Number of documents", data: [] }],
+});
 
-function updateLangChart() {{
+function updateLangChart() {
     const year_range = slider.noUiSlider.get(true);
     const yearFrom = parseInt(year_range[0]);
     const yearTo = parseInt(year_range[1]);
@@ -42,39 +59,39 @@ function updateLangChart() {{
 
     let filtered;
 
-    if (selectedRegion === "Todas") {{
+    if (selectedRegion === "Todas") {
         filtered = Object.values(lang_json)
             .flat()
             .filter((d) => d.ano >= yearFrom && d.ano <= yearTo);
-    }} else {{
+    } else {
         filtered = lang_json[selectedRegion].filter(
             (d) => d.ano >= yearFrom && d.ano <= yearTo
         );
-    }}
+    }
 
-    if (!filtered || filtered.length === 0) {{
+    if (!filtered || filtered.length === 0) {
         const langs = Object.keys(Object.values(lang_json)[0][0]).filter((key) => key !== "ano");
         lang_chart.series[0].setData(langs.map(() => 0));
-        lang_chart.update({{ xAxis: {{ categories: langs }} }});
+        lang_chart.update({ xAxis: { categories: langs } });
         return;
-    }}
+    }
 
     const langs = Object.keys(filtered[0]).filter((key) => key !== "ano" && filtered.some(d => d[key] > 0));
 
-    const total = {{}};
+    const total = {};
     langs.forEach((lang) => (total[lang] = 0));
 
-    filtered.forEach((d) => {{
-        langs.forEach((lang) => {{
+    filtered.forEach((d) => {
+        langs.forEach((lang) => {
             total[lang] += d[lang] || 0;
-        }});
-    }});
+        });
+    });
 
     // Monta pares idioma/valor
-    let sorted = langs.map((lang) => ({{
+    let sorted = langs.map((lang) => ({
         name: lang,
         value: total[lang]
-    }}));
+    }));
 
     // Ordena do maior para o menor
     sorted.sort((a, b) => b.value - a.value);
@@ -82,8 +99,8 @@ function updateLangChart() {{
 
     // Atualiza gráfico com dados ordenados
     lang_chart.series[0].setData(sorted.map(item => item.value));
-    lang_chart.update({{ xAxis: {{ categories: sorted.map(item => item.name) }} }});
-}}
+    lang_chart.update({ xAxis: { categories: sorted.map(item => item.name) } });
+}
 
 const debouncedUpdateLang = debounce(updateLangChart, 100);
 slider.noUiSlider.on("update", debouncedUpdateLang);
@@ -138,7 +155,7 @@ def generate_html_language():
         f'<option value="{r}">{r}</option>' for r in sorted(regions)
     )
 
-    html_with_data = HTML_TEMPLATE.format(lang_json=data_json)
+    html_with_data = HTML_TEMPLATE.replace("{lang_json}", data_json)
 
     return { 
         'min_year': min_year,
