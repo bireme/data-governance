@@ -19,7 +19,8 @@ const map_json = {map_json};
             borderRadius: 16,
             borderColor: '#C7C6C0',
             borderWidth: 2,
-            spacingTop: 20
+            spacingTop: 20,
+            height: 325
         },
         exporting: {
             buttons: {

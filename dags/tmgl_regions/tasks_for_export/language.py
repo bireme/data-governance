@@ -13,7 +13,8 @@ let lang_chart = Highcharts.chart("lang_container", {
         borderRadius: 16,
         borderColor: '#C7C6C0',
         borderWidth: 2,
-        spacingTop: 20
+        spacingTop: 20,
+        height: 325
     },
     exporting: {
         buttons: {

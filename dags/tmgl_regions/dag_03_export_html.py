@@ -6,6 +6,7 @@ from airflow.hooks.filesystem import FSHook
 from data_governance.dags.tmgl_regions.tasks_for_export.map import generate_html_map
 from data_governance.dags.tmgl_regions.tasks_for_export.language import generate_html_language
 from data_governance.dags.tmgl_regions.tasks_for_export.timeline import generate_html_timeline
+from data_governance.dags.tmgl_regions.tasks_for_export.indicator import generate_html_indicators
 
 
 HTML_TEMPLATE = """
@@ -68,6 +69,14 @@ HTML_TEMPLATE = """
       color: #0093d5;
       font-weight: 800;
     }}
+    #indicator_container {{
+      background: #F7F7F8;
+      border: 2px solid #C7C6C0;
+      border-radius: 16px;
+      font-size: 40px;
+      font-weight: 700;
+      min-height: 325px;
+    }}
   </style>
 
   <script src="./highcharts.js"></script>
@@ -128,6 +137,19 @@ HTML_TEMPLATE = """
 
     <div class="col-lg-6 col-xs-12">
       <div class="mt-3">
+        <div id="indicator_container" class="py-5 mt-md-5">
+          <div class="row text-center">
+            <div class="col col-md-6">
+              Total Documents<br><span id="indicator_total_documents"></span>
+            </div>
+            <div class="col col-md-6">
+              Full Text<br><span id="indicator_total_fulltext"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-3">
         <h3 class="h4">Total Publications and Full-Text Availability over time</h3>
         <div id="timeline_container"></div>
       </div>
@@ -163,6 +185,8 @@ HTML_TEMPLATE = """
     {html_language}
 
     {html_timeline}
+
+    {html_indicators}
   </script>
 </body>
 </html>
@@ -175,6 +199,7 @@ def generate_html_reports(ti):
     language_data = ti.xcom_pull(task_ids='generate_html_language')
     timeline_data = ti.xcom_pull(task_ids='generate_html_timeline')
     map_data = ti.xcom_pull(task_ids='generate_html_map')
+    indicators_data = ti.xcom_pull(task_ids='generate_html_indicators')
 
     html_with_data = HTML_TEMPLATE.format(
         html_language=language_data['html'],
@@ -182,7 +207,8 @@ def generate_html_reports(ti):
         year_range_min=language_data['min_year'],
         year_range_max=language_data['max_year'],
         html_timeline=timeline_data['html'],
-        html_map=map_data['html']
+        html_map=map_data['html'],
+        html_indicators=indicators_data['html']
     )
 
     fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
@@ -223,6 +249,10 @@ with DAG(
         task_id='generate_html_map',
         python_callable=generate_html_map,
     )
+    generate_html_indicators_task = PythonOperator(
+        task_id='generate_html_indicators',
+        python_callable=generate_html_indicators,
+    )
 
     generate_reports_task = PythonOperator(
         task_id='generate_html_reports',
@@ -232,3 +262,4 @@ with DAG(
     generate_html_language_task >> generate_reports_task
     generate_html_timeline_task >> generate_reports_task
     generate_html_map_task >> generate_reports_task
+    generate_html_indicators_task >> generate_reports_task
