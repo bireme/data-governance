@@ -40,7 +40,6 @@ HTML_TEMPLATE = """
       margin: 30px auto;
     }}
     .slider-control {{
-      max-width: 900px;
       margin: 15px auto;
       display: flex;
       align-items: center;
@@ -77,6 +76,20 @@ HTML_TEMPLATE = """
       font-weight: 700;
       min-height: 325px;
     }}
+    #indicator_total_documents, #indicator_total_fulltext {{
+      font-size: 48px;
+    }}
+    .noUi-connect {{
+      background: #0093d5 !important;
+    }}
+    .noUi-handle {{
+      border: 2px solid #0093d5 !important;
+      background: white !important;
+    }}
+    #filters {{
+      max-width: 900px;
+      margin: auto;
+    }}
   </style>
 
   <script src="./highcharts.js"></script>
@@ -110,49 +123,51 @@ HTML_TEMPLATE = """
     </li>
   </ul>
 
-  <div class="slider-control">
-    <div id="yearRangeSlider"></div>
+  <div class="d-flex justify-content-center" id="filters">
+    <div class="slider-control form-floating">
+      <select id="regionSelect" class="form-select">
+        <option value="Todas">Todas</option>
+        {region_options}
+      </select>
+      <label for="regionSelect">WHO Region</label>
+    </div>
+
+    <div class="slider-control pt-1 ms-2">
+      <div id="yearRangeSlider"></div>
+    </div>
   </div>
 
-  <div class="slider-control">
-    <label for="regionSelect">WHO Region</label>
-    <select id="regionSelect">
-      <option value="Todas">Todas</option>
-      {region_options}
-    </select>
-  </div>
-
-  <div class="row">
-    <div class="col-lg-6 col-xs-12">
-      <div class="mt-3">
-        <h3 class="h4">Total Publications and Full-Text Availability by Country</h3>
+  <div class="row mt-4">
+    <h3 class="h4">Total Publications and Full-Text Availability by Country</h3>
+    <div class="row m-0">
+      <div class="col-lg-6 col-xs-12">
         <div id="map_container"></div>
       </div>
 
-      <div class="mt-3">
-        <h3 class="h4">Publications by Language</h3>
-        <div id="lang_container"></div>
-      </div>
-    </div>
-
-    <div class="col-lg-6 col-xs-12">
-      <div class="mt-3">
-        <div id="indicator_container" class="py-5 mt-md-5">
-          <div class="row text-center">
-            <div class="col col-md-6">
+      <div class="col-lg-6 col-xs-12">
+        <div id="indicator_container" class="py-5">
+          <div class="d-flex justify-content-center text-center mt-5">
+            <div class="p-2" style="flex: 1 1 50%;">
               Total Documents<br><span id="indicator_total_documents"></span>
             </div>
-            <div class="col col-md-6">
+            <div class="p-2" style="flex: 1 1 50%;">
               Full Text<br><span id="indicator_total_fulltext"></span>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div class="mt-3">
-        <h3 class="h4">Total Publications and Full-Text Availability over time</h3>
-        <div id="timeline_container"></div>
-      </div>
+  <div class="row mt-4">
+    <div class="col-lg-6 col-xs-12">
+      <h3 class="h4">Publications by Language</h3>
+      <div id="lang_container"></div>
+    </div>
+
+    <div class="col-lg-6 col-xs-12">
+      <h3 class="h4">Total Publications and Full-Text Availability over time</h3>
+      <div id="timeline_container"></div>
     </div>
   </div>
 

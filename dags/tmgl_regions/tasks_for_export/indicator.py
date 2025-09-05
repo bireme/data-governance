@@ -57,8 +57,8 @@ function updateIndicators() {
     const total_documents = filtered.reduce((acc, d) => acc + (d.total_documents || 0), 0);
     const total_fulltext = filtered.reduce((acc, d) => acc + (d.total_fulltext || 0), 0);
 
-    total_documents_container.innerText = total_documents;
-    total_fulltext_container.innerText = total_fulltext;
+    total_documents_container.innerText = total_documents.toLocaleString('pt-BR');
+    total_fulltext_container.innerText = total_fulltext.toLocaleString('pt-BR');
 }
 
 const debouncedUpdateIndicators = debounce(updateIndicators, 100);

@@ -72,7 +72,8 @@ function updateLangChart() {
     }
 
     if (!filtered || filtered.length === 0) {
-        const langs = Object.keys(Object.values(lang_json)[0][0]).filter((key) => key !== "ano");
+        let langs = Object.keys(Object.values(lang_json)[0][0]).filter((key) => key !== "ano");
+        langs = langs.slice(0, 10);
         lang_chart.series[0].setData(langs.map(() => 0));
         lang_chart.update({ xAxis: { categories: langs } });
         return;
