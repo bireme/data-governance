@@ -14,6 +14,83 @@ def create_timeline():
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     source_collection = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
     target_collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
+
+    batch = []
+    pipeline = [
+        {"$addFields": {
+            "year": {
+                "$toInt": {
+                    "$ifNull": [
+                        {
+                            "$getField": {
+                                "field": "match",
+                                "input": {
+                                    "$regexFind": {
+                                        "input": {
+                                            "$cond": [
+                                                {"$eq": [{"$type": "$dp"}, "string"]},
+                                                "$dp",
+                                                ""
+                                            ]
+                                        },
+                                        "regex": r"\d{4}"
+                                    }
+                                }
+                            }
+                        },
+                        "0"  # default se não encontrou ano
+                    ]
+                }
+            }
+        }},
+        {"$match": {"year": {"$gte": 1500}}},
+        {"$group": {
+            "_id": {
+                "year": "$year"
+            },
+            "total": {"$sum": 1},
+            "with_fulltext": {
+                "$sum": {
+                    "$cond": [{"$eq": ["$fulltext", "1"]}, 1, 0]
+                }
+            }
+        }}
+    ]
+
+    for result in source_collection.aggregate(pipeline):
+        year = result["_id"]["year"]
+
+        if year is None:
+            continue
+
+        logger.info(f"year={year}, total={result['total']}, fulltext={result['with_fulltext']}")
+
+        batch.append(UpdateOne(
+            {
+                "type": "timeline",
+                "region": None,
+                "year": year
+            },
+            {
+                "$set": {
+                    "total": result["total"],
+                    "with_fulltext": result["with_fulltext"],
+                    "timestamp": datetime.now()
+                }
+            },
+            upsert=True
+        ))
+
+    if batch:
+        target_collection.bulk_write(batch, ordered=False)
+
+
+def create_timeline_region():
+    logger = logging.getLogger(__name__)
+
+    mongo_hook = MongoHook(mongo_conn_id='mongo')
+    source_collection = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
+    target_collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
     
     who_region_collection = mongo_hook.get_collection('who_region', 'TABS')
     regions = get_regions(who_region_collection)
@@ -114,4 +191,8 @@ with DAG(
     create_timeline_task = PythonOperator(
         task_id='create_timeline',
         python_callable=create_timeline
+    )
+    create_timeline_region_task = PythonOperator(
+        task_id='create_timeline_region',
+        python_callable=create_timeline_region
     )

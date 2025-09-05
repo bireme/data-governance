@@ -4,7 +4,8 @@ from airflow.providers.mongo.hooks.mongo import MongoHook
 
 
 HTML_TEMPLATE = """
-const lang_json = {lang_json};
+const lang_region_year_json = {lang_region_year_json};
+const lang_year_json = {lang_year_json};
 
 let lang_chart = Highcharts.chart("lang_container", {
     chart: { 
@@ -62,17 +63,17 @@ function updateLangChart() {
     let filtered;
 
     if (selectedRegion === "Todas") {
-        filtered = Object.values(lang_json)
+        filtered = Object.values(lang_year_json)
             .flat()
             .filter((d) => d.ano >= yearFrom && d.ano <= yearTo);
     } else {
-        filtered = lang_json[selectedRegion].filter(
+        filtered = lang_region_year_json[selectedRegion].filter(
             (d) => d.ano >= yearFrom && d.ano <= yearTo
         );
     }
 
     if (!filtered || filtered.length === 0) {
-        let langs = Object.keys(Object.values(lang_json)[0][0]).filter((key) => key !== "ano");
+        let langs = Object.keys(Object.values(lang_year_json)[0][0]).filter((key) => key !== "ano");
         langs = langs.slice(0, 10);
         lang_chart.series[0].setData(langs.map(() => 0));
         lang_chart.update({ xAxis: { categories: langs } });
@@ -118,13 +119,11 @@ def generate_html_language():
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
 
-    documents = list(collection.find({"type": "language"}))
+    # Builds lang_region_year_json
+    documents = list(collection.find({"type": "language", "region": {"$ne": None}}).sort("year", 1))
     all_langs = set(doc["name"] for doc in documents)
-
     aggregated_data = {}
-    years = []
     regions = set()
-
     for doc in documents:
         region = doc["region"]
         regions.add(region)
@@ -132,7 +131,6 @@ def generate_html_language():
         year = int(doc["year"])
         lang = doc["name"]
         count = doc.get("count", 0)
-        years.append(year)
 
         if region not in aggregated_data:
             aggregated_data[region] = []
@@ -146,19 +144,41 @@ def generate_html_language():
 
         year_data[lang] = count
 
-    for reg in aggregated_data:
-        aggregated_data[reg] = sorted(aggregated_data[reg], key=lambda x: x["ano"])
+    lang_region_year_json = json.dumps(aggregated_data, ensure_ascii=False)
+
+
+    # Builds lang_year_json
+    documents = list(collection.find({"type": "language", "region": None}).sort("year", 1))
+    all_langs = set(doc["name"] for doc in documents)
+    aggregated_data = []
+    years = []
+    for doc in documents:
+        year = int(doc["year"])
+        lang = doc["name"]
+        count = doc.get("count", 0)
+        years.append(year)
+
+        year_data = next((item for item in aggregated_data if item["ano"] == year), None)
+        if not year_data:
+            year_data = {"ano": year}
+            for l in all_langs:
+                year_data[l] = 0
+            aggregated_data.append(year_data)
+
+        year_data[lang] = count
+
+    lang_year_json = json.dumps(aggregated_data, ensure_ascii=False)
+
 
     min_year = min(years)
     max_year = max(years)
-
-    data_json = json.dumps(aggregated_data, ensure_ascii=False)
 
     region_options = "\n".join(
         f'<option value="{r}">{r}</option>' for r in sorted(regions)
     )
 
-    html_with_data = HTML_TEMPLATE.replace("{lang_json}", data_json)
+    html_with_data = HTML_TEMPLATE.replace("{lang_region_year_json}", lang_region_year_json)
+    html_with_data = html_with_data.replace("{lang_year_json}", lang_year_json)
 
     return { 
         'min_year': min_year,

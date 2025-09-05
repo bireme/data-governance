@@ -15,6 +15,85 @@ def create_metric_languages():
     source_collection = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
     target_collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
     
+    batch = []
+    # Agrupa por idioma + ano extraído de dp
+    pipeline = [
+        {"$unwind": "$la"},
+        {"$addFields": {
+            "year": {
+                "$toInt": {
+                    "$ifNull": [
+                        {
+                            "$getField": {
+                                "field": "match",
+                                "input": {
+                                    "$regexFind": {
+                                        "input": {
+                                            "$cond": [
+                                                {"$eq": [{"$type": "$dp"}, "string"]},
+                                                "$dp",
+                                                ""
+                                            ]
+                                        },
+                                        "regex": r"\d{4}"
+                                    }
+                                }
+                            }
+                        },
+                        "0"  # valor default quando não encontra \d{4}
+                    ]
+                }
+            }
+        }},
+        # Filtra apenas anos encontrados e maiores ou iguais a 1500
+        {"$match": {"year": {"$gte": 1500}}},
+        {"$group": {
+            "_id": {
+                "language": {"$toLower": "$la"},
+                "year": "$year"
+            },
+            "count": {"$sum": 1}
+        }}
+    ]
+    
+    # Processa cada idioma/ano retornado para o país
+    for result in source_collection.aggregate(pipeline):
+        lang = result["_id"]["language"]
+        year = result["_id"]["year"]
+        logger.info(f"{lang}, {year}")
+        
+        # Ignora se não conseguiu extrair ano
+        if year is None:
+            continue
+        
+        batch.append(UpdateOne(
+            {
+                "type": "language",
+                "region": None,
+                "name": lang,
+                "year": year
+            },
+            {
+                "$set": {
+                    "count": result["count"],
+                    "timestamp": datetime.now()
+                }
+            },
+            upsert=True
+        ))
+
+    # Armazenar resultados
+    if batch:
+        target_collection.bulk_write(batch, ordered=False)
+
+
+def create_metric_languages_region():
+    logger = logging.getLogger(__name__)
+
+    mongo_hook = MongoHook(mongo_conn_id='mongo')
+    source_collection = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
+    target_collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
+    
     who_region_collection = mongo_hook.get_collection('who_region', 'TABS')
     regions = get_regions(who_region_collection)
     logger.info(f"Regioes carregadas: {regions.keys()}")
@@ -116,4 +195,8 @@ with DAG(
     create_metric_languages_task = PythonOperator(
         task_id='create_metric_languages',
         python_callable=create_metric_languages
+    )
+    create_metric_languages_region_task = PythonOperator(
+        task_id='create_metric_languages_region',
+        python_callable=create_metric_languages_region
     )

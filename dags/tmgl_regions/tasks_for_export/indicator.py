@@ -75,7 +75,7 @@ def generate_html_indicators():
     collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
 
     # Builds indicator_region_year_json
-    documents = list(collection.find({"type": "timeline"}))
+    documents = list(collection.find({"type": "timeline", "region": {"$ne": None}}).sort("year", 1))
     aggregated_data = {}
     for doc in documents:
         region = doc["region"]
@@ -94,14 +94,11 @@ def generate_html_indicators():
         }
         aggregated_data[region].append(year_data)
 
-    for reg in aggregated_data:
-        aggregated_data[reg] = sorted(aggregated_data[reg], key=lambda x: x["ano"])
-
     indicator_region_year_json = json.dumps(aggregated_data, ensure_ascii=False)
 
 
     # Builds indicator_year_json
-    documents = list(collection.find({"type": "indicator"}))
+    documents = list(collection.find({"type": "timeline", "region": None}).sort("year", 1))
     aggregated_data = []
     for doc in documents:
         year = int(doc["year"])
@@ -114,8 +111,6 @@ def generate_html_indicators():
             "total_fulltext": total_fulltext
         }
         aggregated_data.append(year_data)
-
-    aggregated_data = sorted(aggregated_data, key=lambda x: x["ano"])
 
     indicator_year_json = json.dumps(aggregated_data, ensure_ascii=False)
 

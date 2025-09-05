@@ -4,7 +4,8 @@ from airflow.providers.mongo.hooks.mongo import MongoHook
 
 
 HTML_TEMPLATE = """
-const timeline_json = {timeline_json};
+const timeline_region_year_json = {timeline_region_year_json};
+const timeline_year_json = {timeline_year_json};
 
 let timeline_chart = Highcharts.chart("timeline_container", {
     chart: { 
@@ -58,7 +59,7 @@ function updateTimelineChart() {
 
     if (selectedRegion === "Todas") {
         // Junta dados de todas as regiões
-        filtered = Object.values(timeline_json)
+        filtered = Object.values(timeline_year_json)
             .flat()
             .filter((d) => d.ano >= yearFrom && d.ano <= yearTo);
 
@@ -79,7 +80,7 @@ function updateTimelineChart() {
         // Converte para array
         filtered = Object.values(grouped);
     } else {
-        filtered = timeline_json[selectedRegion]?.filter(
+        filtered = timeline_region_year_json[selectedRegion]?.filter(
             (d) => d.ano >= yearFrom && d.ano <= yearTo
         ) ?? [];
     }
@@ -116,10 +117,9 @@ def generate_html_timeline():
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
 
-    documents = list(collection.find({"type": "timeline"}))
-
+    # Documents with region
+    documents = list(collection.find({"type": "timeline", "region": {"$ne": None}}).sort("year", 1))
     aggregated_data = {}
-
     for doc in documents:
         region = doc["region"]
 
@@ -137,12 +137,29 @@ def generate_html_timeline():
         }
         aggregated_data[region].append(year_data)
 
-    for reg in aggregated_data:
-        aggregated_data[reg] = sorted(aggregated_data[reg], key=lambda x: x["ano"])
+    timeline_region_year_json = json.dumps(aggregated_data, ensure_ascii=False)
 
-    data_json = json.dumps(aggregated_data, ensure_ascii=False)
 
-    html_with_data = HTML_TEMPLATE.replace("{timeline_json}", data_json)
+    # Documents without region
+    documents = list(collection.find({"type": "timeline", "region": None}).sort("year", 1))
+    aggregated_data = []
+    for doc in documents:
+        year = int(doc["year"])
+        total_documents = doc.get("total", 0)
+        total_fulltext = doc.get("with_fulltext", 0)
+
+        year_data = {
+            "ano": year,
+            "total_documents": total_documents,
+            "total_fulltext": total_fulltext
+        }
+        aggregated_data.append(year_data)
+
+    timeline_year_json = json.dumps(aggregated_data, ensure_ascii=False)
+
+
+    html_with_data = HTML_TEMPLATE.replace("{timeline_region_year_json}", timeline_region_year_json)
+    html_with_data = html_with_data.replace("{timeline_year_json}", timeline_year_json)
 
     return { 
         'html': html_with_data
