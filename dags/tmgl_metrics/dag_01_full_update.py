@@ -72,6 +72,8 @@ def setup_collections():
     collection_lz.create_index([('type_of_study', 1)], collation={ 'locale': 'en', 'strength': 1 })
     collection_lz.create_index([('type', 1)], collation={ 'locale': 'en', 'strength': 1 })
     collection_lz.create_index([('cp', 1)], collation={ 'locale': 'en', 'strength': 1 })
+    collection_lz.create_index([('la', 1)], collation={ 'locale': 'en', 'strength': 1 })
+    collection_lz.create_index([('ta', 1)], collation={ 'locale': 'en', 'strength': 1 })
     collection_lz.create_index([('pais_afiliacao', 1)], collation={ 'locale': 'en', 'strength': 1 })
     collection_lz.create_index([('who_regions', 1)], collation={ 'locale': 'en', 'strength': 1 })
 
