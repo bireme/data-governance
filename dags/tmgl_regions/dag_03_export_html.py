@@ -18,79 +18,7 @@ HTML_TEMPLATE = """
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <style>@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');</style>
-  <style>
-    body {{
-      font-family: "Roboto", sans-serif !important;
-      padding: 20px;
-    }}
-    h2 {{
-      font-size: 26px;
-      font-weight: 800;
-    }}
-    h2 img {{
-      height: 28px;
-      vertical-align: top;
-    }}
-    h3 {{
-      font-weight: 700 !important;
-    }}
-    #container {{
-      width: 100%;
-      max-width: 900px;
-      margin: 30px auto;
-    }}
-    .slider-control {{
-      margin: 15px auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-    }}
-    input[type=range] {{
-      width: 200px;
-    }}
-    #yearRangeSlider {{
-      width: 300px;
-      margin-bottom: 8px;
-    }}
-    .custom-nav {{
-      background: #F3F3F2;
-      border-radius: 16px;
-      font-size: 20px !important;
-      padding: 8px 0;
-    }}
-    .custom-nav .nav-link {{
-      color: #222;
-      border-radius: 16px;
-      text-align: center;
-    }}
-    .custom-nav .selected {{
-      color: #0093d5;
-      font-weight: 800;
-    }}
-    #indicator_container {{
-      background: #F7F7F8;
-      border: 2px solid #C7C6C0;
-      border-radius: 16px;
-      font-size: 40px;
-      font-weight: 700;
-      min-height: 325px;
-    }}
-    #indicator_total_documents, #indicator_total_fulltext {{
-      font-size: 48px;
-    }}
-    .noUi-connect {{
-      background: #0093d5 !important;
-    }}
-    .noUi-handle {{
-      border: 2px solid #0093d5 !important;
-      background: white !important;
-    }}
-    #filters {{
-      max-width: 900px;
-      margin: auto;
-    }}
-  </style>
+  <link href="tmgl_regions.css" rel="stylesheet">
 
   <script src="./highcharts.js"></script>
   <script src="./map.js"></script>
@@ -119,14 +47,14 @@ HTML_TEMPLATE = """
       <a class="nav-link" href="#">TCIM areas</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="#">About</a>
+      <a class="nav-link" href="about.html">About</a>
     </li>
   </ul>
 
   <div class="d-flex justify-content-center" id="filters">
     <div class="slider-control form-floating">
       <select id="regionSelect" class="form-select">
-        <option value="Todas">Todas</option>
+        <option value="Todas">All</option>
         {region_options}
       </select>
       <label for="regionSelect">WHO Region</label>
@@ -228,7 +156,7 @@ def generate_html_reports(ti):
 
     fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
     output_dir = fs_hook.get_path()
-    output_file = os.path.join(output_dir, "report_languages.html")
+    output_file = os.path.join(output_dir, "index.html")
 
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(html_with_data)
