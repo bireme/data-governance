@@ -69,3 +69,6 @@ input[type=range] {
     max-width: 900px;
     margin: auto;
 }
+.nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+    background: #0093d5 !important;
+}

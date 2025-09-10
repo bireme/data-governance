@@ -7,6 +7,7 @@ from data_governance.dags.tmgl_regions.tasks_for_export.map import generate_html
 from data_governance.dags.tmgl_regions.tasks_for_export.language import generate_html_language
 from data_governance.dags.tmgl_regions.tasks_for_export.timeline import generate_html_timeline
 from data_governance.dags.tmgl_regions.tasks_for_export.indicator import generate_html_indicators
+from data_governance.dags.tmgl_regions.tasks_for_export.journal import generate_html_journal
 
 
 HTML_TEMPLATE = """
@@ -21,6 +22,7 @@ HTML_TEMPLATE = """
   <link href="tmgl_regions.css" rel="stylesheet">
 
   <script src="./highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>
   <script src="./map.js"></script>
   <script src="./accessibility.js"></script>
   <script src="./exporting.js"></script>
@@ -33,21 +35,21 @@ HTML_TEMPLATE = """
 <body>
   <h2><img src="icone_tmgl.svg"> TM Research Analytics</h2>
 
-  <ul class="nav nav-pills nav-justified custom-nav my-3">
-    <li class="nav-item">
-      <a class="nav-link selected" href="#">Global Scientific Output</a>
+  <ul class="nav nav-pills nav-justified custom-nav my-3" id="pills-tab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="pills-output-tab" data-bs-toggle="pill" data-bs-target="#output-tab-pane" type="button" role="tab" aria-controls="output-tab-pane" aria-selected="true">Global Scientific Output</button>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">Study Type and Sources</a>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="pills-study-type-tab" data-bs-toggle="pill" data-bs-target="#study-type-tab-pane" type="button" role="tab" aria-controls="study-type-tab-pane" aria-selected="false">Study Type and Sources</button>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">Topics & Countries focus</a>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="pills-topics-countries-tab" data-bs-toggle="pill" data-bs-target="#topics-countries-tab-pane" type="button" role="tab" aria-controls="topics-countries-tab-pane" aria-selected="false">Topics & Countries focus</button>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">TCIM areas</a>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="pills-tcim-areas-tab" data-bs-toggle="pill" data-bs-target="#tcim-areas-tab-pane" type="button" role="tab" aria-controls="tcim-areas-tab-pane" aria-selected="false">TCIM areas</button>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" href="about.html">About</a>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="pills-about-tab" data-bs-toggle="pill" data-bs-target="#about-tab-pane" type="button" role="tab" aria-controls="about-tab-pane" aria-selected="false">About</button>
     </li>
   </ul>
 
@@ -65,37 +67,71 @@ HTML_TEMPLATE = """
     </div>
   </div>
 
-  <div class="row mt-4">
-    <h3 class="h4">Total Publications and Full-Text Availability by Country</h3>
-    <div class="row m-0">
-      <div class="col-lg-6 col-xs-12">
-        <div id="map_container"></div>
-      </div>
+  <div class="tab-content">
+    <div class="tab-pane fade show active" id="output-tab-pane" role="tabpanel" aria-labelledby="pills-output-tab">
+      <div class="row mt-4">
+        <h3 class="h4">Total Publications and Full-Text Availability by Country</h3>
+        <div class="row m-0">
+          <div class="col-lg-6 col-xs-12">
+            <div id="map_container"></div>
+          </div>
 
-      <div class="col-lg-6 col-xs-12">
-        <div id="indicator_container" class="py-5">
-          <div class="d-flex justify-content-center text-center mt-5">
-            <div class="p-2" style="flex: 1 1 50%;">
-              Total Documents<br><span id="indicator_total_documents"></span>
-            </div>
-            <div class="p-2" style="flex: 1 1 50%;">
-              Full Text<br><span id="indicator_total_fulltext"></span>
+          <div class="col-lg-6 col-xs-12 mt-lg-0 mt-3">
+            <div id="indicator_container" class="py-5">
+              <div class="d-flex justify-content-center text-center mt-5">
+                <div class="p-2" style="flex: 1 1 50%;">
+                  Total Documents<br><span id="indicator_total_documents"></span>
+                </div>
+                <div class="p-2" style="flex: 1 1 50%;">
+                  Full Text<br><span id="indicator_total_fulltext"></span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="row mt-4">
-    <div class="col-lg-6 col-xs-12">
-      <h3 class="h4">Publications by Language</h3>
-      <div id="lang_container"></div>
+      <div class="row mt-4">
+        <div class="col-lg-6 col-xs-12">
+          <h3 class="h4">Publications by Language</h3>
+          <div id="lang_container"></div>
+        </div>
+
+        <div class="col-lg-6 col-xs-12 mt-lg-0 mt-3">
+          <h3 class="h4">Total Publications and Full-Text Availability over time</h3>
+          <div id="timeline_container"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="col-lg-6 col-xs-12">
-      <h3 class="h4">Total Publications and Full-Text Availability over time</h3>
-      <div id="timeline_container"></div>
+
+    <div class="tab-pane fade" id="study-type-tab-pane" role="tabpanel" aria-labelledby="pills-study-type-tab">
+      <div class="row mt-4">
+        <div class="col-lg-6 col-xs-12">
+          <h3 class="h4">Top 10 Journals</h3>
+          <div id="journals_container"></div>
+
+          <h3 class="h4 mt-3">Publications by Document Type</h3>
+          <div id="document_type_container"></div>
+        </div>
+
+        <div class="col-lg-6 col-xs-12 mt-lg-0 mt-3">
+          <h3 class="h4">Publications by Study Type</h3>
+          <div id="study_type_container"></div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="tab-pane fade" id="about-tab-pane" role="tabpanel" aria-labelledby="pills-about-tab">
+      <div class="row mt-4">
+        <div class="col-xs-12">
+          <h3 class="h4">About</h3>
+          <p><strong>TM Research Analytics</strong> is an interactive tool designed to support the analysis, visualization, and interpretation of global scientific output related to <strong>Traditional, Complementary, and Integrative Medicine (TCIM)</strong>.</p>
+          <p>Its purpose is to provide researchers, policymakers, managers, and other stakeholders with a comprehensive overview of trends, geographical distribution, therapeutic methods, and key thematic areas in this field, facilitating evidence-informed decision-making.</p>
+          <p>The dashboard was developed based on data indexed in the <strong>Traditional Medicine Global Library (TMGL)</strong> and related databases. The process involved data extraction, cleaning, and classification, followed by the creation of interactive visualizations using <strong>Python</strong>. The design and indicators were defined collaboratively by BIREME/PAHO/WHO in alignment with the needs of the WHO Traditional Medicine Centre (TMC) and the Department of Digital Health and Innovation (DHI).</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -130,7 +166,10 @@ HTML_TEMPLATE = """
     {html_timeline}
 
     {html_indicators}
+
+    {html_journals}
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>
 """
@@ -143,6 +182,7 @@ def generate_html_reports(ti):
     timeline_data = ti.xcom_pull(task_ids='generate_html_timeline')
     map_data = ti.xcom_pull(task_ids='generate_html_map')
     indicators_data = ti.xcom_pull(task_ids='generate_html_indicators')
+    journal_data = ti.xcom_pull(task_ids='generate_html_journal')
 
     html_with_data = HTML_TEMPLATE.format(
         html_language=language_data['html'],
@@ -151,7 +191,8 @@ def generate_html_reports(ti):
         year_range_max=language_data['max_year'],
         html_timeline=timeline_data['html'],
         html_map=map_data['html'],
-        html_indicators=indicators_data['html']
+        html_indicators=indicators_data['html'],
+        html_journals=journal_data['html']
     )
 
     fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
@@ -196,6 +237,10 @@ with DAG(
         task_id='generate_html_indicators',
         python_callable=generate_html_indicators,
     )
+    generate_html_journal_task = PythonOperator(
+        task_id='generate_html_journal',
+        python_callable=generate_html_journal,
+    )
 
     generate_reports_task = PythonOperator(
         task_id='generate_html_reports',
@@ -206,3 +251,4 @@ with DAG(
     generate_html_timeline_task >> generate_reports_task
     generate_html_map_task >> generate_reports_task
     generate_html_indicators_task >> generate_reports_task
+    generate_html_journal_task >> generate_reports_task
