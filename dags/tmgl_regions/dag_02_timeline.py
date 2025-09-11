@@ -8,6 +8,48 @@ from data_governance.dags.tmgl_metrics.misc import get_tmgl_countries_query
 from data_governance.dags.tmgl_regions.misc import get_regions
 
 
+BASE_PIPELINE = [
+    {"$addFields": {
+        "year": {
+            "$toInt": {
+                "$ifNull": [
+                    {
+                        "$getField": {
+                            "field": "match",
+                            "input": {
+                                "$regexFind": {
+                                    "input": {
+                                        "$cond": [
+                                            {"$eq": [{"$type": "$dp"}, "string"]},
+                                            "$dp",
+                                            ""
+                                        ]
+                                    },
+                                    "regex": r"\d{4}"
+                                }
+                            }
+                        }
+                    },
+                    "0"  # default se não encontrou ano
+                ]
+            }
+        }
+    }},
+    {"$match": {"year": {"$gte": 1500}}},
+    {"$group": {
+        "_id": {
+            "year": "$year"
+        },
+        "total": {"$sum": 1},
+        "with_fulltext": {
+            "$sum": {
+                "$cond": [{"$eq": ["$fulltext", "1"]}, 1, 0]
+            }
+        }
+    }}
+]
+
+
 def create_timeline():
     logger = logging.getLogger(__name__)
 
@@ -16,46 +58,7 @@ def create_timeline():
     target_collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
 
     batch = []
-    pipeline = [
-        {"$addFields": {
-            "year": {
-                "$toInt": {
-                    "$ifNull": [
-                        {
-                            "$getField": {
-                                "field": "match",
-                                "input": {
-                                    "$regexFind": {
-                                        "input": {
-                                            "$cond": [
-                                                {"$eq": [{"$type": "$dp"}, "string"]},
-                                                "$dp",
-                                                ""
-                                            ]
-                                        },
-                                        "regex": r"\d{4}"
-                                    }
-                                }
-                            }
-                        },
-                        "0"  # default se não encontrou ano
-                    ]
-                }
-            }
-        }},
-        {"$match": {"year": {"$gte": 1500}}},
-        {"$group": {
-            "_id": {
-                "year": "$year"
-            },
-            "total": {"$sum": 1},
-            "with_fulltext": {
-                "$sum": {
-                    "$cond": [{"$eq": ["$fulltext", "1"]}, 1, 0]
-                }
-            }
-        }}
-    ]
+    pipeline = BASE_PIPELINE
 
     for result in source_collection.aggregate(pipeline):
         year = result["_id"]["year"]
@@ -102,46 +105,8 @@ def create_timeline_region():
         logger.info(query)
 
         pipeline = [
-            {"$match": query},
-            {"$addFields": {
-                "year": {
-                    "$toInt": {
-                        "$ifNull": [
-                            {
-                                "$getField": {
-                                    "field": "match",
-                                    "input": {
-                                        "$regexFind": {
-                                            "input": {
-                                                "$cond": [
-                                                    {"$eq": [{"$type": "$dp"}, "string"]},
-                                                    "$dp",
-                                                    ""
-                                                ]
-                                            },
-                                            "regex": r"\d{4}"
-                                        }
-                                    }
-                                }
-                            },
-                            "0"  # default se não encontrou ano
-                        ]
-                    }
-                }
-            }},
-            {"$match": {"year": {"$gte": 1500}}},
-            {"$group": {
-                "_id": {
-                    "year": "$year"
-                },
-                "total": {"$sum": 1},
-                "with_fulltext": {
-                    "$sum": {
-                        "$cond": [{"$eq": ["$fulltext", "1"]}, 1, 0]
-                    }
-                }
-            }}
-        ]
+            {"$match": query}
+        ] + BASE_PIPELINE
 
         for result in source_collection.aggregate(pipeline):
             year = result["_id"]["year"]

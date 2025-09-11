@@ -5,7 +5,7 @@ def get_regions(collection):
     pipeline = [
         {
             "$group": {
-                "_id": "$region_nome",
+                "_id": "$who_region",
                 "countries": {
                     "$addToSet": {
                         "$cond": [

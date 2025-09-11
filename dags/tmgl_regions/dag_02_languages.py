@@ -8,6 +8,46 @@ from data_governance.dags.tmgl_metrics.misc import get_tmgl_countries_query
 from data_governance.dags.tmgl_regions.misc import get_regions
 
 
+BASE_PIPELINE = [
+    {"$unwind": "$la"},
+    {"$addFields": {
+        "year": {
+            "$toInt": {
+                "$ifNull": [
+                    {
+                        "$getField": {
+                            "field": "match",
+                            "input": {
+                                "$regexFind": {
+                                    "input": {
+                                        "$cond": [
+                                            {"$eq": [{"$type": "$dp"}, "string"]},
+                                            "$dp",
+                                            ""
+                                        ]
+                                    },
+                                    "regex": r"\d{4}"
+                                }
+                            }
+                        }
+                    },
+                    "0"  # valor default quando não encontra \d{4}
+                ]
+            }
+        }
+    }},
+    # Filtra apenas anos encontrados e maiores ou iguais a 1500
+    {"$match": {"year": {"$gte": 1500}}},
+    {"$group": {
+        "_id": {
+            "language": {"$toLower": "$la"},
+            "year": "$year"
+        },
+        "count": {"$sum": 1}
+    }}
+]
+
+
 def create_metric_languages():
     logger = logging.getLogger(__name__)
 
@@ -17,44 +57,7 @@ def create_metric_languages():
     
     batch = []
     # Agrupa por idioma + ano extraído de dp
-    pipeline = [
-        {"$unwind": "$la"},
-        {"$addFields": {
-            "year": {
-                "$toInt": {
-                    "$ifNull": [
-                        {
-                            "$getField": {
-                                "field": "match",
-                                "input": {
-                                    "$regexFind": {
-                                        "input": {
-                                            "$cond": [
-                                                {"$eq": [{"$type": "$dp"}, "string"]},
-                                                "$dp",
-                                                ""
-                                            ]
-                                        },
-                                        "regex": r"\d{4}"
-                                    }
-                                }
-                            }
-                        },
-                        "0"  # valor default quando não encontra \d{4}
-                    ]
-                }
-            }
-        }},
-        # Filtra apenas anos encontrados e maiores ou iguais a 1500
-        {"$match": {"year": {"$gte": 1500}}},
-        {"$group": {
-            "_id": {
-                "language": {"$toLower": "$la"},
-                "year": "$year"
-            },
-            "count": {"$sum": 1}
-        }}
-    ]
+    pipeline = BASE_PIPELINE
     
     # Processa cada idioma/ano retornado para o país
     for result in source_collection.aggregate(pipeline):
@@ -105,44 +108,8 @@ def create_metric_languages_region():
 
         # Agrupa por idioma + ano extraído de dp
         pipeline = [
-            {"$match": query},
-            {"$unwind": "$la"},
-            {"$addFields": {
-                "year": {
-                    "$toInt": {
-                        "$ifNull": [
-                            {
-                                "$getField": {
-                                    "field": "match",
-                                    "input": {
-                                        "$regexFind": {
-                                            "input": {
-                                                "$cond": [
-                                                    {"$eq": [{"$type": "$dp"}, "string"]},
-                                                    "$dp",
-                                                    ""
-                                                ]
-                                            },
-                                            "regex": r"\d{4}"
-                                        }
-                                    }
-                                }
-                            },
-                            "0"  # valor default quando não encontra \d{4}
-                        ]
-                    }
-                }
-            }},
-            # Filtra apenas anos encontrados e maiores ou iguais a 1500
-            {"$match": {"year": {"$gte": 1500}}},
-            {"$group": {
-                "_id": {
-                    "language": {"$toLower": "$la"},
-                    "year": "$year"
-                },
-                "count": {"$sum": 1}
-            }}
-        ]
+            {"$match": query}
+        ] + BASE_PIPELINE
         
         # Processa cada idioma/ano retornado para o país
         for result in source_collection.aggregate(pipeline):
