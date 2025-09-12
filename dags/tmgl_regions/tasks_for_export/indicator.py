@@ -14,34 +14,19 @@ function updateIndicators() {
     const total_documents_container = document.getElementById("indicator_total_documents");
     const total_fulltext_container = document.getElementById("indicator_total_fulltext");
 
+    let year_from = {year_from};
     let filtered;
-
     if (selectedRegion === "Todas") {
         // Junta dados de todas as regiões
-        filtered = Object.values(timeline_year_json)
-            .flat()
-            .filter((d) => d.ano >= yearFrom && d.ano <= yearTo);
-
-        // Agrupa por ano somando os valores
-        const grouped = {};
-        filtered.forEach(d => {
-            if (!grouped[d.ano]) {
-                grouped[d.ano] = {
-                    ano: d.ano, 
-                    total_documents: 0, 
-                    total_fulltext: 0 
-                };
-            }
-            grouped[d.ano].total_documents += d.total_documents || 0;
-            grouped[d.ano].total_fulltext += d.total_fulltext || 0;
-        });
-
-        // Converte para array
-        filtered = Object.values(grouped);
+        filtered = Object.values(timeline_year_json).flat();
     } else {
-        filtered = timeline_region_year_json[selectedRegion]?.filter(
-            (d) => d.ano >= yearFrom && d.ano <= yearTo
-        ) ?? [];
+        filtered = timeline_region_year_json[selectedRegion];
+    }
+    // Selecting all years before starting year
+    if (yearFrom === year_from) {
+        filtered = filtered.filter((d) => d.ano <= yearTo);
+    } else {
+        filtered = filtered.filter((d) => d.ano >= yearFrom && d.ano <= yearTo);
     }
 
     if (!filtered || filtered.length === 0) {
@@ -65,9 +50,11 @@ updateIndicators();
 """
 
 
-def generate_html_indicators():
+def generate_html_indicators(year_from):
     logger = logging.getLogger(__name__)
 
+    html_with_data = HTML_TEMPLATE.replace("{year_from}", str(year_from))
+
     return { 
-        'html': HTML_TEMPLATE
+        'html': html_with_data
     }

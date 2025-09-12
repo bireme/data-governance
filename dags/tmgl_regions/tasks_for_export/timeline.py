@@ -30,7 +30,15 @@ let timeline_chart = Highcharts.chart("timeline_container", {
         text: ""
     },
     xAxis: { 
-        title: { text: "Year" }
+        title: { text: "Year" },
+        labels: {
+            formatter: function() {
+                if (this.value === {year_from}) {
+                    return "+" + this.value;
+                }
+                return this.value;
+            }
+        }
     },
     yAxis: {
         min: 0,
@@ -55,34 +63,19 @@ function updateTimelineChart() {
 
     const selectedRegion = regionSelect.value;
 
+    let year_from = {year_from};
     let filtered;
-
     if (selectedRegion === "Todas") {
         // Junta dados de todas as regiões
-        filtered = Object.values(timeline_year_json)
-            .flat()
-            .filter((d) => d.ano >= yearFrom && d.ano <= yearTo);
-
-        // Agrupa por ano somando os valores
-        const grouped = {};
-        filtered.forEach(d => {
-            if (!grouped[d.ano]) {
-                grouped[d.ano] = {
-                    ano: d.ano, 
-                    total_documents: 0, 
-                    total_fulltext: 0 
-                };
-            }
-            grouped[d.ano].total_documents += d.total_documents || 0;
-            grouped[d.ano].total_fulltext += d.total_fulltext || 0;
-        });
-
-        // Converte para array
-        filtered = Object.values(grouped);
+        filtered = Object.values(timeline_year_json).flat();
     } else {
-        filtered = timeline_region_year_json[selectedRegion]?.filter(
-            (d) => d.ano >= yearFrom && d.ano <= yearTo
-        ) ?? [];
+        filtered = timeline_region_year_json[selectedRegion];
+    }
+    // Selecting all years before starting year
+    if (yearFrom === year_from) {
+        filtered = filtered.filter((d) => d.ano <= yearTo);
+    } else {
+        filtered = filtered.filter((d) => d.ano >= yearFrom && d.ano <= yearTo);
     }
 
     if (!filtered || filtered.length === 0) {
@@ -91,6 +84,28 @@ function updateTimelineChart() {
         timeline_chart.update({ xAxis: { categories: [] } });
         return;
     }
+
+    // Agrupa por ano no ano de valor minimo
+    const grouped = {};
+    filtered.forEach(d => {
+        if (d.ano < {year_from}) {
+            year = {year_from};
+        } else {
+            year = d.ano;
+        }
+        
+        if (!grouped[year]) {
+            grouped[year] = {
+                ano: year,
+                total_documents: 0,
+                total_fulltext: 0
+            };
+        }
+        grouped[year].total_documents += d.total_documents || 0;
+        grouped[year].total_fulltext += d.total_fulltext || 0;
+    });
+    // Converte para array
+    filtered = Object.values(grouped);
 
     // Ordena pelos anos
     filtered.sort((a, b) => a.ano - b.ano);
@@ -112,7 +127,7 @@ updateTimelineChart();
 """
 
 
-def generate_html_timeline():
+def generate_html_timeline(year_from):
     logger = logging.getLogger(__name__)
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
@@ -160,6 +175,7 @@ def generate_html_timeline():
 
     html_with_data = HTML_TEMPLATE.replace("{timeline_region_year_json}", timeline_region_year_json)
     html_with_data = html_with_data.replace("{timeline_year_json}", timeline_year_json)
+    html_with_data = html_with_data.replace("{year_from}", str(year_from))
 
     return { 
         'html': html_with_data

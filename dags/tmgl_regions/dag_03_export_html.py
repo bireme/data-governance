@@ -8,6 +8,7 @@ from data_governance.dags.tmgl_regions.tasks_for_export.language import generate
 from data_governance.dags.tmgl_regions.tasks_for_export.timeline import generate_html_timeline
 from data_governance.dags.tmgl_regions.tasks_for_export.indicator import generate_html_indicators
 from data_governance.dags.tmgl_regions.tasks_for_export.journal import generate_html_journal
+from data_governance.dags.tmgl_regions.tasks_for_export.doctype import generate_html_doctype
 
 
 HTML_TEMPLATE = """
@@ -24,6 +25,7 @@ HTML_TEMPLATE = """
   <script src="./highcharts.js"></script>
   <script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>
   <script src="./map.js"></script>
+  <script src="./treemap.js"></script>
   <script src="./accessibility.js"></script>
   <script src="./exporting.js"></script>
   <link
@@ -43,7 +45,7 @@ HTML_TEMPLATE = """
       <button class="nav-link" id="pills-study-type-tab" data-bs-toggle="pill" data-bs-target="#study-type-tab-pane" type="button" role="tab" aria-controls="study-type-tab-pane" aria-selected="false">Study Type and Sources</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="pills-topics-countries-tab" data-bs-toggle="pill" data-bs-target="#topics-countries-tab-pane" type="button" role="tab" aria-controls="topics-countries-tab-pane" aria-selected="false">Topics & Countries focus</button>
+      <button class="nav-link" id="pills-topics-countries-tab" data-bs-toggle="pill" data-bs-target="#topics-countries-tab-pane" type="button" role="tab" aria-controls="topics-countries-tab-pane" aria-selected="false">Topics & Countries</button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="pills-tcim-areas-tab" data-bs-toggle="pill" data-bs-target="#tcim-areas-tab-pane" type="button" role="tab" aria-controls="tcim-areas-tab-pane" aria-selected="false">TCIM areas</button>
@@ -112,7 +114,7 @@ HTML_TEMPLATE = """
           <div id="journals_container"></div>
 
           <h3 class="h4 mt-3">Publications by Document Type</h3>
-          <div id="document_type_container"></div>
+          <div id="doctype_container"></div>
         </div>
 
         <div class="col-lg-6 col-xs-12 mt-lg-0 mt-3">
@@ -154,8 +156,14 @@ HTML_TEMPLATE = """
       step: 1,
       tooltips: true,
       format: {{
-        to: (value) => Math.floor(value),
-        from: (value) => Number(value),
+        to: (value) => {{
+            const val = Math.floor(value);
+            if (val === {year_range_min}) {{
+                return "+ " + val;
+            }}
+            return val;
+        }},
+        from: (value) => Number(value)
       }},
     }});
 
@@ -168,11 +176,15 @@ HTML_TEMPLATE = """
     {html_indicators}
 
     {html_journals}
+
+    {html_doctype}
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>
 """
+
+YEAR_FROM = 1950
 
 
 def generate_html_reports(ti):
@@ -183,16 +195,18 @@ def generate_html_reports(ti):
     map_data = ti.xcom_pull(task_ids='generate_html_map')
     indicators_data = ti.xcom_pull(task_ids='generate_html_indicators')
     journal_data = ti.xcom_pull(task_ids='generate_html_journal')
+    doctype_data = ti.xcom_pull(task_ids='generate_html_doctype')
 
     html_with_data = HTML_TEMPLATE.format(
         html_language=language_data['html'],
         region_options=language_data['region_options'],
-        year_range_min=language_data['min_year'],
+        year_range_min=YEAR_FROM,
         year_range_max=language_data['max_year'],
         html_timeline=timeline_data['html'],
         html_map=map_data['html'],
         html_indicators=indicators_data['html'],
-        html_journals=journal_data['html']
+        html_journals=journal_data['html'],
+        html_doctype=doctype_data['html']
     )
 
     fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
@@ -224,22 +238,32 @@ with DAG(
     generate_html_language_task = PythonOperator(
         task_id='generate_html_language',
         python_callable=generate_html_language,
+        op_kwargs={'year_from': YEAR_FROM},
     )
     generate_html_timeline_task = PythonOperator(
         task_id='generate_html_timeline',
         python_callable=generate_html_timeline,
+        op_kwargs={'year_from': YEAR_FROM},
     )
     generate_html_map_task = PythonOperator(
         task_id='generate_html_map',
         python_callable=generate_html_map,
+        op_kwargs={'year_from': YEAR_FROM},
     )
     generate_html_indicators_task = PythonOperator(
         task_id='generate_html_indicators',
         python_callable=generate_html_indicators,
+        op_kwargs={'year_from': YEAR_FROM},
     )
     generate_html_journal_task = PythonOperator(
         task_id='generate_html_journal',
         python_callable=generate_html_journal,
+        op_kwargs={'year_from': YEAR_FROM},
+    )
+    generate_html_doctype_task = PythonOperator(
+        task_id='generate_html_doctype',
+        python_callable=generate_html_doctype,
+        op_kwargs={'year_from': YEAR_FROM},
     )
 
     generate_reports_task = PythonOperator(
@@ -252,3 +276,4 @@ with DAG(
     generate_html_map_task >> generate_reports_task
     generate_html_indicators_task >> generate_reports_task
     generate_html_journal_task >> generate_reports_task
+    generate_html_doctype_task >> generate_reports_task

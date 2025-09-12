@@ -41,8 +41,9 @@ let lang_chart = Highcharts.chart("lang_container", {
         }
     },
     yAxis: {
-        min: 0,
-        title: { text: "Number of documents" }
+        min: 1,
+        title: { text: "Number of documents" },
+        type: "logarithmic"
     },
     plotOptions: {
         bar: {
@@ -60,16 +61,18 @@ function updateLangChart() {
 
     const selectedRegion = regionSelect.value;
 
+    let year_from = {year_from};
     let filtered;
-
     if (selectedRegion === "Todas") {
-        filtered = Object.values(lang_year_json)
-            .flat()
-            .filter((d) => d.ano >= yearFrom && d.ano <= yearTo);
+        filtered = Object.values(lang_year_json).flat();
     } else {
-        filtered = lang_region_year_json[selectedRegion].filter(
-            (d) => d.ano >= yearFrom && d.ano <= yearTo
-        );
+        filtered = lang_region_year_json[selectedRegion];
+    }
+    // Selecting all years before starting year
+    if (yearFrom === year_from) {
+        filtered = filtered.filter((d) => d.ano <= yearTo);
+    } else {
+        filtered = filtered.filter((d) => d.ano >= yearFrom && d.ano <= yearTo);
     }
 
     if (!filtered || filtered.length === 0) {
@@ -113,7 +116,7 @@ updateLangChart();
 """
 
 
-def generate_html_language():
+def generate_html_language(year_from):
     logger = logging.getLogger(__name__)
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
@@ -172,6 +175,7 @@ def generate_html_language():
 
     html_with_data = HTML_TEMPLATE.replace("{lang_region_year_json}", lang_region_year_json)
     html_with_data = html_with_data.replace("{lang_year_json}", lang_year_json)
+    html_with_data = html_with_data.replace("{year_from}", str(year_from))
 
     return { 
         'min_year': min_year,

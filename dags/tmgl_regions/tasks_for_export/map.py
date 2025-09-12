@@ -79,24 +79,28 @@ const map_json = {map_json};
 
         const selectedRegion = regionSelect.value;
 
-        let filteredData;
-
+        let year_from = {year_from};
+        let filtered;
         if (selectedRegion === "Todas") {
-            filteredData = Object.values(map_json)
-                .flat()
-                .filter(d => d.ano >= yearFrom && d.ano <= yearTo);
+            filtered = Object.values(map_json).flat();
         } else {
-            filteredData = map_json[selectedRegion]?.filter(d => d.ano >= yearFrom && d.ano <= yearTo) ?? [];
+            filtered = map_json[selectedRegion];
+        }
+        // Selecting all years before starting year
+        if (yearFrom === year_from) {
+            filtered = filtered.filter((d) => d.ano <= yearTo);
+        } else {
+            filtered = filtered.filter((d) => d.ano >= yearFrom && d.ano <= yearTo);
         }
 
-        if (!filteredData || filteredData.length === 0) {
+        if (!filtered || filtered.length === 0) {
             map.series[0].setData([]);
             return;
         }
 
         const aggregated = {};
 
-        filteredData.forEach(d => {
+        filtered.forEach(d => {
             if (!aggregated[d.country_iso]) {
                 aggregated[d.country_iso] = {
                     country_iso: d.country_iso,
@@ -137,7 +141,7 @@ const map_json = {map_json};
 """
 
 
-def generate_html_map():
+def generate_html_map(year_from):
     logger = logging.getLogger(__name__)
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
@@ -172,6 +176,7 @@ def generate_html_map():
     data_json = json.dumps(aggregated_data, ensure_ascii=False)
 
     html_with_data = HTML_TEMPLATE.replace("{map_json}", data_json)
+    html_with_data = html_with_data.replace("{year_from}", str(year_from))
 
     return { 
         'html': html_with_data

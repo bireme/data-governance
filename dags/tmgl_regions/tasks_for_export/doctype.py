@@ -6,16 +6,16 @@ from airflow.hooks.filesystem import FSHook
 
 
 HTML_TEMPLATE = """
-async function journal_loadDataAndRenderChart() {
-    const regionResp = await fetch('journal_region_year.json');
-    const journal_region_year_json = await regionResp.json();
+async function doctype_loadDataAndRenderChart() {
+    const regionResp = await fetch('doctype_region_year.json');
+    const doctype_region_year_json = await regionResp.json();
 
-    const yearResp = await fetch('journal_year.json');
-    const journal_year_json = await yearResp.json();
+    const yearResp = await fetch('doctype_year.json');
+    const doctype_year_json = await yearResp.json();
 
-    let journal_chart = Highcharts.chart("journals_container", {
+    let doctype_chart = Highcharts.chart("doctype_container", {
         chart: { 
-            type: "bar",
+            type: 'treemap',
             backgroundColor: '#F7F7F8',
             borderRadius: 16,
             borderColor: '#C7C6C0',
@@ -43,30 +43,25 @@ async function journal_loadDataAndRenderChart() {
                 fontSize: '15px'
             }
         },
-        legend: { enabled: false },
-        xAxis: { 
-            title: { text: null },
-            labels: {
-                rotation: 0,
-                step: 1,
-                style: {
-                    fontSize: '14px'
-                }
+        tooltip: {
+            formatter: function () {
+                return `<b>${this.point.name}</b>: ${this.point.originalValue.toLocaleString('pt-BR')}`;
             }
         },
-        yAxis: {
-            min: 0,
-            title: { text: "Number of documents" }
-        },
         plotOptions: {
-            bar: {
+            treemap: {
                 dataLabels: { enabled: true },
             },
         },
-        series: [{ name: "Number of documents", data: [], color: "#0093d5" }],
+        series: [{ 
+            type: 'treemap',
+            layoutAlgorithm: 'squarified',
+            data: [], 
+            color: "#0093d5" 
+        }],
     });
 
-    function updateJournalChart() {
+    function updateDoctypeChart() {
         const year_range = slider.noUiSlider.get(true);
         const yearFrom = parseInt(year_range[0]);
         const yearTo = parseInt(year_range[1]);
@@ -77,9 +72,9 @@ async function journal_loadDataAndRenderChart() {
         let year_from = {year_from};
         let filtered;
         if (selectedRegion === "Todas") {
-            filtered = Object.values(journal_year_json).flat();
+            filtered = Object.values(doctype_year_json).flat();
         } else {
-            filtered = journal_region_year_json[selectedRegion];
+            filtered = doctype_region_year_json[selectedRegion];
         }
         // Selecting all years before starting year
         if (yearFrom === year_from) {
@@ -89,51 +84,50 @@ async function journal_loadDataAndRenderChart() {
         }
 
         if (!filtered || filtered.length === 0) {
-            journal_chart.series[0].setData([]);
-            journal_chart.update({ xAxis: { categories: [] } });
-            journal_chart.showNoData();
+            doctype_chart.series[0].setData([]);
+            doctype_chart.showNoData();
             return;
         } else {
-            journal_chart.hideNoData();
+            doctype_chart.hideNoData();
         }
 
-        const journals = [...new Set(filtered.flatMap(obj => Object.keys(obj)))].filter(key => key !== "ano");
+        const doctypes = [...new Set(filtered.flatMap(obj => Object.keys(obj)))].filter(key => key !== "ano");
 
         const total = {};
 
         filtered.forEach((d) => {
-            journals.forEach((journal) => {
-                total[journal] = (total[journal] || 0) + (d[journal] || 0);
+            doctypes.forEach((doctype) => {
+                total[doctype] = (total[doctype] || 0) + (d[doctype] || 0);
             });
         });
 
         // Monta pares idioma/valor
-        let sorted = journals.map((journal) => ({
-            name: journal,
-            value: total[journal]
+        let sorted = doctypes.map((doctype) => ({
+            name: doctype,
+            value: Math.sqrt(total[doctype]),
+            originalValue: total[doctype]
         }));
 
         // Ordena do maior para o menor
         sorted.sort((a, b) => b.value - a.value);
-        sorted = sorted.slice(0, 10);
+        sorted = sorted.slice(0, 20);
 
         // Atualiza gráfico com dados ordenados
-        journal_chart.series[0].setData(sorted.map(item => item.value));
-        journal_chart.update({ xAxis: { categories: sorted.map(item => item.name) } });
+        doctype_chart.series[0].setData(sorted);
     }
 
-    const debouncedUpdateJournal = debounce(updateJournalChart, 100);
-    slider.noUiSlider.on("update", debouncedUpdateJournal);
-    regionSelect.addEventListener("change", debouncedUpdateJournal);
+    const debouncedUpdateDoctype = debounce(updateDoctypeChart, 100);
+    slider.noUiSlider.on("update", debouncedUpdateDoctype);
+    regionSelect.addEventListener("change", debouncedUpdateDoctype);
 
-    updateJournalChart();
+    updateDoctypeChart();
 }
 
-journal_loadDataAndRenderChart();
+doctype_loadDataAndRenderChart();
 """
 
 
-def generate_html_journal(year_from):
+def generate_html_doctype(year_from):
     logger = logging.getLogger(__name__)
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
@@ -141,14 +135,14 @@ def generate_html_journal(year_from):
     fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
     output_dir = fs_hook.get_path()
 
-    # Builds journal_region_year_json
-    documents = list(collection.find({"type": "journal", "region": {"$ne": None}}).sort("year", 1))
+    # Builds doctype_region_year_json
+    documents = list(collection.find({"type": "doctype", "region": {"$ne": None}}).sort("year", 1))
     aggregated_data = {}
     for doc in documents:
         region = doc["region"]
 
         year = int(doc["year"])
-        journal = doc["name"]
+        doctype = doc["name"]
         count = doc.get("count", 0)
 
         if region not in aggregated_data:
@@ -159,19 +153,19 @@ def generate_html_journal(year_from):
             year_data = {"ano": year}
             aggregated_data[region].append(year_data)
 
-        year_data[journal] = count
+        year_data[doctype] = count
 
-    output_file = os.path.join(output_dir, "journal_region_year.json")
+    output_file = os.path.join(output_dir, "doctype_region_year.json")
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(aggregated_data, f, ensure_ascii=False, indent=4)
 
 
-    # Builds journal_year_json
-    documents = list(collection.find({"type": "journal", "region": None}).sort("year", 1))
+    # Builds doctype_year_json
+    documents = list(collection.find({"type": "doctype", "region": None}).sort("year", 1))
     aggregated_data = []
     for doc in documents:
         year = int(doc["year"])
-        journal = doc["name"]
+        doctype = doc["name"]
         count = doc.get("count", 0)
 
         year_data = next((item for item in aggregated_data if item["ano"] == year), None)
@@ -179,9 +173,9 @@ def generate_html_journal(year_from):
             year_data = {"ano": year}
             aggregated_data.append(year_data)
 
-        year_data[journal] = count
+        year_data[doctype] = count
 
-    output_file = os.path.join(output_dir, "journal_year.json")
+    output_file = os.path.join(output_dir, "doctype_year.json")
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(aggregated_data, f, ensure_ascii=False, indent=4)
 
