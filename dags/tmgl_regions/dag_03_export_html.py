@@ -9,6 +9,7 @@ from data_governance.dags.tmgl_regions.tasks_for_export.timeline import generate
 from data_governance.dags.tmgl_regions.tasks_for_export.indicator import generate_html_indicators
 from data_governance.dags.tmgl_regions.tasks_for_export.journal import generate_html_journal
 from data_governance.dags.tmgl_regions.tasks_for_export.doctype import generate_html_doctype
+from data_governance.dags.tmgl_regions.tasks_for_export.studytype import generate_html_studytype
 
 
 HTML_TEMPLATE = """
@@ -119,7 +120,7 @@ HTML_TEMPLATE = """
 
         <div class="col-lg-6 col-xs-12 mt-lg-0 mt-3">
           <h3 class="h4">Publications by Study Type</h3>
-          <div id="study_type_container"></div>
+          <div id="studytype_container"></div>
         </div>
       </div>
     </div>
@@ -178,6 +179,8 @@ HTML_TEMPLATE = """
     {html_journals}
 
     {html_doctype}
+
+    {html_studytype}
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
@@ -196,6 +199,7 @@ def generate_html_reports(ti):
     indicators_data = ti.xcom_pull(task_ids='generate_html_indicators')
     journal_data = ti.xcom_pull(task_ids='generate_html_journal')
     doctype_data = ti.xcom_pull(task_ids='generate_html_doctype')
+    studytype_data = ti.xcom_pull(task_ids='generate_html_studytype')
 
     html_with_data = HTML_TEMPLATE.format(
         html_language=language_data['html'],
@@ -206,7 +210,8 @@ def generate_html_reports(ti):
         html_map=map_data['html'],
         html_indicators=indicators_data['html'],
         html_journals=journal_data['html'],
-        html_doctype=doctype_data['html']
+        html_doctype=doctype_data['html'],
+        html_studytype=studytype_data['html']
     )
 
     fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
@@ -265,6 +270,11 @@ with DAG(
         python_callable=generate_html_doctype,
         op_kwargs={'year_from': YEAR_FROM},
     )
+    generate_html_studytype_task = PythonOperator(
+        task_id='generate_html_studytype',
+        python_callable=generate_html_studytype,
+        op_kwargs={'year_from': YEAR_FROM},
+    )
 
     generate_reports_task = PythonOperator(
         task_id='generate_html_reports',
@@ -277,3 +287,4 @@ with DAG(
     generate_html_indicators_task >> generate_reports_task
     generate_html_journal_task >> generate_reports_task
     generate_html_doctype_task >> generate_reports_task
+    generate_html_studytype_task >> generate_reports_task
