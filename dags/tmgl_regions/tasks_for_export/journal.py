@@ -125,8 +125,6 @@ async function journal_loadDataAndRenderChart() {
     const debouncedUpdateJournal = debounce(updateJournalChart, 100);
     slider.noUiSlider.on("update", debouncedUpdateJournal);
     regionSelect.addEventListener("change", debouncedUpdateJournal);
-
-    updateJournalChart();
 }
 
 journal_loadDataAndRenderChart();

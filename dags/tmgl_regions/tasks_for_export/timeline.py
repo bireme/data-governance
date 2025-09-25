@@ -122,8 +122,6 @@ function updateTimelineChart() {
 const debouncedUpdateTimeline = debounce(updateTimelineChart, 100);
 slider.noUiSlider.on("update", debouncedUpdateTimeline);
 regionSelect.addEventListener("change", debouncedUpdateTimeline);
-
-updateTimelineChart();
 """
 
 

@@ -135,8 +135,6 @@ const map_json = {map_json};
     const debouncedUpdateMap = debounce(updateMap, 100);
     slider.noUiSlider.on('update', debouncedUpdateMap);
     regionSelect.addEventListener('change', debouncedUpdateMap);
-
-    updateMap();
 })();
 """
 

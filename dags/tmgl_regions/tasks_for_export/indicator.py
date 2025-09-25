@@ -45,8 +45,6 @@ function updateIndicators() {
 const debouncedUpdateIndicators = debounce(updateIndicators, 100);
 slider.noUiSlider.on("update", debouncedUpdateIndicators);
 regionSelect.addEventListener("change", debouncedUpdateIndicators);
-
-updateIndicators();
 """
 
 

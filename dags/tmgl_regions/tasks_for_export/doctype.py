@@ -15,7 +15,7 @@ async function doctype_loadDataAndRenderChart() {
 
     let doctype_chart = Highcharts.chart("doctype_container", {
         chart: { 
-            type: 'treemap',
+            type: 'column',
             backgroundColor: '#F7F7F8',
             borderRadius: 16,
             borderColor: '#C7C6C0',
@@ -35,6 +35,7 @@ async function doctype_loadDataAndRenderChart() {
         title: { 
             text: ""
         },
+        legend: { enabled: false },
         lang: {
             noData: 'No data to display for this filter combination'
         },
@@ -43,21 +44,20 @@ async function doctype_loadDataAndRenderChart() {
                 fontSize: '15px'
             }
         },
-        tooltip: {
-            formatter: function () {
-                return `<b>${this.point.name}</b>: ${this.point.originalValue.toLocaleString('pt-BR')}`;
-            }
+        yAxis: {
+            min: 1,
+            title: { text: "Number of documents" },
+            type: "logarithmic"
         },
         plotOptions: {
-            treemap: {
+            column: {
                 dataLabels: { enabled: true },
             },
         },
         series: [{ 
-            type: 'treemap',
-            layoutAlgorithm: 'squarified',
+            name: "Number of documents",
             data: [], 
-            color: "#0093d5" 
+            color: "#0093d5"
         }],
     });
 
@@ -104,8 +104,7 @@ async function doctype_loadDataAndRenderChart() {
         // Monta pares idioma/valor
         let sorted = doctypes.map((doctype) => ({
             name: doctype,
-            value: Math.sqrt(total[doctype]),
-            originalValue: total[doctype]
+            value: total[doctype]
         }));
 
         // Ordena do maior para o menor
@@ -113,14 +112,13 @@ async function doctype_loadDataAndRenderChart() {
         sorted = sorted.slice(0, 20);
 
         // Atualiza gráfico com dados ordenados
-        doctype_chart.series[0].setData(sorted);
+        doctype_chart.series[0].setData(sorted.map(item => item.value));
+        doctype_chart.update({ xAxis: { categories: sorted.map(item => item.name) } });
     }
 
     const debouncedUpdateDoctype = debounce(updateDoctypeChart, 100);
     slider.noUiSlider.on("update", debouncedUpdateDoctype);
     regionSelect.addEventListener("change", debouncedUpdateDoctype);
-
-    updateDoctypeChart();
 }
 
 doctype_loadDataAndRenderChart();

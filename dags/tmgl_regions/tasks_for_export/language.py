@@ -111,8 +111,6 @@ function updateLangChart() {
 const debouncedUpdateLang = debounce(updateLangChart, 100);
 slider.noUiSlider.on("update", debouncedUpdateLang);
 regionSelect.addEventListener("change", debouncedUpdateLang);
-
-updateLangChart();
 """
 
 
