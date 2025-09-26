@@ -9,8 +9,8 @@ from data_governance.dags.tmgl_regions.misc import get_regions
 
 
 BASE_PIPELINE = [
-    {"$match": {"mj": {"$exists": True, "$ne": None}}},
-    {"$unwind": "$mj"},
+    {"$match": {"who_regions": {"$exists": True, "$ne": None}}},
+    {"$unwind": "$who_regions"},
     {"$addFields": {
         "year": {
             "$toInt": {
@@ -36,28 +36,23 @@ BASE_PIPELINE = [
                 ]
             }
         },
-        "subject_id": {
-            "$arrayElemAt": [
-                {
-                    "$getField": {
-                        "field": "captures",
-                        "input": {
-                            "$regexFind": {
-                                "input": "$mj",
-                                "regex": r"(\d+)"
-                            }
-                        }
+        "region": {
+            "$getField": {
+                "field": "match",
+                "input": {
+                    "$regexFind": {
+                        "input": "$who_regions",
+                        "regex": r"(.+\/.+)"
                     }
-                },
-                0
-            ]
+                }
+            }
         }
     }},
     # Filtra apenas anos encontrados e maiores ou iguais a 1500
-    {"$match": {"year": {"$gte": 1500}, "subject_id": {"$exists": True, "$ne": None}}},
+    {"$match": {"year": {"$gte": 1500}, "region": {"$exists": True, "$ne": None}}},
     {"$group": {
         "_id": {
-            "subject_id": "$subject_id",
+            "region": "$region",
             "year": "$year"
         },
         "count": {"$sum": 1}
@@ -65,48 +60,32 @@ BASE_PIPELINE = [
 ]
 
 
-def load_descriptors(decs_col):
-    """Mapeia códigos DECS para descritores em inglês"""
-    descriptor_map = {}
-    for decs_doc in decs_col.find():
-        raw_mfn = decs_doc.get('Mfn', '').lstrip('0')
-        english_desc = decs_doc.get('Descritor Inglês', '').strip()
-        if raw_mfn and english_desc:
-            descriptor_map[raw_mfn] = english_desc
-    return descriptor_map
-
-
-def create_metric_subjects():
+def create_metric_regions():
     logger = logging.getLogger(__name__)
 
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     source_collection = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
     target_collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
-
-    # Carregar mapeamento DECS
-    decs_col = mongo_hook.get_collection('current', 'DECS')
-    descriptor_map = load_descriptors(decs_col)
     
     batch = []
     pipeline = BASE_PIPELINE
     
     # Processa cada idioma/ano retornado para o país
-    for result in source_collection.aggregate(pipeline, batchSize=500):
-        subject_id = result["_id"]["subject_id"]
-        subject = descriptor_map.get(subject_id, f"{subject_id}")
+    for result in source_collection.aggregate(pipeline):
+        region = result["_id"]["region"]
 
         year = result["_id"]["year"]
-        logger.info(f"{subject}, {year}")
-        
+        logger.info(f"{region}, {year}")
+
         # Ignora se não conseguiu extrair ano
         if year is None:
             continue
         
         batch.append(UpdateOne(
             {
-                "type": "subject",
+                "type": "region",
                 "region": None,
-                "name": subject,
+                "name": region,
                 "year": year
             },
             {
@@ -118,24 +97,17 @@ def create_metric_subjects():
             upsert=True
         ))
 
-        if len(batch) >= 500:
-            target_collection.bulk_write(batch, ordered=False)
-            batch = []
-
+    # Armazenar resultados
     if batch:
         target_collection.bulk_write(batch, ordered=False)
 
 
-def create_metric_subjects_region():
+def create_metric_regions_region():
     logger = logging.getLogger(__name__)
 
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     source_collection = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
     target_collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
-
-    # Carregar mapeamento DECS
-    decs_col = mongo_hook.get_collection('current', 'DECS')
-    descriptor_map = load_descriptors(decs_col)
     
     who_region_collection = mongo_hook.get_collection('who_region', 'TABS')
     regions = get_regions(who_region_collection)
@@ -152,12 +124,11 @@ def create_metric_subjects_region():
         ] + BASE_PIPELINE
         
         # Processa cada idioma/ano retornado para o país
-        for result in source_collection.aggregate(pipeline, batchSize=500):
-            subject_id = result["_id"]["subject_id"]
-            subject = descriptor_map.get(subject_id, f"{subject_id}")
+        for result in source_collection.aggregate(pipeline):
+            region_name = result["_id"]["region"]
 
             year = result["_id"]["year"]
-            logger.info(f"{region}, {subject}, {year}")
+            logger.info(f"{region}, {region_name}, {year}")
             
             # Ignora se não conseguiu extrair ano
             if year is None:
@@ -165,9 +136,9 @@ def create_metric_subjects_region():
             
             batch.append(UpdateOne(
                 {
-                    "type": "subject",
+                    "type": "region",
                     "region": region,
-                    "name": subject,
+                    "name": region_name,
                     "year": year
                 },
                 {
@@ -178,11 +149,8 @@ def create_metric_subjects_region():
                 },
                 upsert=True
             ))
-
-            if len(batch) >= 500:
-                target_collection.bulk_write(batch, ordered=False)
-                batch = []
-
+    
+        # Armazenar resultados
         if batch:
             target_collection.bulk_write(batch, ordered=False)
 
@@ -197,18 +165,18 @@ default_args = {
 }
 
 with DAG(
-    'TMGL_REGION_02_create_metric_subjects',
-    description='TMGL REGION - Calcula o total de documentos por assunto e ano',
-    tags=["tmgl", "metrics", "mongodb", "subject", "year"],
+    'TMGL_REGION_02_create_metric_regions',
+    description='TMGL REGION - Calcula o total de documentos por região e ano',
+    tags=["tmgl", "metrics", "mongodb", "region", "year"],
     schedule=None,
     catchup=False,
     doc_md=__doc__
 ) as dag:
-    create_metric_subjects_task = PythonOperator(
-        task_id='create_metric_subjects',
-        python_callable=create_metric_subjects
+    create_metric_regions_task = PythonOperator(
+        task_id='create_metric_regions',
+        python_callable=create_metric_regions
     )
-    create_metric_subjects_region_task = PythonOperator(
-        task_id='create_metric_subjects_region',
-        python_callable=create_metric_subjects_region
+    create_metric_regions_region_task = PythonOperator(
+        task_id='create_metric_regions_region',
+        python_callable=create_metric_regions_region
     )
