@@ -10,6 +10,9 @@ from data_governance.dags.tmgl_regions.tasks_for_export.indicator import generat
 from data_governance.dags.tmgl_regions.tasks_for_export.journal import generate_html_journal
 from data_governance.dags.tmgl_regions.tasks_for_export.doctype import generate_html_doctype
 from data_governance.dags.tmgl_regions.tasks_for_export.studytype import generate_html_studytype
+from data_governance.dags.tmgl_regions.tasks_for_export.subject import generate_html_subject
+from data_governance.dags.tmgl_regions.tasks_for_export.region import generate_html_region
+from data_governance.dags.tmgl_regions.tasks_for_export.dimention import generate_html_dimention
 
 
 HTML_TEMPLATE = """
@@ -26,6 +29,8 @@ HTML_TEMPLATE = """
   <script src="./highcharts.js"></script>
   <script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>
   <script src="./map.js"></script>
+  <script src="./wordcloud.js"></script>
+  <script src="./drilldown.js"></script>
   <script src="./treemap.js"></script>
   <script src="./accessibility.js"></script>
   <script src="./exporting.js"></script>
@@ -126,6 +131,24 @@ HTML_TEMPLATE = """
     </div>
 
 
+    <div class="tab-pane fade" id="topics-countries-tab-pane" role="tabpanel" aria-labelledby="pills-topics-countries-tab">
+      <div class="row mt-4">
+        <div class="col-lg-6 col-xs-12">
+          <h3 class="h4">Most Frequent Subjects</h3>
+          <div id="subject_container"></div>
+
+          <h3 class="h4 mt-3">TCIM Publications by WHO region with country as topic</h3>
+          <div id="region_container"></div>
+        </div>
+
+        <div class="col-lg-6 col-xs-12 mt-lg-0 mt-3">
+          <h3 class="h4">Publications by Traditional Medicine Dimension</h3>
+          <div id="dimention_container"></div>
+        </div>
+      </div>
+    </div>
+
+
     <div class="tab-pane fade" id="about-tab-pane" role="tabpanel" aria-labelledby="pills-about-tab">
       <div class="row mt-4">
         <div class="col-xs-12">
@@ -181,6 +204,12 @@ HTML_TEMPLATE = """
     {html_doctype}
 
     {html_studytype}
+
+    {html_subject}
+
+    {html_region}
+
+    {html_dimention}
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
@@ -200,6 +229,9 @@ def generate_html_reports(ti):
     journal_data = ti.xcom_pull(task_ids='generate_html_journal')
     doctype_data = ti.xcom_pull(task_ids='generate_html_doctype')
     studytype_data = ti.xcom_pull(task_ids='generate_html_studytype')
+    subject_data = ti.xcom_pull(task_ids='generate_html_subject')
+    region_data = ti.xcom_pull(task_ids='generate_html_region')
+    dimention_data = ti.xcom_pull(task_ids='generate_html_dimention')
 
     html_with_data = HTML_TEMPLATE.format(
         html_language=language_data['html'],
@@ -211,7 +243,10 @@ def generate_html_reports(ti):
         html_indicators=indicators_data['html'],
         html_journals=journal_data['html'],
         html_doctype=doctype_data['html'],
-        html_studytype=studytype_data['html']
+        html_studytype=studytype_data['html'],
+        html_subject=subject_data['html'],
+        html_region=region_data['html'],
+        html_dimention=dimention_data['html']
     )
 
     fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
@@ -275,6 +310,21 @@ with DAG(
         python_callable=generate_html_studytype,
         op_kwargs={'year_from': YEAR_FROM},
     )
+    generate_html_subject_task = PythonOperator(
+        task_id='generate_html_subject',
+        python_callable=generate_html_subject,
+        op_kwargs={'year_from': YEAR_FROM},
+    )
+    generate_html_region_task = PythonOperator(
+        task_id='generate_html_region',
+        python_callable=generate_html_region,
+        op_kwargs={'year_from': YEAR_FROM},
+    )
+    generate_html_dimention_task = PythonOperator(
+        task_id='generate_html_dimention',
+        python_callable=generate_html_dimention,
+        op_kwargs={'year_from': YEAR_FROM},
+    )
 
     generate_reports_task = PythonOperator(
         task_id='generate_html_reports',
@@ -288,3 +338,6 @@ with DAG(
     generate_html_journal_task >> generate_reports_task
     generate_html_doctype_task >> generate_reports_task
     generate_html_studytype_task >> generate_reports_task
+    generate_html_subject_task >> generate_reports_task
+    generate_html_region_task >> generate_reports_task
+    generate_html_dimention_task >> generate_reports_task
