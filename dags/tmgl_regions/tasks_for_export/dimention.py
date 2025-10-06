@@ -23,17 +23,15 @@ async function dimention_loadDataAndRenderChart() {
             height: 700
         },
         colors: [
-            "#ecf4ff",
-            "#d8eaff",
-            "#a7d3ff",
-            "#6fc0ff",
-            "#00aaf5",
-            "#0093d5",
-            "#0074a9",
-            "#005881",
             "#003b58",
-            "#002236",
-            "#001523"
+            "#005881",
+            "#0074a9",
+            "#0093d5",
+            "#00aaf5",
+            "#6fc0ff",
+            "#a7d3ff",
+            "#d8eaff",
+            "#ecf4ff"
         ],
         exporting: {
             buttons: {
@@ -213,7 +211,7 @@ def generate_html_dimention(year_from):
         region = doc["region"]
 
         year = int(doc["year"])
-        name = doc["name"]
+        name = doc["name"].replace("_", " ")
         count = doc.get("count", 0)
 
         if region not in aggregated_data:
@@ -236,7 +234,7 @@ def generate_html_dimention(year_from):
     aggregated_data = []
     for doc in documents:
         year = int(doc["year"])
-        name = doc["name"]
+        name = doc["name"].replace("_", " ")
         count = doc.get("count", 0)
 
         year_data = next((item for item in aggregated_data if item["ano"] == year), None)

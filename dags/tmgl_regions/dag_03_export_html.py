@@ -13,6 +13,9 @@ from data_governance.dags.tmgl_regions.tasks_for_export.studytype import generat
 from data_governance.dags.tmgl_regions.tasks_for_export.subject import generate_html_subject
 from data_governance.dags.tmgl_regions.tasks_for_export.region import generate_html_region
 from data_governance.dags.tmgl_regions.tasks_for_export.dimention import generate_html_dimention
+from data_governance.dags.tmgl_regions.tasks_for_export.therapies import generate_html_therapy
+from data_governance.dags.tmgl_regions.tasks_for_export.complementary import generate_html_complementary
+from data_governance.dags.tmgl_regions.tasks_for_export.traditional import generate_html_traditional
 
 
 HTML_TEMPLATE = """
@@ -32,6 +35,9 @@ HTML_TEMPLATE = """
   <script src="./wordcloud.js"></script>
   <script src="./drilldown.js"></script>
   <script src="./treemap.js"></script>
+  <script src="./highcharts-more.js"></script>
+  <script src="./dumbbell.js"></script>
+  <script src="./lollipop.js"></script>
   <script src="./accessibility.js"></script>
   <script src="./exporting.js"></script>
   <link
@@ -149,6 +155,24 @@ HTML_TEMPLATE = """
     </div>
 
 
+    <div class="tab-pane fade" id="tcim-areas-tab-pane" role="tabpanel" aria-labelledby="pills-tcim-areas-tab">
+      <div class="row mt-4">
+        <div class="col-lg-6 col-xs-12">
+          <h3 class="h4">Therapeutic Methods and Therapies distribution</h3>
+          <div id="therapy_container"></div>
+
+          <h3 class="h4 mt-3">Complementary Medicines Distribution</h3>
+          <div id="complementary_container"></div>
+        </div>
+
+        <div class="col-lg-6 col-xs-12 mt-lg-0 mt-3">
+          <h3 class="h4">Traditional Medicines</h3>
+          <div id="traditional_container"></div>
+        </div>
+      </div>
+    </div>
+
+
     <div class="tab-pane fade" id="about-tab-pane" role="tabpanel" aria-labelledby="pills-about-tab">
       <div class="row mt-4">
         <div class="col-xs-12">
@@ -210,8 +234,24 @@ HTML_TEMPLATE = """
     {html_region}
 
     {html_dimention}
+
+    {html_therapy}
+
+    {html_complementary}
+
+    {html_traditional}
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script>
+    function sendHeight() {{
+      const height = document.body.scrollHeight || document.documentElement.scrollHeight;
+      parent.postMessage({{ type: "resize", height }}, "*");
+    }}
+
+    window.addEventListener("load", sendHeight);
+    window.addEventListener("resize", sendHeight);
+    new MutationObserver(sendHeight).observe(document.body, {{ childList: true, subtree: true }});
+  </script>
 </body>
 </html>
 """
@@ -232,6 +272,9 @@ def generate_html_reports(ti):
     subject_data = ti.xcom_pull(task_ids='generate_html_subject')
     region_data = ti.xcom_pull(task_ids='generate_html_region')
     dimention_data = ti.xcom_pull(task_ids='generate_html_dimention')
+    therapy_data = ti.xcom_pull(task_ids='generate_html_therapy')
+    complementary_data = ti.xcom_pull(task_ids='generate_html_complementary')
+    traditional_data = ti.xcom_pull(task_ids='generate_html_traditional')
 
     html_with_data = HTML_TEMPLATE.format(
         html_language=language_data['html'],
@@ -246,7 +289,10 @@ def generate_html_reports(ti):
         html_studytype=studytype_data['html'],
         html_subject=subject_data['html'],
         html_region=region_data['html'],
-        html_dimention=dimention_data['html']
+        html_dimention=dimention_data['html'],
+        html_therapy=therapy_data['html'],
+        html_complementary=complementary_data['html'],
+        html_traditional=traditional_data['html'],
     )
 
     fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
@@ -325,6 +371,21 @@ with DAG(
         python_callable=generate_html_dimention,
         op_kwargs={'year_from': YEAR_FROM},
     )
+    generate_html_therapies_task = PythonOperator(
+        task_id='generate_html_therapy',
+        python_callable=generate_html_therapy,
+        op_kwargs={'year_from': YEAR_FROM},
+    )
+    generate_html_complementary_task = PythonOperator(
+        task_id='generate_html_complementary',
+        python_callable=generate_html_complementary,
+        op_kwargs={'year_from': YEAR_FROM},
+    )
+    generate_html_traditional_task = PythonOperator(
+        task_id='generate_html_traditional',
+        python_callable=generate_html_traditional,
+        op_kwargs={'year_from': YEAR_FROM},
+    )
 
     generate_reports_task = PythonOperator(
         task_id='generate_html_reports',
@@ -341,3 +402,6 @@ with DAG(
     generate_html_subject_task >> generate_reports_task
     generate_html_region_task >> generate_reports_task
     generate_html_dimention_task >> generate_reports_task
+    generate_html_therapies_task >> generate_reports_task
+    generate_html_complementary_task >> generate_reports_task
+    generate_html_traditional_task >> generate_reports_task

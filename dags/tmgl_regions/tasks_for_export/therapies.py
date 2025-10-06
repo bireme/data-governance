@@ -6,14 +6,14 @@ from airflow.hooks.filesystem import FSHook
 
 
 HTML_TEMPLATE = """
-async function region_loadDataAndRenderChart() {
-    const regionResp = await fetch('region_region_year.json');
-    const region_region_year_json = await regionResp.json();
+async function therapy_loadDataAndRenderChart() {
+    const therapyResp = await fetch('therapy_region_year.json');
+    const therapy_region_year_json = await therapyResp.json();
 
-    const yearResp = await fetch('region_year.json');
-    const region_year_json = await yearResp.json();
+    const yearResp = await fetch('therapy_year.json');
+    const therapy_year_json = await yearResp.json();
 
-    let region_chart = Highcharts.chart("region_container", {
+    let therapy_chart = Highcharts.chart("therapy_container", {
         chart: { 
             type: 'pie',
             backgroundColor: '#F7F7F8',
@@ -84,7 +84,7 @@ async function region_loadDataAndRenderChart() {
                 '<b>{point.percentage:.2f}%</b> of total<br/>'
         },
         series: [{ 
-            name: "Regions", 
+            name: "Therapeutic Methods and Therapies", 
             data: [], 
         }],
         drilldown: {
@@ -92,7 +92,7 @@ async function region_loadDataAndRenderChart() {
         }
     });
 
-    function updateRegionChart() {
+    function updateTherapyChart() {
         const year_range = slider.noUiSlider.get(true);
         const yearFrom = parseInt(year_range[0]);
         const yearTo = parseInt(year_range[1]);
@@ -103,9 +103,9 @@ async function region_loadDataAndRenderChart() {
         let year_from = {year_from};
         let filtered;
         if (selectedRegion === "Todas") {
-            filtered = Object.values(region_year_json).flat();
+            filtered = Object.values(therapy_year_json).flat();
         } else {
-            filtered = region_region_year_json[selectedRegion];
+            filtered = therapy_region_year_json[selectedRegion];
         }
         // Selecting all years before starting year
         if (yearFrom === year_from) {
@@ -115,54 +115,54 @@ async function region_loadDataAndRenderChart() {
         }
 
         if (!filtered || filtered.length === 0) {
-            region_chart.series[0].setData([]);
-            region_chart.showNoData();
+            therapy_chart.series[0].setData([]);
+            therapy_chart.showNoData();
             return;
         } else {
-            region_chart.hideNoData();
+            therapy_chart.hideNoData();
         }
 
-        const regions = [...new Set(filtered.flatMap(obj => Object.keys(obj)))].filter(key => key !== "ano");
+        const therapies = [...new Set(filtered.flatMap(obj => Object.keys(obj)))].filter(key => key !== "ano");
 
         const total = {};
 
         filtered.forEach((d) => {
-            regions.forEach((region) => {
-                total[region] = (total[region] || 0) + (d[region] || 0);
+            therapies.forEach((therapy) => {
+                total[therapy] = (total[therapy] || 0) + (d[therapy] || 0);
             });
         });
 
-        // Monta pares idioma/valor
-        let sorted = regions.map((region) => ({
-            name: region,
-            y: total[region]
+        // Monta pares terapia/valor
+        let sorted = therapies.map((therapy) => ({
+            name: therapy,
+            y: total[therapy]
         }));
 
         // Ordena do maior para o menor
         sorted.sort((a, b) => b.y - a.y);
 
-        const regionDataMap = {};
+        const therapyDataMap = {};
         const drilldownMap = {};
 
         sorted.forEach(({name, y}) => {
-            const [region, country] = name.split('/');
-            if (!regionDataMap[region]) {
-                regionDataMap[region] = 0;
-                drilldownMap[region] = {
-                    name: region,
-                    id: region,
+            const [level1, level2] = name.split('/');
+            if (!therapyDataMap[level1]) {
+                therapyDataMap[level1] = 0;
+                drilldownMap[level1] = {
+                    name: level1,
+                    id: level1,
                     data: []
                 };
             }
-            regionDataMap[region] += y;
-            drilldownMap[region].data.push([country, y]);
+            therapyDataMap[level1] += y;
+            drilldownMap[level1].data.push([level2, y]);
         });
 
         // Criar o array data com soma dos valores por região
-        const data = Object.entries(regionDataMap).map(([region, sum]) => ({
-            name: region.toUpperCase(),
+        const data = Object.entries(therapyDataMap).map(([level1, sum]) => ({
+            name: level1.toUpperCase(),
             y: sum,
-            drilldown: region
+            drilldown: level1
         }));
 
         const drilldown = {
@@ -170,25 +170,25 @@ async function region_loadDataAndRenderChart() {
         };
 
         // Atualiza gráfico com dados ordenados
-        region_chart.update({
+        therapy_chart.update({
             drilldown: {
                 series: drilldown.series
             }
         }, false);
 
-        region_chart.series[0].setData(data);
+        therapy_chart.series[0].setData(data);
     }
 
-    const debouncedUpdateRegion = debounce(updateRegionChart, 100);
-    slider.noUiSlider.on("update", debouncedUpdateRegion);
-    regionSelect.addEventListener("change", debouncedUpdateRegion);
+    const debouncedUpdateTherapy = debounce(updateTherapyChart, 100);
+    slider.noUiSlider.on("update", debouncedUpdateTherapy);
+    regionSelect.addEventListener("change", debouncedUpdateTherapy);
 }
 
-region_loadDataAndRenderChart();
+therapy_loadDataAndRenderChart();
 """
 
 
-def generate_html_region(year_from):
+def generate_html_therapy(year_from):
     logger = logging.getLogger(__name__)
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
@@ -196,8 +196,8 @@ def generate_html_region(year_from):
     fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
     output_dir = fs_hook.get_path()
 
-    # Builds region_region_year_json
-    documents = list(collection.find({"type": "region", "region": {"$ne": None}}).sort("year", 1))
+    # Builds therapy_region_year_json
+    documents = list(collection.find({"type": "therapy", "region": {"$ne": None}}).sort("year", 1))
     aggregated_data = {}
     for doc in documents:
         region = doc["region"]
@@ -216,13 +216,13 @@ def generate_html_region(year_from):
 
         year_data[name] = count
 
-    output_file = os.path.join(output_dir, "region_region_year.json")
+    output_file = os.path.join(output_dir, "therapy_region_year.json")
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(aggregated_data, f, ensure_ascii=False, indent=4)
 
 
     # Builds region_year_json
-    documents = list(collection.find({"type": "region", "region": None}).sort("year", 1))
+    documents = list(collection.find({"type": "therapy", "region": None}).sort("year", 1))
     aggregated_data = []
     for doc in documents:
         year = int(doc["year"])
@@ -236,7 +236,7 @@ def generate_html_region(year_from):
 
         year_data[name] = count
 
-    output_file = os.path.join(output_dir, "region_year.json")
+    output_file = os.path.join(output_dir, "therapy_year.json")
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(aggregated_data, f, ensure_ascii=False, indent=4)
 

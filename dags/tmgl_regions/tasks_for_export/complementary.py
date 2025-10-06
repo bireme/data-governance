@@ -6,34 +6,23 @@ from airflow.hooks.filesystem import FSHook
 
 
 HTML_TEMPLATE = """
-async function studytype_loadDataAndRenderChart() {
-    const regionResp = await fetch('studytype_region_year.json');
-    const studytype_region_year_json = await regionResp.json();
+async function complementary_loadDataAndRenderChart() {
+    const regionResp = await fetch('complementary_region_year.json');
+    const complementary_region_year_json = await regionResp.json();
 
-    const yearResp = await fetch('studytype_year.json');
-    const studytype_year_json = await yearResp.json();
+    const yearResp = await fetch('complementary_year.json');
+    const complementary_year_json = await yearResp.json();
 
-    let studytype_chart = Highcharts.chart("studytype_container", {
+    let complementary_chart = Highcharts.chart("complementary_container", {
         chart: { 
-            type: 'pie',
+            type: "bar",
             backgroundColor: '#F7F7F8',
             borderRadius: 16,
             borderColor: '#C7C6C0',
             borderWidth: 2,
             spacingTop: 20,
-            height: 700
+            height: 325
         },
-        colors: [
-            "#003b58",
-            "#005881",
-            "#0074a9",
-            "#0093d5",
-            "#00aaf5",
-            "#6fc0ff",
-            "#a7d3ff",
-            "#d8eaff",
-            "#ecf4ff"
-        ],
         exporting: {
             buttons: {
                 contextButton: {
@@ -54,24 +43,30 @@ async function studytype_loadDataAndRenderChart() {
                 fontSize: '15px'
             }
         },
-        plotOptions: {
-        pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                dataLabels: {
-                    enabled: true,
-                    format: `<b>{point.name}</b>: {point.percentage:.2f}%`
+        legend: { enabled: false },
+        xAxis: { 
+            title: { text: null },
+            labels: {
+                rotation: 0,
+                step: 1,
+                style: {
+                    fontSize: '14px'
                 }
             }
         },
-        series: [{ 
-            name: "Number of documents", 
-            data: [], 
-            colorByPoint: true
-        }],
+        yAxis: {
+            min: 0,
+            title: { text: "Number of documents" }
+        },
+        plotOptions: {
+            bar: {
+                dataLabels: { enabled: true },
+            },
+        },
+        series: [{ name: "Number of documents", data: [], color: "#0093d5" }],
     });
 
-    function updateStudytypeChart() {
+    function updateComplementaryChart() {
         const year_range = slider.noUiSlider.get(true);
         const yearFrom = parseInt(year_range[0]);
         const yearTo = parseInt(year_range[1]);
@@ -82,9 +77,9 @@ async function studytype_loadDataAndRenderChart() {
         let year_from = {year_from};
         let filtered;
         if (selectedRegion === "Todas") {
-            filtered = Object.values(studytype_year_json).flat();
+            filtered = Object.values(complementary_year_json).flat();
         } else {
-            filtered = studytype_region_year_json[selectedRegion];
+            filtered = complementary_region_year_json[selectedRegion];
         }
         // Selecting all years before starting year
         if (yearFrom === year_from) {
@@ -94,47 +89,49 @@ async function studytype_loadDataAndRenderChart() {
         }
 
         if (!filtered || filtered.length === 0) {
-            studytype_chart.series[0].setData([]);
-            studytype_chart.showNoData();
+            complementary_chart.series[0].setData([]);
+            complementary_chart.update({ xAxis: { categories: [] } });
+            complementary_chart.showNoData();
             return;
         } else {
-            studytype_chart.hideNoData();
+            complementary_chart.hideNoData();
         }
 
-        const studytypes = [...new Set(filtered.flatMap(obj => Object.keys(obj)))].filter(key => key !== "ano");
+        const complementaries = [...new Set(filtered.flatMap(obj => Object.keys(obj)))].filter(key => key !== "ano");
 
         const total = {};
 
         filtered.forEach((d) => {
-            studytypes.forEach((studytype) => {
-                total[studytype] = (total[studytype] || 0) + (d[studytype] || 0);
+            complementaries.forEach((complementary) => {
+                total[complementary] = (total[complementary] || 0) + (d[complementary] || 0);
             });
         });
 
         // Monta pares idioma/valor
-        let sorted = studytypes.map((studytype) => ({
-            name: studytype,
-            y: total[studytype]
+        let sorted = complementaries.map((complementary) => ({
+            name: complementary,
+            value: total[complementary]
         }));
 
         // Ordena do maior para o menor
         sorted.sort((a, b) => b.value - a.value);
-        sorted = sorted.slice(0, 20);
+        sorted = sorted.slice(0, 40);
 
         // Atualiza gráfico com dados ordenados
-        studytype_chart.series[0].setData(sorted);
+        complementary_chart.series[0].setData(sorted.map(item => item.value));
+        complementary_chart.update({ xAxis: { categories: sorted.map(item => item.name) } });
     }
 
-    const debouncedUpdateStudytype = debounce(updateStudytypeChart, 100);
-    slider.noUiSlider.on("update", debouncedUpdateStudytype);
-    regionSelect.addEventListener("change", debouncedUpdateStudytype);
+    const debouncedUpdateComplementary = debounce(updateComplementaryChart, 100);
+    slider.noUiSlider.on("update", debouncedUpdateComplementary);
+    regionSelect.addEventListener("change", debouncedUpdateComplementary);
 }
 
-studytype_loadDataAndRenderChart();
+complementary_loadDataAndRenderChart();
 """
 
 
-def generate_html_studytype(year_from):
+def generate_html_complementary(year_from):
     logger = logging.getLogger(__name__)
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
@@ -142,14 +139,14 @@ def generate_html_studytype(year_from):
     fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
     output_dir = fs_hook.get_path()
 
-    # Builds studytype_region_year_json
-    documents = list(collection.find({"type": "studytype", "region": {"$ne": None}}).sort("year", 1))
+    # Builds complementary_region_year_json
+    documents = list(collection.find({"type": "complementary", "region": {"$ne": None}}).sort("year", 1))
     aggregated_data = {}
     for doc in documents:
         region = doc["region"]
 
         year = int(doc["year"])
-        studytype = doc["name"]
+        name = doc["name"].replace("_", " ")
         count = doc.get("count", 0)
 
         if region not in aggregated_data:
@@ -160,19 +157,19 @@ def generate_html_studytype(year_from):
             year_data = {"ano": year}
             aggregated_data[region].append(year_data)
 
-        year_data[studytype] = count
+        year_data[name] = count
 
-    output_file = os.path.join(output_dir, "studytype_region_year.json")
+    output_file = os.path.join(output_dir, "complementary_region_year.json")
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(aggregated_data, f, ensure_ascii=False, indent=4)
 
 
-    # Builds studytype_year_json
-    documents = list(collection.find({"type": "studytype", "region": None}).sort("year", 1))
+    # Builds complementary_year_json
+    documents = list(collection.find({"type": "complementary", "region": None}).sort("year", 1))
     aggregated_data = []
     for doc in documents:
         year = int(doc["year"])
-        studytype = doc["name"]
+        name = doc["name"].replace("_", " ")
         count = doc.get("count", 0)
 
         year_data = next((item for item in aggregated_data if item["ano"] == year), None)
@@ -180,9 +177,9 @@ def generate_html_studytype(year_from):
             year_data = {"ano": year}
             aggregated_data.append(year_data)
 
-        year_data[studytype] = count
+        year_data[name] = count
 
-    output_file = os.path.join(output_dir, "studytype_year.json")
+    output_file = os.path.join(output_dir, "complementary_year.json")
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(aggregated_data, f, ensure_ascii=False, indent=4)
 

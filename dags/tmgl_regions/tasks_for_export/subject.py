@@ -24,15 +24,13 @@ async function subject_loadDataAndRenderChart() {
             height: 325
         },
         colors: [
-            "#a7d3ff",
-            "#6fc0ff",
-            "#00aaf5",
-            "#0093d5",
-            "#0074a9",
-            "#005881",
             "#003b58",
-            "#002236",
-            "#001523"
+            "#005881",
+            "#0074a9",
+            "#0093d5",
+            "#00aaf5",
+            "#6fc0ff",
+            "#a7d3ff"
         ],
         exporting: {
             buttons: {
