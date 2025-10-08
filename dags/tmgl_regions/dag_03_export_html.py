@@ -1,5 +1,6 @@
 import os
 import logging
+import shutil
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.hooks.filesystem import FSHook
@@ -298,12 +299,19 @@ def generate_html_reports(ti):
         html_traditional=traditional_data['html'],
     )
 
-    fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
+    fs_hook = FSHook(fs_conn_id='TMGL_REGION_HTML_OUTPUT')
     output_dir = fs_hook.get_path()
     output_file = os.path.join(output_dir, "index.html")
 
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(html_with_data)
+
+    assets_dir = os.path.join(os.path.dirname(__file__), 'assets')
+    for item in os.listdir(assets_dir):
+        origin = os.path.join(assets_dir, item)
+        if os.path.isfile(origin):
+            destination = os.path.join(output_dir, item)
+            shutil.copy2(origin, destination)
 
     logger.info(f"HTML report gerado e salvo em {output_file}")
 

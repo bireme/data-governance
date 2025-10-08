@@ -142,7 +142,7 @@ def generate_html_subject(year_from):
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
 
-    fs_hook = FSHook(fs_conn_id='TMGL_HTML_OUTPUT')
+    fs_hook = FSHook(fs_conn_id='TMGL_REGION_HTML_OUTPUT')
     output_dir = fs_hook.get_path()
 
     # Builds subject_region_year_json
