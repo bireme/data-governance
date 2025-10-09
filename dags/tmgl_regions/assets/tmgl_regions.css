@@ -51,12 +51,12 @@ input[type=range] {
     background: #F7F7F8;
     border: 2px solid #C7C6C0;
     border-radius: 16px;
-    font-size: 40px;
+    font-size: 20px;
     font-weight: 700;
     min-height: 325px;
 }
 #indicator_total_documents, #indicator_total_fulltext {
-    font-size: 48px;
+    font-size: 40px;
 }
 .noUi-connect {
     background: #0093d5 !important;
