@@ -41,30 +41,35 @@ with DAG(
         task_id='run_DG_01_incremental_update',
         trigger_dag_id='DG_01_incremental_update',
         wait_for_completion=True,
+        deferrable=True,
     )
 
     run_create_iahx_xml_collection = TriggerDagRunOperator(
         task_id='run_DG_02_create_iahx_xml_collection',
         trigger_dag_id='DG_02_create_iahx_xml_collection',
         wait_for_completion=True,
+        deferrable=True,
     )
 
     run_enrich_xml = TriggerDagRunOperator(
         task_id='run_DG_03_enrich_xml',
         trigger_dag_id='DG_03_enrich_xml',
         wait_for_completion=True,
+        deferrable=True,
     )
 
     run_x01_create_iahx_xml_collection = TriggerDagRunOperator(
         task_id='run_DG_02_x01_create_iahx_xml_collection',
         trigger_dag_id='DG_02_x01_create_iahx_xml_collection',
         wait_for_completion=True,
+        deferrable=True,
     )
 
     run_export_xml = TriggerDagRunOperator(
         task_id='run_DG_04_export_xml',
         trigger_dag_id='DG_04_export_xml',
         wait_for_completion=True,
+        deferrable=True,
     )
 
     run_incremental_update >> run_create_iahx_xml_collection >> run_x01_create_iahx_xml_collection >> run_enrich_xml >> run_export_xml

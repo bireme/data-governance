@@ -71,42 +71,49 @@ with DAG(
         task_id='run_TMGL_01_full_update',
         trigger_dag_id='TMGL_01_full_update',
         wait_for_completion=True,
+        deferrable=True,
     )
 
     run_metric_total_docs = TriggerDagRunOperator(
         task_id='run_TMGL_02_create_metric_total_docs',
         trigger_dag_id='TMGL_02_create_metric_total_docs',
         wait_for_completion=True,
+        deferrable=True,
     )
 
     run_metric_doc_type = TriggerDagRunOperator(
         task_id='run_TMGL_03_create_metric_doc_type',
         trigger_dag_id='TMGL_03_create_metric_doc_type',
         wait_for_completion=True,
+        deferrable=True,
     )
 
     run_metric_study_type = TriggerDagRunOperator(
         task_id='run_TMGL_04_create_metric_study_type',
         trigger_dag_id='TMGL_04_create_metric_study_type',
         wait_for_completion=True,
+        deferrable=True,
     )
 
     run_dimentions = TriggerDagRunOperator(
         task_id='run_TMGL_05_create_metric_dimentions',
         trigger_dag_id='TMGL_05_create_metric_dimentions',
         wait_for_completion=True,
+        deferrable=True,
     )
 
     run_subjects = TriggerDagRunOperator(
         task_id='run_TMGL_06_create_metric_main_subjects',
         trigger_dag_id='TMGL_06_create_metric_main_subjects',
         wait_for_completion=True,
+        deferrable=True,
     )
 
     run_export_html = TriggerDagRunOperator(
         task_id='run_TMGL_07_export_html_reports',
         trigger_dag_id='TMGL_07_export_html_reports',
         wait_for_completion=True,
+        deferrable=True,
     )
 
     run_full_update >> run_metric_total_docs >> run_export_html
