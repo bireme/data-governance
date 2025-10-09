@@ -113,7 +113,7 @@ def create_metric_traditional_region():
         ] + BASE_PIPELINE
         
         # Processa cada idioma/ano retornado para o país
-        for result in source_collection.aggregate(pipeline, maxTimeMS=600000):
+        for result in source_collection.aggregate(pipeline):
             name = result["_id"]["name"]
             year = result["_id"]["year"]
             logger.info(f"{region}, {name}, {year}")
