@@ -6,6 +6,7 @@ from airflow.operators.python import PythonOperator
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from data_governance.dags.tmgl_metrics.misc import get_tmgl_countries_query
 from data_governance.dags.tmgl_regions.misc import get_regions
+from data_governance.dags.tmgl_regions.misc import load_areas
 
 
 BASE_PIPELINE = [
@@ -55,6 +56,10 @@ def create_metric_complementary():
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     source_collection = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
     target_collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
+
+    # Carregar mapeamento de Areas
+    areas_col = mongo_hook.get_collection('tmgl_areas', 'TABS')
+    areas_map = load_areas(areas_col)
     
     batch = []
     # Agrupa por idioma + ano extraído de dp
@@ -62,7 +67,9 @@ def create_metric_complementary():
     
     # Processa cada idioma/ano retornado para o país
     for result in source_collection.aggregate(pipeline):
-        name = result["_id"]["name"]
+        name_code = result["_id"]["name"]
+        name = areas_map.get(name_code, name_code)
+
         year = result["_id"]["year"]
         logger.info(f"{name}, {year}")
         
@@ -97,6 +104,10 @@ def create_metric_complementary_region():
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     source_collection = mongo_hook.get_collection('01_landing_zone', 'tmgl_metrics')
     target_collection = mongo_hook.get_collection('02_metrics', 'tmgl_charts')
+
+    # Carregar mapeamento de Areas
+    areas_col = mongo_hook.get_collection('tmgl_areas', 'TABS')
+    areas_map = load_areas(areas_col)
     
     who_region_collection = mongo_hook.get_collection('who_region', 'TABS')
     regions = get_regions(who_region_collection)
@@ -114,7 +125,9 @@ def create_metric_complementary_region():
         
         # Processa cada idioma/ano retornado para o país
         for result in source_collection.aggregate(pipeline):
-            name = result["_id"]["name"]
+            name_code = result["_id"]["name"]
+            name = areas_map.get(name_code, name_code)
+            
             year = result["_id"]["year"]
             logger.info(f"{region}, {name}, {year}")
             

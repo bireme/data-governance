@@ -41,3 +41,14 @@ def get_country_data(collection, country_name):
     }
     result = collection.find_one(query)
     return result
+
+
+def load_areas(areas_col):
+    """Mapeia códigos DECS para descritores em inglês"""
+    areas_map = {}
+    for area_doc in areas_col.find():
+        code = area_doc.get('code_xml', '').strip()
+        english_desc = area_doc.get('label_en', '').strip()
+        if code and english_desc:
+            areas_map[code] = english_desc
+    return areas_map
