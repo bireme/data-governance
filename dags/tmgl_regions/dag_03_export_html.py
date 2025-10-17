@@ -184,6 +184,27 @@ HTML_TEMPLATE = """
           <p>Drawing on bibliometric analysis, the dashboard translates indexed data into meaningful insights. Production indicators such as the total number of documents, availability of full texts, and temporal distribution of publications over the past decade reveal not only the scale but also the growth dynamics of TCIM research. The classification of document and study types, together with the identification of leading journals, highlights the main channels through which this knowledge is disseminated and the research methodologies most frequently adopted.</p>
           <p>At the same time, the dashboard enables exploration of content patterns by analyzing the languages of publication, the most frequent subjects, and the thematic orientation of research across the Traditional Medicine Dimensions inspired by the Gujarat Declaration, as well as by therapeutic methods and TCIM areas. This perspective is further enriched by a geographical lens, allowing comparisons across WHO Regions and individual countries, thereby making visible regional research strengths, collaboration trends, and thematic priorities.</p>
           <p>TM Research Analytics (beta) was conceived as a global resource that also provides regional and country-level filters, allowing users to explore 13 core indicators within a single interactive interface. The dashboard was developed through a process of data extraction, cleaning, and classification combined with interactive visualizations built with Highcharts. Beyond presenting numbers, it seeks to narrate the story of TCIM research - how it is produced, where it is concentrated, and which dimensions of traditional medicine are gaining scientific visibility across the world.</p>
+          <p>
+            <strong>Legend — Study Types (Groupings)</strong>
+            <ul>
+              <li><strong>Systematic review</strong> = Systematic review + Systematic review of observational studies</li>
+              <li><strong>Other Reviews</strong> = Literature review + Review</li>
+              <li><strong>Other studies</strong> = Diagnostic Etiology Prognostic Prevalence Screening Incidence Health technology assessment Health economic evaluation Evaluation study Overview/Evidence synthesis</li>
+            </ul>
+          </p>
+          <p>
+            <strong>Legend - Document Types</strong>
+            <ul>
+              <li><strong>Multimedia</strong> = Video + Audio</li>
+            </ul>
+          </p>
+          <p>
+            <strong>Legend - Publications by Language</strong>
+            <ul>
+              <li><strong>Mult</strong> = Multiple languages</li>
+            </ul>
+          </p>
+          <p><strong>How to cite: BIREME/PAHO/WHO.</strong> <em>The WHO Traditional Medicine Global Library (TMGL)</em> [Internet]. São Paulo: BIREME/PAHO/WHO; 2025 [cited 2025 Oct 13]. Available from: <a href="https://staging.org">https://staging.org</a></p>
         </div>
       </div>
     </div>
@@ -246,6 +267,16 @@ HTML_TEMPLATE = """
     {html_traditional}
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script>
+    document.addEventListener('shown.bs.tab', function (event) {{
+      const filterDiv = document.getElementById("filters");
+      if(event.target.id === "pills-about-tab") {{
+        filterDiv.classList.add("d-none");
+      }} else {{
+        filterDiv.classList.remove("d-none");
+      }}
+    }});
+  </script>
   <script>
     function sendHeight() {{
       const height = document.body.scrollHeight || document.documentElement.scrollHeight;
