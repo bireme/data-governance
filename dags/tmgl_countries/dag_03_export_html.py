@@ -6,9 +6,10 @@ from airflow.operators.python import PythonOperator
 from airflow.hooks.filesystem import FSHook
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from data_governance.dags.tmgl_regions.misc import get_country_data
+from data_governance.dags.tmgl_countries.misc import get_eligible_countries
 #from data_governance.dags.tmgl_countries.tasks_for_export.indicator import generate_html_indicators
 from data_governance.dags.tmgl_countries.tasks_for_export.doctype import generate_html_doctype
-#from data_governance.dags.tmgl_countries.tasks_for_export.studytype import generate_html_studytype
+from data_governance.dags.tmgl_countries.tasks_for_export.studytype import generate_html_studytype
 #from data_governance.dags.tmgl_countries.tasks_for_export.subject import generate_html_subject
 #from data_governance.dags.tmgl_countries.tasks_for_export.dimention import generate_html_dimention
 #from data_governance.dags.tmgl_countries.tasks_for_export.therapies import generate_html_therapy
@@ -241,18 +242,6 @@ HTML_TEMPLATE = """
 YEAR_FROM = 1950
 
 
-def get_eligible_countries():
-    logger = logging.getLogger(__name__)
-
-    mongo_hook = MongoHook(mongo_conn_id='mongo')
-    collection = mongo_hook.get_collection('02_metrics_countries', 'tmgl_charts')
-    eligible_countries = collection.find(
-        {"country": {"$exists": True, "$ne": None}}, {'country': 1}
-    ).distinct('country')
-
-    return [[country] for country in eligible_countries]
-
-
 def copy_assets():
     fs_hook = FSHook(fs_conn_id='TMGL_COUNTRIES_HTML_OUTPUT')
     output_dir = fs_hook.get_path()
@@ -277,8 +266,8 @@ def generate_html_reports(country):
     logger.info(f"Gerando HTML - {country} - {country_iso}")
 
     doctype_data = generate_html_doctype(YEAR_FROM, country, country_iso)
+    studytype_data = generate_html_studytype(YEAR_FROM, country, country_iso)
     """indicators_data = ti.xcom_pull(task_ids='generate_html_indicators')
-    studytype_data = ti.xcom_pull(task_ids='generate_html_studytype')
     subject_data = ti.xcom_pull(task_ids='generate_html_subject')
     region_data = ti.xcom_pull(task_ids='generate_html_region')
     dimention_data = ti.xcom_pull(task_ids='generate_html_dimention')
@@ -291,7 +280,7 @@ def generate_html_reports(country):
         year_range_max=doctype_data['max_year'],
         html_doctype=doctype_data['html'],
         html_indicators="",
-        html_studytype="",
+        html_studytype=studytype_data['html'],
         html_subject="",
         html_dimention="",
         html_therapy="",
@@ -299,7 +288,6 @@ def generate_html_reports(country):
         html_traditional="",
     )
     """html_indicators=indicators_data['html'],
-        html_studytype=studytype_data['html'],
         html_subject=subject_data['html'],
         html_dimention=dimention_data['html'],
         html_therapy=therapy_data['html'],

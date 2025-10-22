@@ -77,6 +77,7 @@ def setup_collections():
     collection_lz.create_index([('traditional_medicines_cluster', 1)], collation={ 'locale': 'en', 'strength': 1 })
     collection_lz.create_index([('pais_afiliacao', 1)], collation={ 'locale': 'en', 'strength': 1 })
     collection_lz.create_index([('who_regions', 1)], collation={ 'locale': 'en', 'strength': 1 })
+    collection_lz.create_index([('year', 1)])
 
     # Cria coleção de métricas
     collection_metrics = mongo_hook.get_collection('02_countries_metrics', 'tmgl_metrics')
