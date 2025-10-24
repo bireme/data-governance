@@ -7,7 +7,7 @@ from airflow.hooks.filesystem import FSHook
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from data_governance.dags.tmgl_regions.misc import get_country_data
 from data_governance.dags.tmgl_countries.misc import get_eligible_countries
-#from data_governance.dags.tmgl_countries.tasks_for_export.indicator import generate_html_indicators
+from data_governance.dags.tmgl_countries.tasks_for_export.indicator import generate_html_indicators
 from data_governance.dags.tmgl_countries.tasks_for_export.doctype import generate_html_doctype
 from data_governance.dags.tmgl_countries.tasks_for_export.studytype import generate_html_studytype
 #from data_governance.dags.tmgl_countries.tasks_for_export.subject import generate_html_subject
@@ -73,15 +73,13 @@ HTML_TEMPLATE = """
       <div class="row mt-4">
         <div class="col-lg-6 col-xs-12">
           <h3 class="h4">Scientific Output</h3>
-          <div class="col-lg-6 col-xs-12 mt-lg-0 mt-3">
-            <div id="indicator_container" class="py-5">
-              <div class="d-flex justify-content-center text-center mt-5">
-                <div class="p-2" style="flex: 1 1 50%;">
-                  Total Documents<br><span id="indicator_total_documents"></span>
-                </div>
-                <div class="p-2" style="flex: 1 1 50%;">
-                  Full Text<br><span id="indicator_total_fulltext"></span>
-                </div>
+          <div id="indicator_container" class="py-5">
+            <div class="d-flex justify-content-center text-center mt-5">
+              <div class="p-2" style="flex: 1 1 50%;">
+                Total Documents<br><span id="indicator_total_documents"></span>
+              </div>
+              <div class="p-2" style="flex: 1 1 50%;">
+                Full Text<br><span id="indicator_total_fulltext"></span>
               </div>
             </div>
           </div>
@@ -267,8 +265,8 @@ def generate_html_reports(country):
 
     doctype_data = generate_html_doctype(YEAR_FROM, country, country_iso)
     studytype_data = generate_html_studytype(YEAR_FROM, country, country_iso)
-    """indicators_data = ti.xcom_pull(task_ids='generate_html_indicators')
-    subject_data = ti.xcom_pull(task_ids='generate_html_subject')
+    indicators_data = generate_html_indicators(YEAR_FROM, country, country_iso)
+    """subject_data = ti.xcom_pull(task_ids='generate_html_subject')
     region_data = ti.xcom_pull(task_ids='generate_html_region')
     dimention_data = ti.xcom_pull(task_ids='generate_html_dimention')
     therapy_data = ti.xcom_pull(task_ids='generate_html_therapy')
@@ -279,7 +277,7 @@ def generate_html_reports(country):
         year_range_min=YEAR_FROM,
         year_range_max=doctype_data['max_year'],
         html_doctype=doctype_data['html'],
-        html_indicators="",
+        html_indicators=indicators_data['html'],
         html_studytype=studytype_data['html'],
         html_subject="",
         html_dimention="",
@@ -287,8 +285,7 @@ def generate_html_reports(country):
         html_complementary="",
         html_traditional="",
     )
-    """html_indicators=indicators_data['html'],
-        html_subject=subject_data['html'],
+    """html_subject=subject_data['html'],
         html_dimention=dimention_data['html'],
         html_therapy=therapy_data['html'],
         html_complementary=complementary_data['html'],
