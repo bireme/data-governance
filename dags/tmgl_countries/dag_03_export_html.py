@@ -10,7 +10,7 @@ from data_governance.dags.tmgl_countries.misc import get_eligible_countries
 from data_governance.dags.tmgl_countries.tasks_for_export.indicator import generate_html_indicators
 from data_governance.dags.tmgl_countries.tasks_for_export.doctype import generate_html_doctype
 from data_governance.dags.tmgl_countries.tasks_for_export.studytype import generate_html_studytype
-#from data_governance.dags.tmgl_countries.tasks_for_export.subject import generate_html_subject
+from data_governance.dags.tmgl_countries.tasks_for_export.subject import generate_html_subject
 #from data_governance.dags.tmgl_countries.tasks_for_export.dimention import generate_html_dimention
 #from data_governance.dags.tmgl_countries.tasks_for_export.therapies import generate_html_therapy
 #from data_governance.dags.tmgl_countries.tasks_for_export.complementary import generate_html_complementary
@@ -266,8 +266,8 @@ def generate_html_reports(country):
     doctype_data = generate_html_doctype(YEAR_FROM, country, country_iso)
     studytype_data = generate_html_studytype(YEAR_FROM, country, country_iso)
     indicators_data = generate_html_indicators(YEAR_FROM, country, country_iso)
-    """subject_data = ti.xcom_pull(task_ids='generate_html_subject')
-    region_data = ti.xcom_pull(task_ids='generate_html_region')
+    subject_data = generate_html_subject(YEAR_FROM, country, country_iso)
+    """region_data = ti.xcom_pull(task_ids='generate_html_region')
     dimention_data = ti.xcom_pull(task_ids='generate_html_dimention')
     therapy_data = ti.xcom_pull(task_ids='generate_html_therapy')
     complementary_data = ti.xcom_pull(task_ids='generate_html_complementary')
@@ -279,14 +279,13 @@ def generate_html_reports(country):
         html_doctype=doctype_data['html'],
         html_indicators=indicators_data['html'],
         html_studytype=studytype_data['html'],
-        html_subject="",
+        html_subject=subject_data['html'],
         html_dimention="",
         html_therapy="",
         html_complementary="",
         html_traditional="",
     )
-    """html_subject=subject_data['html'],
-        html_dimention=dimention_data['html'],
+    """html_dimention=dimention_data['html'],
         html_therapy=therapy_data['html'],
         html_complementary=complementary_data['html'],
         html_traditional=traditional_data['html'],"""
