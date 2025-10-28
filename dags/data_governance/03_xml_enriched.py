@@ -7,7 +7,7 @@ Esta DAG realiza o enriquecimento da coleção XML utilizada pelo iah-X, adicion
 
 ## Objetivos
 
-- **Enriquecer a coleção `03_xml_enriched`** com campos estáticos e dinâmicos, facilitando consultas e segmentações no iah-X.
+- **Enriquece a coleção `03_xml_enriched`** com campos estáticos e dinâmicos, facilitando consultas e segmentações no iah-X.
 - **Adicionar informações de instância e coleções temáticas** provenientes de diversas coleções do MongoDB (TEMAS_BVS).
 - **Padronizar e expandir metadados** para diferentes recortes temáticos e contextos de uso.
 
