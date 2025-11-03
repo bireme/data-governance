@@ -12,6 +12,7 @@ from data_governance.dags.tmgl_countries.tasks_for_export.doctype import generat
 from data_governance.dags.tmgl_countries.tasks_for_export.studytype import generate_html_studytype
 from data_governance.dags.tmgl_countries.tasks_for_export.subject import generate_html_subject
 from data_governance.dags.tmgl_countries.tasks_for_export.dimention import generate_html_dimention
+from data_governance.dags.tmgl_countries.tasks_for_export.region import generate_html_region
 #from data_governance.dags.tmgl_countries.tasks_for_export.therapies import generate_html_therapy
 #from data_governance.dags.tmgl_countries.tasks_for_export.complementary import generate_html_complementary
 #from data_governance.dags.tmgl_countries.tasks_for_export.traditional import generate_html_traditional
@@ -204,6 +205,8 @@ HTML_TEMPLATE = """
 
     {html_subject}
 
+    {html_region}
+
     {html_dimention}
 
     {html_therapy}
@@ -268,8 +271,8 @@ def generate_html_reports(country):
     indicators_data = generate_html_indicators(YEAR_FROM, country, country_iso)
     subject_data = generate_html_subject(YEAR_FROM, country, country_iso)
     dimention_data = generate_html_dimention(YEAR_FROM, country, country_iso)
-    """region_data = ti.xcom_pull(task_ids='generate_html_region')
-    therapy_data = ti.xcom_pull(task_ids='generate_html_therapy')
+    region_data = generate_html_region(YEAR_FROM, country, country_iso)
+    """therapy_data = ti.xcom_pull(task_ids='generate_html_therapy')
     complementary_data = ti.xcom_pull(task_ids='generate_html_complementary')
     traditional_data = ti.xcom_pull(task_ids='generate_html_traditional')"""
 
@@ -281,6 +284,7 @@ def generate_html_reports(country):
         html_studytype=studytype_data['html'],
         html_subject=subject_data['html'],
         html_dimention=dimention_data['html'],
+        html_region=region_data['html'],
         html_therapy="",
         html_complementary="",
         html_traditional="",
