@@ -6,7 +6,7 @@ from airflow.operators.python import PythonOperator
 from airflow.hooks.filesystem import FSHook
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from data_governance.dags.tmgl_regions.misc import get_country_data
-from data_governance.dags.tmgl_countries.misc import get_eligible_countries
+from data_governance.dags.tmgl_countries.misc import get_eligible_countries_for_export
 from data_governance.dags.tmgl_countries.tasks_for_export.indicator import generate_html_indicators
 from data_governance.dags.tmgl_countries.tasks_for_export.doctype import generate_html_doctype
 from data_governance.dags.tmgl_countries.tasks_for_export.studytype import generate_html_studytype
@@ -14,7 +14,7 @@ from data_governance.dags.tmgl_countries.tasks_for_export.subject import generat
 from data_governance.dags.tmgl_countries.tasks_for_export.dimention import generate_html_dimention
 from data_governance.dags.tmgl_countries.tasks_for_export.region import generate_html_region
 from data_governance.dags.tmgl_countries.tasks_for_export.therapies import generate_html_therapy
-#from data_governance.dags.tmgl_countries.tasks_for_export.complementary import generate_html_complementary
+from data_governance.dags.tmgl_countries.tasks_for_export.complementary import generate_html_complementary
 #from data_governance.dags.tmgl_countries.tasks_for_export.traditional import generate_html_traditional
 
 
@@ -273,8 +273,8 @@ def generate_html_reports(country):
     dimention_data = generate_html_dimention(YEAR_FROM, country, country_iso)
     region_data = generate_html_region(YEAR_FROM, country, country_iso)
     therapy_data = generate_html_therapy(YEAR_FROM, country, country_iso)
-    """complementary_data = ti.xcom_pull(task_ids='generate_html_complementary')
-    traditional_data = ti.xcom_pull(task_ids='generate_html_traditional')"""
+    complementary_data = generate_html_complementary(YEAR_FROM, country, country_iso)
+    """traditional_data = ti.xcom_pull(task_ids='generate_html_traditional')"""
 
     html_with_data = HTML_TEMPLATE.format(
         year_range_min=YEAR_FROM,
@@ -286,11 +286,10 @@ def generate_html_reports(country):
         html_dimention=dimention_data['html'],
         html_region=region_data['html'],
         html_therapy=therapy_data['html'],
-        html_complementary="",
+        html_complementary=complementary_data['html'],
         html_traditional="",
     )
-    """html_complementary=complementary_data['html'],
-        html_traditional=traditional_data['html'],"""
+    """html_traditional=traditional_data['html'],"""
 
     fs_hook = FSHook(fs_conn_id='TMGL_COUNTRIES_HTML_OUTPUT')
     output_dir = fs_hook.get_path()
@@ -319,8 +318,8 @@ with DAG(
     tags=['tmgl', 'report', 'html']
 ) as dag:
     get_eligible_countries_task = PythonOperator(
-        task_id='get_eligible_countries',
-        python_callable=get_eligible_countries
+        task_id='get_eligible_countries_for_export',
+        python_callable=get_eligible_countries_for_export
     )
     copy_assets_task = PythonOperator(
         task_id='copy_assets',
