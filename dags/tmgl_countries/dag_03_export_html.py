@@ -15,7 +15,7 @@ from data_governance.dags.tmgl_countries.tasks_for_export.dimention import gener
 from data_governance.dags.tmgl_countries.tasks_for_export.region import generate_html_region
 from data_governance.dags.tmgl_countries.tasks_for_export.therapies import generate_html_therapy
 from data_governance.dags.tmgl_countries.tasks_for_export.complementary import generate_html_complementary
-#from data_governance.dags.tmgl_countries.tasks_for_export.traditional import generate_html_traditional
+from data_governance.dags.tmgl_countries.tasks_for_export.traditional import generate_html_traditional
 
 
 HTML_TEMPLATE = """
@@ -274,7 +274,7 @@ def generate_html_reports(country):
     region_data = generate_html_region(YEAR_FROM, country, country_iso)
     therapy_data = generate_html_therapy(YEAR_FROM, country, country_iso)
     complementary_data = generate_html_complementary(YEAR_FROM, country, country_iso)
-    """traditional_data = ti.xcom_pull(task_ids='generate_html_traditional')"""
+    traditional_data = generate_html_traditional(YEAR_FROM, country, country_iso)
 
     html_with_data = HTML_TEMPLATE.format(
         year_range_min=YEAR_FROM,
@@ -287,9 +287,8 @@ def generate_html_reports(country):
         html_region=region_data['html'],
         html_therapy=therapy_data['html'],
         html_complementary=complementary_data['html'],
-        html_traditional="",
+        html_traditional=traditional_data['html'],
     )
-    """html_traditional=traditional_data['html'],"""
 
     fs_hook = FSHook(fs_conn_id='TMGL_COUNTRIES_HTML_OUTPUT')
     output_dir = fs_hook.get_path()

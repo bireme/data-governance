@@ -81,12 +81,12 @@ with DAG(
         deferrable=True,
     )
 
-    """run_create_metric_traditional = TriggerDagRunOperator(
-        task_id='run_TMGL_REGION_02_create_metric_traditional',
-        trigger_dag_id='TMGL_REGION_02_create_metric_traditional',
+    run_create_metric_traditional = TriggerDagRunOperator(
+        task_id='run_TMGL_COUNTRIES_02_create_metric_traditional',
+        trigger_dag_id='TMGL_COUNTRIES_02_create_metric_traditional',
         wait_for_completion=True,
         deferrable=True,
-    )"""
+    )
 
     run_export_html = TriggerDagRunOperator(
         task_id='run_TMGL_COUNTRIES_03_export_html',
@@ -103,4 +103,4 @@ with DAG(
     run_setup >> run_create_metric_subjects >> run_export_html
     run_setup >> run_create_metric_therapies >> run_export_html
     run_setup >> run_create_timeline >> run_export_html
-    #run_setup >> run_create_metric_traditional >> run_export_html
+    run_setup >> run_create_metric_traditional >> run_export_html
