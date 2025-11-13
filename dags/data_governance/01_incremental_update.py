@@ -15,7 +15,6 @@ Executar coleta seletiva de registros atualizados recentemente no FI-Admin e arm
 """
 
 from airflow import DAG
-from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from data_governance.dags.data_governance.tasks_for_01 import harvest_fiadmin_and_store_in_mongodb
 
 

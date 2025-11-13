@@ -1,6 +1,7 @@
 import os
 import logging
 import shutil
+from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.hooks.filesystem import FSHook
@@ -30,7 +31,7 @@ HTML_TEMPLATE = """
   <link href="tmgl_regions.css" rel="stylesheet">
 
   <script src="./highcharts.js"></script>
-  <script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>
+  <script src="./no-data-to-display.js"></script>
   <script src="./wordcloud.js"></script>
   <script src="./drilldown.js"></script>
   <script src="./treemap.js"></script>
@@ -39,6 +40,7 @@ HTML_TEMPLATE = """
   <script src="./lollipop.js"></script>
   <script src="./accessibility.js"></script>
   <script src="./exporting.js"></script>
+  <script src="./export-data.js"></script>
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.css"
@@ -136,18 +138,31 @@ HTML_TEMPLATE = """
       <div class="row mt-4">
         <div class="col-xs-12">
           <h3 class="h4">About</h3>
-          <p><strong>TM Research Analytics</strong> (beta) is an interactive dashboard developed by BIREME/PAHO/WHO to support the analysis, visualization, and interpretation of global and WHO regional scientific output in the field of Traditional, Complementary, and Integrative Medicine (TCIM).</p>
-          <p>It compiles bibliographic records of scientific literature published by various organizations, collected, indexed, or archived in the Traditional Medicine Global Library (TMGL) mega-database, and makes them accessible to users through its integrated search engine (iAHx).</p>
-          <p>The dashboard aims to provide researchers, policymakers, managers, and other stakeholders with a comprehensive understanding of the evolution of TCIM scientific production - its geographical distribution, the prominence of specific therapeutic methods, and the emergence of key thematic areas - thereby fostering evidence-informed decision-making.</p>
-          <p>Drawing on bibliometric analysis, the dashboard translates indexed data into meaningful insights. Production indicators such as the total number of documents, availability of full texts, and temporal distribution of publications over the past decade reveal not only the scale but also the growth dynamics of TCIM research. The classification of document and study types, together with the identification of leading journals, highlights the main channels through which this knowledge is disseminated and the research methodologies most frequently adopted.</p>
-          <p>At the same time, the dashboard enables exploration of content patterns by analyzing the languages of publication, the most frequent subjects, and the thematic orientation of research across the Traditional Medicine Dimensions inspired by the Gujarat Declaration, as well as by therapeutic methods and TCIM areas. This perspective is further enriched by a geographical lens, allowing comparisons across WHO Regions and individual countries, thereby making visible regional research strengths, collaboration trends, and thematic priorities.</p>
-          <p>TM Research Analytics (beta) was conceived as a global resource that also provides regional and country-level filters, allowing users to explore 13 core indicators within a single interactive interface. The dashboard was developed through a process of data extraction, cleaning, and classification combined with interactive visualizations built with Highcharts. Beyond presenting numbers, it seeks to narrate the story of TCIM research - how it is produced, where it is concentrated, and which dimensions of traditional medicine are gaining scientific visibility across the world.</p>
+          <p>TM Research Analytics is an interactive dashboard developed by <a href="https://www.paho.org/en/bireme">BIREME/PAHO/WHO</a> for quantitative and structural analysis of scientific production in Traditional, Complementary, and Integrative Medicine (TCIM) at country level.</p>
+          <p>The dashboard integrates bibliographic data indexed in the Traditional Medicine Global Library (TMGL), accessible via the iAHx search interface. It provides a set of bibliometric analysis graphics and filters designed to support the analysis of the evolution, distribution, and thematic focus of TCIM research.</p>
+          <p>
+            <strong>Main analytical components</strong>
+            <ul>
+              <li><strong>Most Frequent Subjects:</strong> displays dominant topics and descriptors associated with national TCIM scientific production, allowing identification of thematic concentration and research focus areas.</li>
+              <li><strong>TCIM Publications by WHO Region (with country as topic):</strong> visualizes geographic research topic, highlighting which countries are most frequently referenced as subjects in publications authored by a specific country -supporting regional and international collaboration analysis.</li>
+              <li><strong>Publications by Traditional Medicine Dimension:</strong> categorizes research outputs according to the Traditional Medicine Dimensions inspired by the Gujarat Declaration, reflecting scientific attention across conceptual, therapeutic, and policy dimensions.</li>
+            </ul>
+          </p>
+          <p>
+            <strong>Technical specifications</strong>
+            <ul>
+              <li>Bibliometric indicators derived from TMGL indexed data.</li>
+              <li>Interactive visualizations developed with <strong>Highcharts</strong>.</li>
+              <li>Data updated automatically on a <strong>weekly</strong> basis with new TMGL records.</li>
+              <li>Filters available by <strong>WHO Region</strong> and <strong>year of publication</strong>.</li>
+            </ul>
+          </p>
           <p>
             <strong>Legend — Study Types (Groupings)</strong>
             <ul>
               <li><strong>Systematic review</strong> = Systematic review + Systematic review of observational studies</li>
               <li><strong>Other Reviews</strong> = Literature review + Review</li>
-              <li><strong>Other studies</strong> = Diagnostic Etiology Prognostic Prevalence Screening Incidence Health technology assessment Health economic evaluation Evaluation study Overview/Evidence synthesis</li>
+              <li><strong>Other studies</strong> = Diagnostic, Etiology, Prognostic, Prevalence, Screening, Incidence, Health technology assessment, Health economic evaluation, Evaluation study, Overview/Evidence synthesis</li>
             </ul>
           </p>
           <p>
@@ -156,13 +171,8 @@ HTML_TEMPLATE = """
               <li><strong>Multimedia</strong> = Video + Audio</li>
             </ul>
           </p>
-          <p>
-            <strong>Legend - Publications by Language</strong>
-            <ul>
-              <li><strong>Mult</strong> = Multiple languages</li>
-            </ul>
-          </p>
-          <p><strong>How to cite: BIREME/PAHO/WHO.</strong> <em>The WHO Traditional Medicine Global Library (TMGL)</em> [Internet]. São Paulo: BIREME/PAHO/WHO; 2025 [cited 2025 Oct 13]. Available from: <a href="https://staging.org">https://staging.org</a></p>
+          <p><strong>How to cite: BIREME/PAHO/WHO.</strong> <em>The WHO Traditional Medicine Global Library (TMGL)</em> [Internet]. São Paulo: BIREME/PAHO/WHO; [Year] [cited YYYY Mon DD]. Available from: <a href="https://tmgl.org">https://tmgl.org</a></p>
+          <p>Last data update: {today}</p>
         </div>
       </div>
     </div>
@@ -276,6 +286,9 @@ def generate_html_reports(country):
     complementary_data = generate_html_complementary(YEAR_FROM, country, country_iso)
     traditional_data = generate_html_traditional(YEAR_FROM, country, country_iso)
 
+    current_date = datetime.now()
+    us_date_format = current_date.strftime('%b %d, %Y')
+
     html_with_data = HTML_TEMPLATE.format(
         year_range_min=YEAR_FROM,
         year_range_max=doctype_data['max_year'],
@@ -288,6 +301,7 @@ def generate_html_reports(country):
         html_therapy=therapy_data['html'],
         html_complementary=complementary_data['html'],
         html_traditional=traditional_data['html'],
+        today=us_date_format
     )
 
     fs_hook = FSHook(fs_conn_id='TMGL_COUNTRIES_HTML_OUTPUT')

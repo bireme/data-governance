@@ -81,7 +81,7 @@ async function region_loadDataAndRenderChart() {
                 '<b>{point.percentage:.2f}%</b> of total<br/>'
         },
         series: [{ 
-            name: "Regions", 
+            name: "WHO Regions", 
             data: [], 
         }],
         drilldown: {
