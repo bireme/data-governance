@@ -32,10 +32,9 @@ def get_tmgl_countries_query(countries):
     or_clauses = []
     for country_name in countries:
         escaped_country = re.escape(country_name)
-        escaped_country_underscore = country_name.replace(" ", "_")
         
-        or_clauses.append({"pais_afiliacao": {"$regex": f"^{escaped_country}", "$options": "i"}})
-        or_clauses.append({"cp": {"$regex": f"^{escaped_country}$", "$options": "i"}})
+        or_clauses.append({"pais_afiliacao": {"$regex": f"\\^i{escaped_country}", "$options": "i"}})
+        or_clauses.append({"cp": escaped_country})
     
     query = {"$or": or_clauses}
     return query

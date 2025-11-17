@@ -2,8 +2,8 @@ import logging
 from airflow import DAG
 from airflow.hooks.base import BaseHook
 from airflow.operators.python import PythonOperator
+from airflow.hooks.filesystem import FSHook
 from airflow.providers.mongo.hooks.mongo import MongoHook
-from airflow.models import Variable
 from data_governance.dags.data_governance.tasks_for_01 import send_json_to_mongodb
 from data_governance.dags.data_governance.tasks_for_01 import get_requests_session
 from data_governance.dags.data_governance.tasks_for_01 import Timer
@@ -21,8 +21,10 @@ def ids_update():
     headers = {'apikey': fiadmin_conn.password}
     session = get_requests_session()
 
-    ids_str = Variable.get("data_governance_id_update", default_var="")
-    ids_list = [id_str.strip() for id_str in ids_str.splitlines() if id_str.strip()]
+    fs_hook = FSHook(fs_conn_id='DG_IDS_LIST_FILE_PATH_FOR_UPDATE')
+    ids_list_path = fs_hook.get_path()
+    ids_arr = open(ids_list_path, 'r').readlines()
+    ids_list = [id_str.strip() for id_str in ids_arr if id_str.strip()]
     
     for id_str in ids_list:
         params = {
