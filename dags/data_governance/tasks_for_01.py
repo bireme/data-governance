@@ -114,8 +114,8 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode, **context):
         incremental_update_date = (datetime.today() - timedelta(days=10)).strftime('%Y-%m-%d')
         extra_params = {'updated_time__gte': incremental_update_date}
     elif update_mode == "DATE_PARAM":
-        start_date = context["params"]["start_date"]
-        end_date = context["params"]["end_date"]
+        start_date = context["params"]["start_date"] + "T00:00:00"
+        end_date = context["params"]["end_date"] + "T23:59:59"
         extra_params = {'updated_time__gte': start_date, 'updated_time__lte': end_date}
 
     while total_records is None or offset < total_records:
