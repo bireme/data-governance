@@ -883,7 +883,7 @@ def transform_and_migrate():
                   else None
             ),
             'cc': doc.get('cooperative_center_code'),
-            'cn_co': doc.get('conferente_country'),
+            'cn_co': doc.get('conference_country'),
             'cn_cy': doc.get('conference_city'),
             'cn_da': doc.get('conference_normalized_date'),
             'cn_dt': doc.get('conference_date'),
