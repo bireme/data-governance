@@ -100,7 +100,7 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode, **context):
     error_collection = mongo_db["01_fiadmin_error_tracking"]
 
     url = fiadmin_conn.host
-    limit = 1
+    limit = 100
     offset = 0
     extra_params = {}
     headers = {'apikey': fiadmin_conn.password}
