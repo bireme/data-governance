@@ -228,7 +228,6 @@ def enrich_join_instanceEcollection(offset):
 
         db_list = doc.get("db", [])
         instances = set()
-        collections = set()
         collection_instances = {}
         for db_name in db_list:              
             if db_name in databases_data:
@@ -240,13 +239,6 @@ def enrich_join_instanceEcollection(offset):
                         instances.update(db_data['instance'])
                     else:
                         instances.add(str(db_data['instance']))
-                
-                # Tratamento para coleções
-                if 'collection' in db_data:
-                    if isinstance(db_data['collection'], list):
-                        collections.update(db_data['collection'])
-                    else:
-                        collections.add(str(db_data['collection']))
 
                 # Tratamento para collection_instance
                 if 'collection_instance' in db_data:
@@ -263,13 +255,6 @@ def enrich_join_instanceEcollection(offset):
                 "$setUnion": [
                     {"$ifNull": ["$instance", []]},
                     list(instances)
-                ]
-            }
-        if collections:
-            update_fields["collection"] = {
-                "$setUnion": [
-                    {"$ifNull": ["$collection", []]},
-                    list(collections)
                 ]
             }
         for collection_instance, dbs in collection_instances.items():
@@ -317,7 +302,6 @@ def enrich_join_DBinstanceEcollection(offset):
         db_list = doc.get("database", [])
         dbs = set()
         instances = set()
-        collections = set()
         collection_instances = {}
         for db_name in db_list:              
             if db_name in databases_data:
@@ -336,13 +320,6 @@ def enrich_join_DBinstanceEcollection(offset):
                         instances.update(db_data['instance'])
                     else:
                         instances.add(str(db_data['instance']))
-                
-                # Tratamento para coleções
-                if 'collection' in db_data:
-                    if isinstance(db_data['collection'], list):
-                        collections.update(db_data['collection'])
-                    else:
-                        collections.add(str(db_data['collection']))
 
                 # Tratamento para collection_instance
                 if 'collection_instance' in db_data:
@@ -366,13 +343,6 @@ def enrich_join_DBinstanceEcollection(offset):
                 "$setUnion": [
                     {"$ifNull": ["$instance", []]},
                     list(instances)
-                ]
-            }
-        if collections:
-            update_fields["collection"] = {
-                "$setUnion": [
-                    {"$ifNull": ["$collection", []]},
-                    list(collections)
                 ]
             }
         for collection_instance, dbs in collection_instances.items():
