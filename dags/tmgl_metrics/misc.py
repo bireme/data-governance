@@ -15,7 +15,7 @@ def get_tmgl_country_query(country_name):
     query = {
         "$or": [
             {"pais_afiliacao": {"$regex": f"\\^i{escaped_country}", "$options": "i"}},
-            {"cp": escaped_country},
+            {"cp": {"$regex": escaped_country, "$options": "i"}},
             {"who_regions": {"$regex": f"/{escaped_country_underscore}$", "$options": "i"}}
         ]
     }
@@ -34,7 +34,7 @@ def get_tmgl_countries_query(countries):
         escaped_country = re.escape(country_name)
         
         or_clauses.append({"pais_afiliacao": {"$regex": f"\\^i{escaped_country}", "$options": "i"}})
-        or_clauses.append({"cp": escaped_country})
+        or_clauses.append({"cp": {"$regex": escaped_country, "$options": "i"}})
     
     query = {"$or": or_clauses}
     return query
