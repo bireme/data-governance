@@ -74,8 +74,8 @@ with DAG(
             task_id=f'harvest_fiadmin_and_store_in_mongodb_part_{i}'
         )(
             update_mode='FULL',
-            offset=offset,
+            initial_offset=offset,
             limit=limit,
-            step = step
+            step=step
         )
         setup_error_tracking_collection_task >> harvest_task
