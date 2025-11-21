@@ -266,9 +266,8 @@ def standardize_location(value):
 def standardize_fo(doc):
     def format_fo_as(doc):
         parts = []
-        title_serial = ", ".join(doc.get('title_serial')) if doc.get('title_serial') else ''
-        if title_serial:
-            parts.append(title_serial)
+        if doc.get('title_serial'):
+            parts.append(doc['title_serial'])
         if doc.get('volume_serial'):
             parts.append(f";{doc['volume_serial']}")
         if doc.get('issue_number'):
@@ -350,18 +349,16 @@ def standardize_fo(doc):
             desc_b = [entry['_b'] for entry in doc['descriptive_information'] if '_b' in entry and entry['_b']]
             if desc_b:
                 parts.append(', ' + ', '.join(desc_b) + '. ')
-        title_serial = ", ".join(doc.get('title_serial')) if doc.get('title_serial') else ''
-        if title_serial:
-            parts.append('(' + title_serial)
+        if doc.get('title_serial'):
+            parts.append('(' + doc['title_serial'])
         if doc.get('volume_serial'):
             parts.append(', ' + doc['volume_serial'])
         if doc.get('issue_number'):
             parts.append(', ' + doc['issue_number'])
-        if title_serial:
+        if doc.get('title_serial'):
             parts.append(').')
         if doc.get('symbol'):
-            symbol = ", ".join(doc.get('symbol'))
-            parts.append(' (' + symbol + ').')
+            parts.append(' (' + doc['symbol'] + ').')
         return ''.join(parts).strip()
 
     def format_fo_m(doc):
@@ -369,8 +366,6 @@ def standardize_fo(doc):
         has_pub_city = bool(doc.get('publication_city'))
         has_edition = bool(doc.get('edition'))
         has_publisher = bool(doc.get('publisher'))
-        symbol = ", ".join(doc.get('symbol')) if doc.get('symbol') else ''
-        title_serial = ", ".join(doc.get('title_serial')) if doc.get('title_serial') else ''
         if has_pub_city or has_edition or has_publisher:
             if doc.get('publication_city'):
                 parts.append(doc['publication_city'] + '; ')
@@ -392,27 +387,27 @@ def standardize_fo(doc):
                 desc_b = [entry['_b'] for entry in doc['descriptive_information'] if '_b' in entry and entry['_b']]
                 if desc_b:
                     parts.append(', '.join(desc_b) + '.')
-            if title_serial:
-                parts.append('(' + title_serial)
+            if doc.get('title_serial'):
+                parts.append('(' + doc['title_serial'])
             if doc.get('volume_serial'):
                 parts.append(', ' + doc['volume_serial'])
             if doc.get('issue_number'):
                 parts.append(', ' + doc['issue_number'])
-            if title_serial:
+            if doc.get('title_serial'):
                 parts.append(').')
-            if symbol:
-                parts.append(' (' + symbol + ').')
+            if doc.get('symbol'):
+                parts.append(' (' + doc['symbol'] + ').')
         else:
-            if title_serial:
-                parts.append('(' + title_serial)
+            if doc.get('title_serial'):
+                parts.append('(' + doc['title_serial'])
             if doc.get('volume_serial'):
                 parts.append(', ' + doc['volume_serial'])
             if doc.get('issue_number'):
                 parts.append(', ' + doc['issue_number'])
-            if title_serial:
+            if doc.get('title_serial'):
                 parts.append(').')
-            if symbol:
-                parts.append(' (' + symbol + ').')
+            if doc.get('symbol'):
+                parts.append(' (' + doc['symbol'] + ').')
         return ''.join(parts).strip()
 
     def format_fo_c(doc):
@@ -800,7 +795,7 @@ def transform_and_migrate():
         if 'publication_country' in doc:
             publication_country = doc.get('publication_country')
         elif 'title_serial' in doc:
-            publication_country = shortened_title_country.get(doc.get('title_serial')[0].lower().strip(), [])
+            publication_country = shortened_title_country.get(doc.get('title_serial').lower().strip(), [])
             if publication_country:
                 publication_country = publication_country[0]
 
@@ -877,10 +872,19 @@ def transform_and_migrate():
             'aid': doc.get('doi_number'),
             'alternate_id': [alternate_id for alternate_id in doc.get('alternate_ids', []) if alternate_id and alternate_id != id_fields['id']],
             'book_title': (
-                  doc.get('reference_title')
-                  if 'm' in doc.get('treatment_level', '').lower()
-                  and doc.get('literature_type', '').upper() not in ['S', 'T', 'N']
-                  else None
+                next(
+                    (
+                        tm.get('text')
+                        for tm in doc.get('title_monographic', [])
+                    ),
+                    None
+                )
+                if doc.get('title_monographic')
+                    and not (
+                        doc.get('literature_type', '').upper() in ['T', 'N']
+                        and not doc.get('treatment_level', '').lower().startswith('a')
+                    )
+                else None
             ),
             'cc': doc.get('cooperative_center_code'),
             'cn_co': doc.get('conference_country'),

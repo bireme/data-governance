@@ -88,7 +88,7 @@ def retry_error_records(error_collection, lz_collection, session, url, headers):
 
 # Função para obter JSON da API de forma paginada e enviar para o MongoDB
 @task
-def harvest_fiadmin_and_store_in_mongodb(update_mode, **context):
+def harvest_fiadmin_and_store_in_mongodb(update_mode, initial_offset=0, limit=100, step=100, **context):
     logger = logging.getLogger(__name__)
 
     fiadmin_conn = BaseHook.get_connection('fiadmin')
@@ -100,13 +100,12 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode, **context):
     error_collection = mongo_db["01_fiadmin_error_tracking"]
 
     url = fiadmin_conn.host
-    limit = 100
-    offset = 0
+    offset = initial_offset
     extra_params = {}
     headers = {'apikey': fiadmin_conn.password}
     session = get_requests_session()
-
     total_records = None
+
     max_erronous_loops = 50
     erronous_loops = 0
 
@@ -163,7 +162,7 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode, **context):
                 results = json_data.get('objects', [])
                 send_json_to_mongodb(results, lz_collection)
                 
-        offset += limit
+        offset += step
 
     if update_mode == "INCREMENTAL":
         retry_error_records(error_collection, lz_collection, session, url, headers)

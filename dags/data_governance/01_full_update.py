@@ -18,9 +18,11 @@ Executar carga completa de todos os registros disponíveis no FI-Admin para o Mo
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.mongo.hooks.mongo import MongoHook
+from airflow.decorators import task
 from data_governance.dags.data_governance.tasks_for_01 import harvest_fiadmin_and_store_in_mongodb
 
 
+@task
 def setup_error_tracking_collection():
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     db = mongo_hook.get_conn()
@@ -34,6 +36,12 @@ def setup_error_tracking_collection():
     # Cria a coleção
     new_collection = db[db_name][collection_name]
     new_collection.create_index([('error_type', 1)])
+
+
+@task
+def get_total_records(update_mode):
+    total_records = 3000  
+    return total_records
 
 
 # Configuração do DAG
@@ -54,12 +62,20 @@ with DAG(
     catchup=False,
     doc_md=__doc__
 ) as dag:
-    setup_error_tracking_collection_task = PythonOperator(
-        task_id='setup_error_tracking_collection',
-        python_callable=setup_error_tracking_collection
-    )
-    harvest_fiadmin_and_store_in_mongodb_task = harvest_fiadmin_and_store_in_mongodb(
-        update_mode='FULL'
-    )
+    setup_error_tracking_collection_task = setup_error_tracking_collection()
 
-    setup_error_tracking_collection_task >> harvest_fiadmin_and_store_in_mongodb_task
+    # Criar 3 tasks paralelas, cada uma com sua fatia de offset
+    workers = 3
+    limit = 100
+    step = limit * workers  # pula 3 em 3 para cada worker
+    for i in range(workers):
+        offset = i * limit
+        harvest_task = harvest_fiadmin_and_store_in_mongodb.override(
+            task_id=f'harvest_fiadmin_and_store_in_mongodb_part_{i}'
+        )(
+            update_mode='FULL',
+            offset=offset,
+            limit=limit,
+            step = step
+        )
+        setup_error_tracking_collection_task >> harvest_task
