@@ -10,6 +10,12 @@ async function doctype_loadDataAndRenderChart() {
     const yearResp = await fetch('{country_iso}_doctype_year.json');
     const doctype_year_json = await yearResp.json();
 
+    Highcharts.setOptions({
+        lang: {
+            thousandsSep: ' '
+        }
+    });
+
     let doctype_chart = Highcharts.chart("doctype_container", {
         chart: { 
             type: 'column',
@@ -127,12 +133,10 @@ def generate_html_doctype(year_from, country, country_iso):
     # Builds doctype_year_json
     documents = list(collection.find({"type": "doctype", "country": country}).sort("year", 1))
     aggregated_data = []
-    years = []
     for doc in documents:
         year = int(doc["year"])
         doctype = doc["name"]
         count = doc.get("count", 0)
-        years.append(year)
 
         year_data = next((item for item in aggregated_data if item["ano"] == year), None)
         if not year_data:
@@ -148,8 +152,6 @@ def generate_html_doctype(year_from, country, country_iso):
 
     html_with_data = HTML_TEMPLATE.replace("{year_from}", str(year_from))
     html_with_data = html_with_data.replace("{country_iso}", country_iso)
-    min_year = min(years)
-    max_year = max(years)
 
     return { 
         'html': html_with_data,

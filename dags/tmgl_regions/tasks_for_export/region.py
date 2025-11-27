@@ -13,6 +13,12 @@ async function region_loadDataAndRenderChart() {
     const yearResp = await fetch('region_year.json');
     const region_year_json = await yearResp.json();
 
+    Highcharts.setOptions({
+        lang: {
+            thousandsSep: ' '
+        }
+    });
+
     let region_chart = Highcharts.chart("region_container", {
         chart: { 
             type: 'pie',

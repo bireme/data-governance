@@ -10,6 +10,12 @@ async function traditional_loadDataAndRenderChart() {
     const yearResp = await fetch('{country_iso}_traditional_year.json');
     const traditional_year_json = await yearResp.json();
 
+    Highcharts.setOptions({
+        lang: {
+            thousandsSep: ' '
+        }
+    });
+
     let traditional_chart = Highcharts.chart("traditional_container", {
         chart: { 
             type: 'lollipop',

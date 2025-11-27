@@ -291,7 +291,7 @@ def generate_html_reports(country):
 
     html_with_data = HTML_TEMPLATE.format(
         year_range_min=YEAR_FROM,
-        year_range_max=doctype_data['max_year'],
+        year_range_max=indicators_data['max_year'],
         html_doctype=doctype_data['html'],
         html_indicators=indicators_data['html'],
         html_studytype=studytype_data['html'],

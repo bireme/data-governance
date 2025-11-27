@@ -10,6 +10,12 @@ async function subject_loadDataAndRenderChart() {
     const yearResp = await fetch('{country_iso}_subject_year.json');
     const subject_year_json = await yearResp.json();
 
+    Highcharts.setOptions({
+        lang: {
+            thousandsSep: ' '
+        }
+    });
+
     let subject_chart = Highcharts.chart("subject_container", {
         chart: { 
             type: 'wordcloud',

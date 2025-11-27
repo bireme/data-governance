@@ -12,6 +12,12 @@ const map_json = {map_json};
             './world.topo.json'
         ).then(response => response.json());
 
+    Highcharts.setOptions({
+        lang: {
+            thousandsSep: ' '
+        }
+    });
+
     let map = Highcharts.mapChart('map_container', {
         chart: {
             map: topology,

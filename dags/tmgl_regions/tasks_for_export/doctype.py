@@ -13,6 +13,12 @@ async function doctype_loadDataAndRenderChart() {
     const yearResp = await fetch('doctype_year.json');
     const doctype_year_json = await yearResp.json();
 
+    Highcharts.setOptions({
+        lang: {
+            thousandsSep: ' '
+        }
+    });
+
     let doctype_chart = Highcharts.chart("doctype_container", {
         chart: { 
             type: 'column',

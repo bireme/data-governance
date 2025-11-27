@@ -13,6 +13,12 @@ async function dimention_loadDataAndRenderChart() {
     const yearResp = await fetch('dimention_year.json');
     const dimention_year_json = await yearResp.json();
 
+    Highcharts.setOptions({
+        lang: {
+            thousandsSep: ' '
+        }
+    });
+
     let dimention_chart = Highcharts.chart("dimention_container", {
         chart: { 
             backgroundColor: '#F7F7F8',

@@ -10,6 +10,12 @@ async function therapy_loadDataAndRenderChart() {
     const yearResp = await fetch('{country_iso}_therapy_year.json');
     const therapy_year_json = await yearResp.json();
 
+    Highcharts.setOptions({
+        lang: {
+            thousandsSep: ' '
+        }
+    });
+
     let therapy_chart = Highcharts.chart("therapy_container", {
         chart: { 
             type: 'pie',

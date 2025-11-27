@@ -62,10 +62,12 @@ def generate_html_indicators(year_from, country, country_iso):
 
     documents = list(collection.find({"type": "timeline", "country": country}).sort("year", 1))
     aggregated_data = []
+    years = []
     for doc in documents:
         year = int(doc["year"])
         total_documents = doc.get("total", 0)
         total_fulltext = doc.get("with_fulltext", 0)
+        years.append(year)
 
         year_data = {
             "ano": year,
@@ -80,7 +82,11 @@ def generate_html_indicators(year_from, country, country_iso):
 
     html_with_data = HTML_TEMPLATE.replace("{year_from}", str(year_from))
     html_with_data = html_with_data.replace("{country_iso}", country_iso)
+    min_year = min(years)
+    max_year = max(years)
 
     return { 
-        'html': html_with_data
+        'html': html_with_data,
+        'min_year': min_year,
+        'max_year': max_year,
     }

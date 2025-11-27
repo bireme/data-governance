@@ -7,6 +7,12 @@ HTML_TEMPLATE = """
 const lang_region_year_json = {lang_region_year_json};
 const lang_year_json = {lang_year_json};
 
+Highcharts.setOptions({
+    lang: {
+        thousandsSep: ' '
+    }
+});
+
 let lang_chart = Highcharts.chart("lang_container", {
     chart: { 
         type: "bar",

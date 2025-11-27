@@ -10,6 +10,12 @@ async function studytype_loadDataAndRenderChart() {
     const yearResp = await fetch('{country_iso}_studytype_year.json');
     const studytype_year_json = await yearResp.json();
 
+    Highcharts.setOptions({
+        lang: {
+            thousandsSep: ' '
+        }
+    });
+
     let studytype_chart = Highcharts.chart("studytype_container", {
         chart: { 
             type: 'pie',

@@ -7,6 +7,12 @@ HTML_TEMPLATE = """
 const timeline_region_year_json = {timeline_region_year_json};
 const timeline_year_json = {timeline_year_json};
 
+Highcharts.setOptions({
+    lang: {
+        thousandsSep: ' '
+    }
+});
+
 let timeline_chart = Highcharts.chart("timeline_container", {
     chart: { 
         type: "line",

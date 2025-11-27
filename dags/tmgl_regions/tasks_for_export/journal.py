@@ -13,6 +13,12 @@ async function journal_loadDataAndRenderChart() {
     const yearResp = await fetch('journal_year.json');
     const journal_year_json = await yearResp.json();
 
+    Highcharts.setOptions({
+        lang: {
+            thousandsSep: ' '
+        }
+    });
+
     let journal_chart = Highcharts.chart("journals_container", {
         chart: { 
             type: "bar",

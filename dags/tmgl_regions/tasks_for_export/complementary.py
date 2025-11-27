@@ -13,6 +13,12 @@ async function complementary_loadDataAndRenderChart() {
     const yearResp = await fetch('complementary_year.json');
     const complementary_year_json = await yearResp.json();
 
+    Highcharts.setOptions({
+        lang: {
+            thousandsSep: ' '
+        }
+    });
+
     let complementary_chart = Highcharts.chart("complementary_container", {
         chart: { 
             type: "bar",
