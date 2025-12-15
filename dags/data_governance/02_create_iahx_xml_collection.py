@@ -891,7 +891,7 @@ def transform_and_migrate():
             'cn_cy': doc.get('conference_city'),
             'cn_da': doc.get('conference_normalized_date'),
             'cn_dt': doc.get('conference_date'),
-            'cn_in': doc.get('conference_sponsoring_institution').splitlines() if doc.get('conference_sponsoring_institution') else None,
+            'cn_in': doc.get('conference_sponsoring_institution'),
             'cn_na': doc.get('conference_name'),
             'ct': ct_values,
             'cy': doc.get('publication_city'),
