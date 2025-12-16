@@ -152,20 +152,23 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode, initial_offset=0, limit=10
 
         logger.info(f"Tempo de coleta de dados no FI-Admin: {t.interval:.4f} segundos")
 
-        if response.status_code == 200:
-            json_data = response.json()
-            
-            # Se a resposta estiver vazia, não há mais dados
-            if not json_data or (json_data and not json_data['objects']):
-                logger.info(f"Batch vazio recebido para offset {offset}. Encerrando coleta.")
-                break
-            else:
-                if total_records is None:
-                    total_records = json_data['meta']['total_count']
-                    logger.info(f"Total de registros encontrados: {total_records}")
+        logger.info(f"Persistindo dados no MongoDB para offset {offset}")
+        with Timer() as t:
+            if response.status_code == 200:
+                json_data = response.json()
+                
+                # Se a resposta estiver vazia, não há mais dados
+                if not json_data or (json_data and not json_data['objects']):
+                    logger.info(f"Batch vazio recebido para offset {offset}. Encerrando coleta.")
+                    break
+                else:
+                    if total_records is None:
+                        total_records = json_data['meta']['total_count']
+                        logger.info(f"Total de registros encontrados: {total_records}")
 
-                results = json_data.get('objects', [])
-                send_json_to_mongodb(results, lz_collection)
+                    results = json_data.get('objects', [])
+                    send_json_to_mongodb(results, lz_collection)
+        logger.info(f"Tempo para persistir dados no MongoDB: {t.interval:.4f} segundos")
                 
         offset += step
 
