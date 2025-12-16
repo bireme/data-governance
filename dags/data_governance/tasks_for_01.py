@@ -69,10 +69,17 @@ def retry_error_records(error_collection, lz_collection, session, url, headers):
     errors = list(error_collection.find({}))
     for error in errors:
         params = error.get("params")
-        try:
-            response = session.get(url, params=params, headers=headers)
-            response.raise_for_status()
 
+        logger.info(f"Coletando no FI-Admin com os parametros {params}")
+        with Timer() as t:
+            try:
+                response = session.get(url, params=params, headers=headers)
+                response.raise_for_status()
+            except Exception as e:
+                logger.error(f"Erro {response.status_code} na coleta do batch {params}. Pulando para o próximo batch. Erro: {str(e)}")
+        logger.info(f"Tempo de coleta de dados no FI-Admin: {t.interval:.4f} segundos")
+
+        if response.status_code == 200:
             json_data = response.json()
             results = json_data.get('objects', [])
 
@@ -82,8 +89,6 @@ def retry_error_records(error_collection, lz_collection, session, url, headers):
             # Remover o erro da coleção após sucesso
             error_collection.delete_one({'_id': error['_id']})
             logger.info(f"Registro de erro com params {params} reprocessado com sucesso.")
-        except Exception as e:
-            logger.error(f"Falha ao reprocessar erro com params {params}: {str(e)}")
 
 
 # Função para obter JSON da API de forma paginada e enviar para o MongoDB
