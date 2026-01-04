@@ -325,9 +325,13 @@ def enrich_join_DBinstanceEcollection(offset):
                 if 'collection_instance' in db_data:
                     for collection_instance in db_data['collection_instance']:
                         if collection_instance:
-                            if collection_instance not in collection_instances:
-                                collection_instances[collection_instance] = set()
-                            collection_instances[collection_instance].add(db_name)
+                            collection_instance_arr = collection_instance.split(":")
+                            collection_instance_key = collection_instance_arr[0]
+                            collection_instance_value = collection_instance_arr[1]
+
+                            if collection_instance_key not in collection_instances:
+                                collection_instances[collection_instance_key] = set()
+                            collection_instances[collection_instance_key].add(collection_instance_value)
 
         # Preparar operação de atualização
         update_fields = {}
@@ -345,11 +349,11 @@ def enrich_join_DBinstanceEcollection(offset):
                     list(instances)
                 ]
             }
-        for collection_instance, dbs in collection_instances.items():
-            update_fields[collection_instance] = {
+        for collection_instance_key, collection_instance_value in collection_instances.items():
+            update_fields[collection_instance_key] = {
                 "$setUnion": [
-                    {"$ifNull": [f"${collection_instance}", []]},
-                    list(dbs)
+                    {"$ifNull": [f"${collection_instance_key}", []]},
+                    list(collection_instance_value)
                 ]
             }
         

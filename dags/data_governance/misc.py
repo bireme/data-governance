@@ -144,9 +144,6 @@ def load_DBinstanceEcollection(collection):
         if doc.get("instance"):
             entry["instance"] = doc["instance"]
         
-        if doc.get("collection"):
-            entry["collection"] = doc["collection"]
-        
         if doc.get("collection_instance"):
             entry["collection_instance"] = doc["collection_instance"]
 
