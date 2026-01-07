@@ -63,6 +63,7 @@ from data_governance.dags.data_governance.misc import load_decs_descriptors
 from data_governance.dags.data_governance.misc import load_title_current
 from data_governance.dags.data_governance.misc import load_title_current_country
 from data_governance.dags.data_governance.misc import remove_diacritics
+from data_governance.dags.data_governance.misc import get_decs_mfn
 
 
 def standardize_pages(value):
@@ -807,8 +808,7 @@ def transform_and_migrate():
         ct_values = []
         if 'check_tags' in doc and isinstance(doc['check_tags'], list):
             for tag in doc['check_tags']:
-                clean_tag = remove_diacritics(tag.strip().lower())
-                formatted_mfn = decs_map.get(clean_tag)
+                formatted_mfn = get_decs_mfn(tag, decs_map)
                 if formatted_mfn:
                     ct_values.append(formatted_mfn)
 
@@ -816,8 +816,7 @@ def transform_and_migrate():
         pt_values = []
         if 'publication_type' in doc and isinstance(doc['publication_type'], list):
             for tag in doc['publication_type']:
-                clean_tag = remove_diacritics(tag.strip().lower())
-                formatted_mfn = decs_map.get(clean_tag)
+                formatted_mfn = get_decs_mfn(tag, decs_map)
                 if formatted_mfn:
                     pt_values.append(formatted_mfn)
 
@@ -828,12 +827,9 @@ def transform_and_migrate():
                 if 'text' in tag:
                     tag = tag['text']
 
-                    clean_tag = remove_diacritics(tag.replace('^d', '').strip().lower())
-                    formatted_mfn = decs_map.get(clean_tag)
+                    formatted_mfn = get_decs_mfn(tag.replace('^d', ''), decs_map)
                     if formatted_mfn:
                         mj_values.append(formatted_mfn)
-                    else:
-                        mj_values.append(tag)
 
         # processa mh
         mh_values = []
@@ -842,12 +838,9 @@ def transform_and_migrate():
                 if 'text' in tag:
                     tag = tag['text']
 
-                    clean_tag = remove_diacritics(tag.replace('^d', '').strip().lower())
-                    formatted_mfn = decs_map.get(clean_tag)
+                    formatted_mfn = get_decs_mfn(tag.replace('^d', ''), decs_map)
                     if formatted_mfn:
                         mh_values.append(formatted_mfn)
-                    else:
-                        mh_values.append(tag)
 
         id_fields = standardize_id(doc.get('id'), doc.get('LILACS_original_id'))
 

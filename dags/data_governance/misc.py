@@ -89,13 +89,17 @@ def load_decs_descriptors(decs_col):
     for decs_doc in decs_col.find():
         # Processa MFN: remove zeros à esquerda e adiciona prefixo
         raw_mfn = decs_doc['Mfn'].lstrip('0')
-        formatted_mfn = f'^d{raw_mfn}' if raw_mfn else None
+        formatted_mfn = raw_mfn if raw_mfn else None
         
         descriptors = [
             decs_doc.get('Descritor Inglês', ''),
             decs_doc.get('Descritor Português', ''),
             decs_doc.get('Descritor Espanhol', ''),
-            decs_doc.get('Descritor Francês', '')
+            decs_doc.get('Descritor Francês', ''),
+            decs_doc.get('Descritor Espanhol-Espanha', ''),
+            decs_doc.get('Versão Alternativa Inglês', ''),
+            decs_doc.get('Versão Alternativa Espanhol', ''),
+            decs_doc.get('Versão Alternativa Português', ''),
         ]
         descriptors = [remove_diacritics(desc.strip().lower()) for desc in descriptors if desc]
 
@@ -103,6 +107,35 @@ def load_decs_descriptors(decs_col):
             descriptor_map[desc] = formatted_mfn
 
     return descriptor_map
+
+
+def get_decs_mfn(keyword, decs_map):
+    if not keyword:
+        return None
+
+    if keyword and keyword[0].isdigit():
+        return f"^d{keyword}"
+
+    clean_tag = remove_diacritics(keyword.strip().lower())
+
+    descriptor = clean_tag.split('/')
+    main_descriptor = descriptor[0]
+    if len(descriptor) > 1:
+        qualifier = "/" + descriptor[1]
+    else:
+        qualifier = None
+
+    main_descriptor_mfn = decs_map.get(main_descriptor)
+    if not main_descriptor_mfn:
+        return None
+
+    if qualifier:
+        qualifier_mfn = decs_map.get(qualifier)
+        formatted_mfn = f"^d{main_descriptor_mfn}^s{qualifier_mfn}" if qualifier_mfn else None
+    else:
+        formatted_mfn = f"^d{main_descriptor_mfn}"
+    
+    return formatted_mfn
 
 
 def load_instanceEcollection(collection):
