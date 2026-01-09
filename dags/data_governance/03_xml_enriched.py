@@ -304,6 +304,7 @@ def enrich_join_DBinstanceEcollection(offset):
         instances = set()
         collection_instances = {}
         for db_name in db_list:              
+            db_name = db_name.lower().strip()
             if db_name in databases_data:
                 db_data = databases_data[db_name]
 

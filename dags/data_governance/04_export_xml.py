@@ -60,17 +60,16 @@ def export_mongo_to_xml():
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
         f.write('<add>\n')
 
-        for doc in collection.find():
+        for doc in collection.find({}, {"database": 0, "_id": 0}):
             id_pk = doc.get('id_pk')
 
             boost_value = str(doc.get('weight', ''))
             root = ET.Element("doc", boost=boost_value)
 
             # Process all document fields dynamically
-            for key, value in doc.items():
-                if key == '_id':
-                    continue
-                
+            for key in sorted(doc.keys()):
+                value = doc[key]
+
                 if isinstance(value, list):
                     for item in value:
                         clean_item = remove_invalid_xml_chars(item)

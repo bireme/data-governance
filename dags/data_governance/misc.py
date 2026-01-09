@@ -169,7 +169,7 @@ def load_instanceEcollection(collection):
 def load_DBinstanceEcollection(collection):
     data = {}
     for doc in collection.find({}):
-        db_key = doc.get("database_campo4")
+        db_key = doc.get("database_campo4").lower().strip()
         if not db_key:
             continue
         
