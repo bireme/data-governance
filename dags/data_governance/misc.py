@@ -101,10 +101,27 @@ def load_decs_descriptors(decs_col):
             decs_doc.get('Versão Alternativa Espanhol', ''),
             decs_doc.get('Versão Alternativa Português', ''),
         ]
-        descriptors = [remove_diacritics(desc.strip().lower()) for desc in descriptors if desc]
 
-        for desc in descriptors:
-            descriptor_map[desc] = formatted_mfn
+        # Campos que são arrays de sinônimos
+        synonym_fields = [
+            'Sinônimos Inglês',
+            'Sinônimos Espanhol',
+            'Sinônimos Português',
+            'Sinônimos Espanha',
+            'Sinônimos Francês',
+        ]
+        synonyms = []
+        for field in synonym_fields:
+            value = decs_doc.get(field, []) or []
+            if isinstance(value, str):
+                value = [value]
+            synonyms.extend(value)
+
+        all_terms = descriptors + synonyms
+        all_terms = [remove_diacritics(term.strip().lower()) for term in all_terms if term]
+
+        for term in all_terms:
+            descriptor_map[term] = formatted_mfn
 
     return descriptor_map
 
