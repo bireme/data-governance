@@ -174,7 +174,7 @@ def setup_03_xml_enriched():
     db[source_collection].aggregate(pipeline)
     
     logger.info(f"Criando índices na coleção {target_collection}")
-    db[target_collection].create_index([("id", 1)])
+    db[target_collection].create_index([("id", 1)], unique=True)
     db[target_collection].create_index([("db", 1)])
     db[target_collection].create_index([("database", 1)])
     db[target_collection].create_index([("id_pk", 1)])
@@ -479,8 +479,6 @@ def _process_batch(collection, doc_map, database):
                 ]
             }
 
-        print(id_value, set_fields)
-
         bulk_ops.append(
             UpdateOne(
                 {'id': id_value},
@@ -489,6 +487,67 @@ def _process_batch(collection, doc_map, database):
         )
     if bulk_ops:
         collection.bulk_write(bulk_ops, ordered=False)
+
+
+def enrich_superresumo():
+    logger = logging.getLogger(__name__)
+
+    mongo_hook = MongoHook(mongo_conn_id='mongo')
+    sr_collection = mongo_hook.get_collection(
+        mongo_collection="sr2",
+        mongo_db="SuperResumos",
+    )
+
+    pipeline = [
+        # Apenas campos que interessam
+        {
+            "$project": {
+                "_id": 0,
+                "id": 1,
+                "super_ab_ia_en": 1,
+                "super_ab_ia_es": 1,
+                "super_ab_ia_fr": 1,
+                "super_ab_ia_pt": 1,
+                "mh_ia": "$mj",  # renomeia mj -> mh_ia
+            }
+        },
+        # Faz o join com a coleção destino
+        {
+            "$lookup": {
+                "from": "03_xml_enriched",
+                "localField": "id",
+                "foreignField": "id",
+                "as": "enriched_doc",
+            }
+        },
+        # "explode" o array para poder dar merge doc-a-doc
+        {"$unwind": "$enriched_doc"},
+        # Sobrescreve os campos no doc de destino
+        {
+            "$replaceRoot": {
+                "newRoot": {
+                    "$mergeObjects": ["$enriched_doc", "$$ROOT"]
+                }
+            }
+        },
+        # Remove o campo auxiliar
+        {"$unset": "enriched_doc"},
+        # Escreve de volta na coleção 03_xml_enriched, com join por id
+        {
+            "$merge": {
+                "into": {
+                    "db": "data_governance",
+                    "coll": "03_xml_enriched",
+                },
+                "on": "id",
+                "whenMatched": "merge",
+                "whenNotMatched": "discard",
+            }
+        },
+    ]
+
+    # Executa o pipeline
+    list(sr_collection.aggregate(pipeline, allowDiskUse=True))
 
 
 default_args = {
@@ -537,6 +596,11 @@ with DAG(
         python_callable=enrich_instancia
     )
 
+    superresumo_task = PythonOperator(
+        task_id="enrich_superresumo",
+        python_callable=enrich_superresumo
+    )
+
     setup_03_xml_enriched_task >> list_join_db_batches_task
     setup_03_xml_enriched_task >> list_join_database_batches_task
 
@@ -548,3 +612,4 @@ with DAG(
     create_union_view_task >> enrich_instancia_task
 
     setup_03_xml_enriched_task >> enrich_instancia_task
+    enrich_instancia_task >> superresumo_task
