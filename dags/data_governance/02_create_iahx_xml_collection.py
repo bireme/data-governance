@@ -921,6 +921,8 @@ def transform_and_migrate():
             'ta': doc.get('title_serial'),
             'ta_fascic': standardize_ta_fascic(ta_var, doc.get('volume_serial'), doc.get('issue_number'), doc.get('publication_date_normalized', '')[:4]),
             'ta_var': ta_var,
+            'tag_comunidade': doc.get('community'),
+            'tag_colecao': doc.get('community_collection_path'),
             'th_in': doc.get('thesis_dissertation_institution'),
             'th_le': [leader['text'] for leader in doc.get('thesis_dissertation_leader', []) if 'text' in leader],
             'th_ti': doc.get('thesis_dissertation_academic_title'),
