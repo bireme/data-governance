@@ -267,8 +267,9 @@ def standardize_location(value):
 def standardize_fo(doc):
     def format_fo_as(doc):
         parts = []
-        if doc.get('title_serial'):
-            parts.append(doc['title_serial'])
+        title_serial = '; '.join(doc.get('title_serial', [])) if isinstance(doc.get('title_serial'), list) else doc.get('title_serial')
+        if title_serial:
+            parts.append(title_serial)
         if doc.get('volume_serial'):
             parts.append(f";{doc['volume_serial']}")
         if doc.get('issue_number'):
@@ -305,6 +306,8 @@ def standardize_fo(doc):
 
         has_individual_author = 'individual_author_monographic' in doc and doc['individual_author_monographic']
         has_corporate_author_monographic = 'corporate_author_monographic' in doc and doc['corporate_author_monographic']
+        title_serial = '; '.join(doc.get('title_serial', [])) if isinstance(doc.get('title_serial'), list) else doc.get('title_serial')
+        symbol = '; '.join(doc.get('symbol', [])) if isinstance(doc.get('symbol'), list) else doc.get('symbol')
         if has_individual_author or has_corporate_author_monographic:
             parts.append('In. ')
             if has_individual_author:
@@ -350,16 +353,16 @@ def standardize_fo(doc):
             desc_b = [entry['_b'] for entry in doc['descriptive_information'] if '_b' in entry and entry['_b']]
             if desc_b:
                 parts.append(', ' + ', '.join(desc_b) + '. ')
-        if doc.get('title_serial'):
-            parts.append('(' + doc['title_serial'])
+        if title_serial:
+            parts.append('(' + title_serial)
         if doc.get('volume_serial'):
             parts.append(', ' + doc['volume_serial'])
         if doc.get('issue_number'):
             parts.append(', ' + doc['issue_number'])
-        if doc.get('title_serial'):
+        if title_serial:
             parts.append(').')
-        if doc.get('symbol'):
-            parts.append(' (' + doc['symbol'] + ').')
+        if symbol:
+            parts.append(' (' + symbol + ').')
         return ''.join(parts).strip()
 
     def format_fo_m(doc):
@@ -367,6 +370,8 @@ def standardize_fo(doc):
         has_pub_city = bool(doc.get('publication_city'))
         has_edition = bool(doc.get('edition'))
         has_publisher = bool(doc.get('publisher'))
+        title_serial = '; '.join(doc.get('title_serial', [])) if isinstance(doc.get('title_serial'), list) else doc.get('title_serial')
+        symbol = '; '.join(doc.get('symbol', [])) if isinstance(doc.get('symbol'), list) else doc.get('symbol')
         if has_pub_city or has_edition or has_publisher:
             if doc.get('publication_city'):
                 parts.append(doc['publication_city'] + '; ')
@@ -388,27 +393,27 @@ def standardize_fo(doc):
                 desc_b = [entry['_b'] for entry in doc['descriptive_information'] if '_b' in entry and entry['_b']]
                 if desc_b:
                     parts.append(', '.join(desc_b) + '.')
-            if doc.get('title_serial'):
-                parts.append('(' + doc['title_serial'])
+            if title_serial:
+                parts.append('(' + title_serial)
             if doc.get('volume_serial'):
                 parts.append(', ' + doc['volume_serial'])
             if doc.get('issue_number'):
                 parts.append(', ' + doc['issue_number'])
-            if doc.get('title_serial'):
+            if title_serial:
                 parts.append(').')
-            if doc.get('symbol'):
-                parts.append(' (' + doc['symbol'] + ').')
+            if symbol:
+                parts.append(' (' + symbol + ').')
         else:
-            if doc.get('title_serial'):
-                parts.append('(' + doc['title_serial'])
+            if title_serial:
+                parts.append('(' + title_serial)
             if doc.get('volume_serial'):
                 parts.append(', ' + doc['volume_serial'])
             if doc.get('issue_number'):
                 parts.append(', ' + doc['issue_number'])
-            if doc.get('title_serial'):
+            if title_serial:
                 parts.append(').')
-            if doc.get('symbol'):
-                parts.append(' (' + doc['symbol'] + ').')
+            if symbol:
+                parts.append(' (' + symbol + ').')
         return ''.join(parts).strip()
 
     def format_fo_c(doc):
@@ -717,6 +722,42 @@ def setup_iahx_xml_collection():
     new_collection.create_index([('id_pk', 1)])
 
 
+def extract_susdigital_theme(value, target_path):
+    """
+    Extrai o tema SUS Digital baseado no community_collection_path.
+    
+    Args:
+        value (str): Campo com string multilíngue separada por '|'
+        target_path (str): 'Programas' ou 'Alvo'
+    
+    Returns:
+        dict: {'tema_susdigital_programas': str} ou {'tema_susdigital_publico_alvo': str}
+    """
+    if not isinstance(value, str) or not value.strip():
+        return {}
+    
+    occurrences = value.split('|')
+    
+    # Procura pela versão pt-br ou pt
+    pt_version = None
+    for occurrence in occurrences:
+        if 'pt-br' in occurrence or 'pt' in occurrence:
+            pt_version = occurrence.strip()
+            break
+    
+    if not pt_version:
+        return {}
+    
+    # Pega a string após o último '/'
+    parts = pt_version.split('/')
+    if parts:
+        theme = parts[-1].strip()
+        field_name = 'tema_susdigital_programas' if target_path == 'Programas' else 'tema_susdigital_publico_alvo'
+        return {field_name: theme}
+    
+    return {}
+
+
 def transform_and_migrate():
     logger = logging.getLogger(__name__)
     
@@ -842,6 +883,14 @@ def transform_and_migrate():
                     if formatted_mfn:
                         mh_values.append(formatted_mfn)
 
+        # Extrai temas SUS Digital baseado em tag_colecao
+        susdigital_fields = {}
+        community_collection_path = doc.get('community_collection_path', '')
+        if 'Programas' in community_collection_path:
+            susdigital_fields = extract_susdigital_theme(community_collection_path, 'Programas')
+        elif 'Alvo' in community_collection_path:
+            susdigital_fields = extract_susdigital_theme(community_collection_path, 'Alvo')
+
         id_fields = standardize_id(doc.get('id'), doc.get('LILACS_original_id'))
 
         descritores_locais = doc.get('local_descriptors', '')
@@ -940,7 +989,8 @@ def transform_and_migrate():
             **location_fields,
             **fo_fields,
             **cp_fields,
-            **pais_publicacao_fields
+            **pais_publicacao_fields,
+            **susdigital_fields,
         }
 
         # Remove campos com valor None, '', [], ou {}
