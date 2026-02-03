@@ -498,6 +498,9 @@ def enrich_superresumo():
         mongo_db="SuperResumos",
     )
 
+    total_docs = sr_collection.count_documents({})
+    logger.info("Total de documentos na coleção sr2: %d", total_docs)
+
     pipeline = [
         # Apenas campos que interessam
         {
@@ -547,7 +550,11 @@ def enrich_superresumo():
     ]
 
     # Executa o pipeline
-    list(sr_collection.aggregate(pipeline, allowDiskUse=True))
+    result_docs = list(sr_collection.aggregate(pipeline, allowDiskUse=True))
+
+    # Total de documentos que passaram pelo pipeline
+    total_pipeline = len(result_docs)
+    logger.info("Total de documentos processados pelo pipeline: %d", total_pipeline)
 
 
 default_args = {
