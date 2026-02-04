@@ -550,11 +550,7 @@ def enrich_superresumo():
     ]
 
     # Executa o pipeline
-    result_docs = list(sr_collection.aggregate(pipeline, allowDiskUse=True))
-
-    # Total de documentos que passaram pelo pipeline
-    total_pipeline = len(result_docs)
-    logger.info("Total de documentos processados pelo pipeline: %d", total_pipeline)
+    sr_collection.aggregate(pipeline, allowDiskUse=True, maxTimeMS=600000)
 
 
 default_args = {
