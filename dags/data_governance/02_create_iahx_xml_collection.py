@@ -154,7 +154,11 @@ def standardize_abstract(value):
 
                 abstract_text = entry['text'].replace('\r\n', ' ')
                 abstract_text = re.sub(r'[\x00-\x08\x0B-\x0C\x0E-\x1F]', ' ', abstract_text)
-                fields[key] = abstract_text
+
+                if key in fields:
+                    fields[key] += f" {abstract_text}"
+                else:
+                    fields[key] = abstract_text
     return fields
 
 
@@ -885,11 +889,18 @@ def transform_and_migrate():
 
         # Extrai temas SUS Digital baseado em tag_colecao
         susdigital_fields = {}
-        community_collection_path = doc.get('community_collection_path', '')
-        if 'Programas' in community_collection_path:
-            susdigital_fields = extract_susdigital_theme(community_collection_path, 'Programas')
-        elif 'Alvo' in community_collection_path:
-            susdigital_fields = extract_susdigital_theme(community_collection_path, 'Alvo')
+        community_collection_path = doc.get('community_collection_path', [])
+
+        # contém 'Programas'
+        programas_match = next((item for item in community_collection_path if 'Programas' in item), None)
+        if programas_match:
+            susdigital_fields = extract_susdigital_theme(programas_match, 'Programas')
+
+        # OU contém 'Alvo'
+        else:
+            alvo_match = next((item for item in community_collection_path if 'Alvo' in item), None)
+            if alvo_match:
+                susdigital_fields = extract_susdigital_theme(alvo_match, 'Alvo')
 
         id_fields = standardize_id(doc.get('id'), doc.get('LILACS_original_id'))
 
