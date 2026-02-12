@@ -726,17 +726,7 @@ def setup_iahx_xml_collection():
     new_collection.create_index([('id_pk', 1)])
 
 
-def extract_susdigital_theme(value, target_path):
-    """
-    Extrai o tema SUS Digital baseado no community_collection_path.
-    
-    Args:
-        value (str): Campo com string multilíngue separada por '|'
-        target_path (str): 'Programas' ou 'Alvo'
-    
-    Returns:
-        dict: {'tema_susdigital_programas': str} ou {'tema_susdigital_publico_alvo': str}
-    """
+def extract_susdigital_theme(value):
     if not isinstance(value, str) or not value.strip():
         return {}
     
@@ -756,10 +746,9 @@ def extract_susdigital_theme(value, target_path):
     parts = pt_version.split('/')
     if parts:
         theme = parts[-1].strip()
-        field_name = 'tema_susdigital_programas' if target_path == 'Programas' else 'tema_susdigital_publico_alvo'
-        return {field_name: theme}
-    
-    return {}
+        return theme    
+
+    return None
 
 
 def transform_and_migrate():
@@ -888,19 +877,19 @@ def transform_and_migrate():
                         mh_values.append(formatted_mfn)
 
         # Extrai temas SUS Digital baseado em tag_colecao
-        susdigital_fields = {}
+        susdigital_fields = {'tema_susdigital_publico_alvo': [], 'tema_susdigital_programas': []}
         community_collection_path = doc.get('community_collection_path', [])
 
-        # contém 'Programas'
-        programas_match = next((item for item in community_collection_path if 'Programas' in item), None)
-        if programas_match:
-            susdigital_fields = extract_susdigital_theme(programas_match, 'Programas')
-
-        # OU contém 'Alvo'
-        else:
-            alvo_match = next((item for item in community_collection_path if 'Alvo' in item), None)
-            if alvo_match:
-                susdigital_fields = extract_susdigital_theme(alvo_match, 'Alvo')
+        for item in community_collection_path:
+            if 'Programas' in item:
+                result = extract_susdigital_theme(item)
+                if result:
+                    susdigital_fields['tema_susdigital_programas'].append(result)
+            
+            if 'Alvo' in item:
+                result = extract_susdigital_theme(item)
+                if result:
+                    susdigital_fields['tema_susdigital_publico_alvo'].append(result)
 
         id_fields = standardize_id(doc.get('id'), doc.get('LILACS_original_id'))
 
