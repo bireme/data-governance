@@ -80,8 +80,8 @@ def setup_collections():
     collection_lz.create_index([('year', 1)])
 
     # Cria coleção de métricas
-    collection_metrics = mongo_hook.get_collection('02_countries_metrics', 'tmgl_metrics')
-    collection_metrics.create_index([('type', 1), ('country', 1), ('name', 1)], unique=True)
+    #collection_metrics = mongo_hook.get_collection('02_countries_metrics', 'tmgl_metrics')
+    #collection_metrics.create_index([('type', 1), ('country', 1), ('name', 1)], unique=True)
 
 
 def list_xml_files():

@@ -74,7 +74,7 @@ with DAG(
         deferrable=True,
     )
 
-    run_metric_total_docs = TriggerDagRunOperator(
+    """run_metric_total_docs = TriggerDagRunOperator(
         task_id='run_TMGL_02_create_metric_total_docs',
         trigger_dag_id='TMGL_02_create_metric_total_docs',
         wait_for_completion=True,
@@ -120,4 +120,4 @@ with DAG(
     run_full_update >> run_metric_doc_type >> run_export_html
     run_full_update >> run_metric_study_type >> run_export_html
     run_full_update >> run_dimentions >> run_export_html 
-    run_full_update >> run_subjects >> run_export_html
+    run_full_update >> run_subjects >> run_export_html"""

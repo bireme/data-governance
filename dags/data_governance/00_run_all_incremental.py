@@ -31,7 +31,7 @@ with DAG(
     'DG_00_run_all_incremental',
     default_args=default_args,
     description='Data Governance - Orquestra todos os DAGs em ordem',
-    schedule="0 23 * * 1-5",
+    schedule="0 10 * * 1-5",
     catchup=False,
     tags=["data_governance", "fi-admin", "mongodb", "incremental_update"],
     doc_md=__doc__
