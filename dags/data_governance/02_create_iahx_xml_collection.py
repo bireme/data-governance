@@ -76,6 +76,8 @@ def standardize_pages(value):
                 pg_value.append(page['text'])
             elif 'f' in page and page['f']:
                 pg_value.append(page['f'])
+            elif '_e' in page and page['_e']:
+                pg_value.append(page['_e'])
     return pg_value
 
 
