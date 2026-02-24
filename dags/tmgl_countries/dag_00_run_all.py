@@ -12,7 +12,7 @@ with DAG(
     'TMGL_COUNTRIES_00_run_all',
     default_args=default_args,
     description='TMGL - Orquestra todos os DAGs TMGL COUNTRIES em ordem',
-    schedule="30 4 * * 7",
+    schedule="30 5 * * 6",
     catchup=False,
     tags=["tmgl", "mongodb", "country"],
     doc_md=__doc__

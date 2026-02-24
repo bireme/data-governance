@@ -12,7 +12,7 @@ with DAG(
     'TMGL_REGION_00_run_all',
     default_args=default_args,
     description='TMGL - Orquestra todos os DAGs TMGL REGION em ordem',
-    schedule="30 4 * * 7",
+    schedule="30 3 * * 7",
     catchup=False,
     tags=["tmgl", "mongodb", "region"],
     doc_md=__doc__
