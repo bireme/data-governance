@@ -5,7 +5,7 @@ from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.hooks.filesystem import FSHook
-from data_governance.dags.tmgl_regions.tasks_for_export.map import generate_html_map
+#from data_governance.dags.tmgl_regions.tasks_for_export.map import generate_html_map
 from data_governance.dags.tmgl_regions.tasks_for_export.language import generate_html_language
 from data_governance.dags.tmgl_regions.tasks_for_export.timeline import generate_html_timeline
 from data_governance.dags.tmgl_regions.tasks_for_export.indicator import generate_html_indicators
@@ -33,7 +33,7 @@ HTML_TEMPLATE = """
 
   <script src="./highcharts.js"></script>
   <script src="./no-data-to-display.js"></script>
-  <script src="./map.js"></script>
+  <!--script src="./map.js"></script-->
   <script src="./wordcloud.js"></script>
   <script src="./drilldown.js"></script>
   <script src="./treemap.js"></script>
@@ -87,13 +87,9 @@ HTML_TEMPLATE = """
   <div class="tab-content">
     <div class="tab-pane fade show active" id="output-tab-pane" role="tabpanel" aria-labelledby="pills-output-tab">
       <div class="row mt-4">
-        <h3 class="h4">Total Publications and Full-Text Availability by Country</h3>
         <div class="row m-0">
           <div class="col-lg-6 col-xs-12">
-            <div id="map_container"></div>
-          </div>
-
-          <div class="col-lg-6 col-xs-12 mt-lg-0 mt-3">
+            <h3 class="h4">Total Publications and Full-Text Availability by Country</h3>
             <div id="indicator_container" class="py-5">
               <div class="d-flex justify-content-center text-center mt-5">
                 <div class="p-2" style="flex: 1 1 50%;">
@@ -105,16 +101,16 @@ HTML_TEMPLATE = """
               </div>
             </div>
           </div>
+
+          <div class="col-lg-6 col-xs-12 mt-lg-0 mt-3">
+            <h3 class="h4">Publications by Language</h3>
+            <div id="lang_container"></div>
+          </div>
         </div>
       </div>
 
       <div class="row mt-4">
-        <div class="col-lg-6 col-xs-12">
-          <h3 class="h4">Publications by Language</h3>
-          <div id="lang_container"></div>
-        </div>
-
-        <div class="col-lg-6 col-xs-12 mt-lg-0 mt-3">
+        <div class="col-xs-12">
           <h3 class="h4">Total Publications and Full-Text Availability over time</h3>
           <div id="timeline_container"></div>
         </div>
@@ -263,8 +259,6 @@ HTML_TEMPLATE = """
       }},
     }});
 
-    {html_map}
-
     {html_language}
 
     {html_timeline}
@@ -322,7 +316,7 @@ def generate_html_reports(ti):
 
     language_data = ti.xcom_pull(task_ids='generate_html_language')
     timeline_data = ti.xcom_pull(task_ids='generate_html_timeline')
-    map_data = ti.xcom_pull(task_ids='generate_html_map')
+    #map_data = ti.xcom_pull(task_ids='generate_html_map')
     indicators_data = ti.xcom_pull(task_ids='generate_html_indicators')
     journal_data = ti.xcom_pull(task_ids='generate_html_journal')
     doctype_data = ti.xcom_pull(task_ids='generate_html_doctype')
@@ -343,7 +337,7 @@ def generate_html_reports(ti):
         year_range_min=YEAR_FROM,
         year_range_max=language_data['max_year'],
         html_timeline=timeline_data['html'],
-        html_map=map_data['html'],
+        #html_map=map_data['html'],
         html_indicators=indicators_data['html'],
         html_journals=journal_data['html'],
         html_doctype=doctype_data['html'],
@@ -400,11 +394,11 @@ with DAG(
         python_callable=generate_html_timeline,
         op_kwargs={'year_from': YEAR_FROM},
     )
-    generate_html_map_task = PythonOperator(
+    """generate_html_map_task = PythonOperator(
         task_id='generate_html_map',
         python_callable=generate_html_map,
         op_kwargs={'year_from': YEAR_FROM},
-    )
+    )"""
     generate_html_indicators_task = PythonOperator(
         task_id='generate_html_indicators',
         python_callable=generate_html_indicators,
@@ -463,7 +457,7 @@ with DAG(
 
     generate_html_language_task >> generate_reports_task
     generate_html_timeline_task >> generate_reports_task
-    generate_html_map_task >> generate_reports_task
+    #generate_html_map_task >> generate_reports_task
     generate_html_indicators_task >> generate_reports_task
     generate_html_journal_task >> generate_reports_task
     generate_html_doctype_task >> generate_reports_task
