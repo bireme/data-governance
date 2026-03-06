@@ -89,7 +89,7 @@ HTML_TEMPLATE = """
       <div class="row mt-4">
         <div class="row m-0">
           <div class="col-lg-6 col-xs-12">
-            <h3 class="h4">Total Publications and Full-Text Availability by Country</h3>
+            <h3 class="h4">Total Publications and Full-Text Availability</h3>
             <div id="indicator_container" class="py-5">
               <div class="d-flex justify-content-center text-center mt-5">
                 <div class="p-2" style="flex: 1 1 50%;">
