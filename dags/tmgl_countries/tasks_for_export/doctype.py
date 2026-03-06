@@ -155,6 +155,4 @@ def generate_html_doctype(year_from, country, country_iso):
 
     return { 
         'html': html_with_data,
-        'min_year': min_year,
-        'max_year': max_year,
     }
