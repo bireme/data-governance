@@ -494,8 +494,8 @@ def enrich_superresumo():
 
     mongo_hook = MongoHook(mongo_conn_id='mongo')
     sr_collection = mongo_hook.get_collection(
-        mongo_collection="sr2",
-        mongo_db="SuperResumos",
+        mongo_collection="enr1",
+        mongo_db="Enrichment_IA",
     )
 
     total_docs = sr_collection.count_documents({})
