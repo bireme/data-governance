@@ -409,7 +409,8 @@ def enrich_instancia():
                     'instances': set(), 
                     'collections': set(), 
                     'tags': {},
-                    'contextos': {}
+                    'contextos': {},
+                    'database': database
                 }
 
             doc_map[key]['instances'].update(instances)
@@ -438,11 +439,11 @@ def enrich_instancia():
         # 3. Enviar batch
         if doc_map:
             logger.info("Enviando batch de %i para o MongoDB" % (BATCH_SIZE, ))
-            _process_batch(enriched_collection, doc_map, database)
+            _process_batch(enriched_collection, doc_map)
             doc_map.clear()
     
 
-def _process_batch(collection, doc_map, database):
+def _process_batch(collection, doc_map):
     bulk_ops = []
     for id_value, data in doc_map.items():
         set_fields = {
@@ -459,7 +460,7 @@ def _process_batch(collection, doc_map, database):
             set_fields[coll_name] = {
                 '$setUnion': [
                     {'$ifNull': [f'${coll_name}', []]},
-                    {'$literal': database}
+                    {'$literal': data['database']}
                 ]
             }
 
