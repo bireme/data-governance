@@ -150,7 +150,7 @@ def standardize_abstract(value):
     fields = {}
     if isinstance(value, list):
         for entry in value:
-            if 'text' in entry:
+            if 'text' in entry and entry['text'] is not None:
                 lang_code = entry.get('_i', '').lower()
                 key = f'ab_{lang_code}' if lang_code else 'ab'
 
