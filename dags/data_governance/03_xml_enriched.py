@@ -503,7 +503,6 @@ def enrich_superresumo():
     logger.info("Total de documentos na coleção sr2: %d", total_docs)
 
     pipeline = [
-        # Apenas campos que interessam
         {
             "$project": {
                 "_id": 0,
@@ -512,31 +511,34 @@ def enrich_superresumo():
                 "super_ab_ia_es": 1,
                 "super_ab_ia_fr": 1,
                 "super_ab_ia_pt": 1,
-                "mh_ia": "$mj",  # renomeia mj -> mh_ia
+                "mh_ia": "$mj", 
             }
         },
-        # Faz o join com a coleção destino
         {
             "$lookup": {
                 "from": "03_xml_enriched",
                 "localField": "id",
                 "foreignField": "id",
-                "as": "enriched_doc",
+                "as": "joined_target",
             }
         },
-        # "explode" o array para poder dar merge doc-a-doc
-        {"$unwind": "$enriched_doc"},
-        # Sobrescreve os campos no doc de destino
+        {"$unwind": "$joined_target"},
         {
             "$replaceRoot": {
                 "newRoot": {
-                    "$mergeObjects": ["$enriched_doc", "$$ROOT"]
+                    "$mergeObjects": [
+                        "$joined_target", 
+                        {
+                            "super_ab_ia_en": "$super_ab_ia_en",
+                            "super_ab_ia_es": "$super_ab_ia_es",
+                            "super_ab_ia_fr": "$super_ab_ia_fr",
+                            "super_ab_ia_pt": "$super_ab_ia_pt",
+                            "mh_ia": "$mh_ia"
+                        }
+                    ]
                 }
             }
         },
-        # Remove o campo auxiliar
-        {"$unset": "enriched_doc"},
-        # Escreve de volta na coleção 03_xml_enriched, com join por id
         {
             "$merge": {
                 "into": {
