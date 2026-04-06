@@ -511,7 +511,7 @@ def enrich_superresumo():
                 "super_ab_ia_es": 1,
                 "super_ab_ia_fr": 1,
                 "super_ab_ia_pt": 1,
-                "mh_ia": "$mj", 
+                "mh_ia": 1, 
             }
         },
         {
