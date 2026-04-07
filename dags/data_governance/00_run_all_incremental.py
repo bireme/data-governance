@@ -57,6 +57,7 @@ with DAG(
         wait_for_completion=True,
         deferrable=True,
     )
+    
     run_enrich_xml = TriggerDagRunOperator(
         task_id='run_DG_03_enrich_xml',
         trigger_dag_id='DG_03_enrich_xml',
