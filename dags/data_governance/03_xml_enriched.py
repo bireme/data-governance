@@ -490,72 +490,6 @@ def _process_batch(collection, doc_map):
         collection.bulk_write(bulk_ops, ordered=False)
 
 
-def enrich_superresumo():
-    logger = logging.getLogger(__name__)
-
-    mongo_hook = MongoHook(mongo_conn_id='mongo')
-    sr_collection = mongo_hook.get_collection(
-        mongo_collection="enr1",
-        mongo_db="Enrichment_IA",
-    )
-
-    total_docs = sr_collection.count_documents({})
-    logger.info("Total de documentos na coleção sr2: %d", total_docs)
-
-    pipeline = [
-        {
-            "$project": {
-                "_id": 0,
-                "id": 1,
-                "super_ab_ia_en": 1,
-                "super_ab_ia_es": 1,
-                "super_ab_ia_fr": 1,
-                "super_ab_ia_pt": 1,
-                "mh_ia": 1, 
-            }
-        },
-        {
-            "$lookup": {
-                "from": "03_xml_enriched",
-                "localField": "id",
-                "foreignField": "id",
-                "as": "joined_target",
-            }
-        },
-        {"$unwind": "$joined_target"},
-        {
-            "$replaceRoot": {
-                "newRoot": {
-                    "$mergeObjects": [
-                        "$joined_target", 
-                        {
-                            "super_ab_ia_en": "$super_ab_ia_en",
-                            "super_ab_ia_es": "$super_ab_ia_es",
-                            "super_ab_ia_fr": "$super_ab_ia_fr",
-                            "super_ab_ia_pt": "$super_ab_ia_pt",
-                            "mh_ia": "$mh_ia"
-                        }
-                    ]
-                }
-            }
-        },
-        {
-            "$merge": {
-                "into": {
-                    "db": "data_governance",
-                    "coll": "03_xml_enriched",
-                },
-                "on": "id",
-                "whenMatched": "merge",
-                "whenNotMatched": "discard",
-            }
-        },
-    ]
-
-    # Executa o pipeline
-    sr_collection.aggregate(pipeline, allowDiskUse=True, maxTimeMS=600000)
-
-
 default_args = {
     'owner': 'airflow',
     'start_date': datetime(2025, 4, 15),
@@ -602,11 +536,6 @@ with DAG(
         python_callable=enrich_instancia
     )
 
-    superresumo_task = PythonOperator(
-        task_id="enrich_superresumo",
-        python_callable=enrich_superresumo
-    )
-
     setup_03_xml_enriched_task >> list_join_db_batches_task
     setup_03_xml_enriched_task >> list_join_database_batches_task
 
@@ -618,4 +547,3 @@ with DAG(
     create_union_view_task >> enrich_instancia_task
 
     setup_03_xml_enriched_task >> enrich_instancia_task
-    enrich_instancia_task >> superresumo_task
