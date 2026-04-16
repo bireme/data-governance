@@ -253,13 +253,21 @@ with DAG(
     )
 
     sanear_xml_com_tidy = BashOperator(
-        task_id='sanear_xml_com_tidy',
-        bash_command='tidy -xml -w 0 -i -utf8 -o /caminho/para/mar_tidy.xml /caminho/para/mar.xml'
+    task_id='sanear_xml_com_tidy',
+    bash_command="""
+    echo "🔧 Iniciando saneamento do XML com tidy..."
+    tidy -xml -w 0 -i -utf8 -o /caminho/para/mar_tidy.xml /caminho/para/mar.xml
+    echo "✅ Saneamento concluído: mar_tidy.xml gerado com sucesso."
+    """
     )
 
     validar_xml = BashOperator(
-        task_id='validar_xml_com_xmlstarlet',
-        bash_command='xmlstarlet val -e /caminho/para/mar_tidy.xml'
+    task_id='validar_xml_com_xmlstarlet',
+    bash_command="""
+    echo "🔍 Iniciando validação do XML com xmlstarlet..."
+    xmlstarlet val -e /caminho/para/mar_tidy.xml
+    echo "✅ Validação concluída: XML válido."
+    """
     )
 
     corrigir_paises >> substituir_ai >> sanear_xml_com_tidy >> validar_xml
