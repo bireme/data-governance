@@ -4,7 +4,6 @@ import logging
 from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.operators.bash import BashOperator
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from pymongo import UpdateOne
 
@@ -252,22 +251,4 @@ with DAG(
         python_callable=substituir_ai_por_mapeamento
     )
 
-    sanear_xml_com_tidy = BashOperator(
-    task_id='sanear_xml_com_tidy',
-    bash_command="""
-    echo "🔧 Iniciando saneamento do XML com tidy..."
-    tidy -xml -w 0 -i -utf8 -o /caminho/para/mar_tidy.xml /caminho/para/mar.xml
-    echo "✅ Saneamento concluído: mar_tidy.xml gerado com sucesso."
-    """
-    )
-
-    validar_xml = BashOperator(
-    task_id='validar_xml_com_xmlstarlet',
-    bash_command="""
-    echo "🔍 Iniciando validação do XML com xmlstarlet..."
-    xmlstarlet val -e /caminho/para/mar_tidy.xml
-    echo "✅ Validação concluída: XML válido."
-    """
-    )
-
-    corrigir_paises >> substituir_ai >> sanear_xml_com_tidy >> validar_xml
+    corrigir_paises >> substituir_ai
