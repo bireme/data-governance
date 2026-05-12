@@ -34,12 +34,24 @@ from airflow.hooks.filesystem import FSHook
 
 
 def remove_invalid_xml_chars(text):
-    # Remove caracteres de controle não permitidos pelo XML 1.0
-    return re.sub(
-        r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', 
-        text if isinstance(text, str) else str(text)
-    )
+    if text is None:
+        return text
 
+    if not isinstance(text, str):
+        text = str(text)
+
+    return re.sub(
+        r'['
+        r'\x00-\x08'
+        r'\x0B-\x0C'
+        r'\x0E-\x1F'
+        r'\x7F'
+        r'\uD800-\uDFFF'   # surrogate pairs inválidos
+        r'\uFFFE\uFFFF'    # ← AQUI está o seu problema
+        r']',
+        '',
+        text
+    )
 
 def export_mongo_to_xml():
     logger = logging.getLogger(__name__)
