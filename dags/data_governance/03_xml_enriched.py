@@ -85,6 +85,7 @@ Cada regra pode adicionar:
 
 
 import logging
+import unicodedata
 from datetime import datetime
 from itertools import islice
 from airflow import DAG
@@ -303,7 +304,15 @@ def enrich_join_DBinstanceEcollection(offset):
         dbs = set()
         instances = set()
         collection_instances = {}
-        for db_name in db_list:              
+        for db_name in db_list:   
+           
+            db_name = unicodedata.normalize('NFKD', db_name)
+
+            db_name = ''.join(
+                c for c in db_name
+                if not unicodedata.combining(c)
+            )
+
             db_name = db_name.lower().strip()
             if db_name in databases_data:
                 db_data = databases_data[db_name]
