@@ -304,7 +304,6 @@ def enrich_join_DBinstanceEcollection(offset):
         dbs = set()
         instances = set()
         collection_instances = {}
-       
         for db_name in db_list:   
            
             db_name = unicodedata.normalize('NFKD', db_name)
