@@ -130,10 +130,10 @@ def get_decs_mfn(keyword, decs_map):
         return None
 
     if isinstance(keyword, str) and keyword and keyword[0].isdigit():
-    return f"^d{keyword}"
+        return f"^d{keyword}"
 
     if not isinstance(keyword, str):
-    return None
+        return None
 
     clean_tag = remove_diacritics(keyword.strip().lower())
     
