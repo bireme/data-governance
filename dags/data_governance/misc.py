@@ -125,16 +125,18 @@ def load_decs_descriptors(decs_col):
 
     return descriptor_map
 
-
 def get_decs_mfn(keyword, decs_map):
     if not keyword:
         return None
 
-    if keyword and keyword[0].isdigit():
-        return f"^d{keyword}"
+    if isinstance(keyword, str) and keyword and keyword[0].isdigit():
+    return f"^d{keyword}"
+
+    if not isinstance(keyword, str):
+    return None
 
     clean_tag = remove_diacritics(keyword.strip().lower())
-
+    
     descriptor = clean_tag.split('/')
     main_descriptor = descriptor[0]
     if len(descriptor) > 1:
