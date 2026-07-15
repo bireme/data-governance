@@ -31,7 +31,10 @@ from airflow import DAG
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.operators.python import PythonOperator
 from airflow.hooks.filesystem import FSHook
+from airflow.providers.sftp.hooks.sftp import SFTPHook
 
+SFTP_CONN_ID = "ssh_serverofi6"
+REMOTE_DIR = "/bases/iahx/proc/portal/main/xml.index"
 
 def remove_invalid_xml_chars(text):
     if text is None:
@@ -53,6 +56,29 @@ def remove_invalid_xml_chars(text):
         text
     )
 
+def transferir_arquivo_remoto(local_file, remote_dir):
+    logger = logging.getLogger(__name__)
+    remote_file = f"{remote_dir}/{os.path.basename(local_file)}"
+
+    try:
+        logger.info(
+            f"Transferindo via SFTP: "
+            f"{local_file} -> {remote_file}"
+        )
+
+        hook = SFTPHook(ssh_conn_id=SFTP_CONN_ID)
+        hook.store_file(
+            remote_full_path=remote_file,
+            local_full_path=local_file
+        )
+
+        logger.info(f"Transferência concluída: {remote_file}")
+        return True
+
+    except Exception as e:
+        logger.error(f"Erro na transferência: {e}")
+        return False
+        
 def export_mongo_to_xml():
     logger = logging.getLogger(__name__)
 
@@ -101,6 +127,19 @@ def export_mongo_to_xml():
     
     logger.info(f"Arquivo XML exportado com sucesso: {output_file}")
 
+    ok = transferir_arquivo_remoto(
+       local_file=output_file,
+       remote_dir=REMOTE_DIR
+    )
+    if ok:
+        logger.info(
+            f"[{col}] transferência remota concluída com sucesso"
+        )
+    else:
+        logger.warning(
+            f"[{col}] exportado localmente, "
+            f"mas a transferência remota falhou"
+         )
 
 default_args = {
     'owner': 'airflow',
