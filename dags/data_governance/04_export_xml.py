@@ -72,7 +72,9 @@ def export_mongo_to_xml():
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
         f.write('<add>\n')
 
-        for doc in collection.find({}, {"database": 0, "_id": 0}):
+        #for doc in collection.find({}, {"database": 0, "_id": 0}):
+        for doc in collection.find({}, {"_id": 0}):
+                 
             id_pk = doc.get('id_pk')
 
             boost_value = str(doc.get('weight', ''))
