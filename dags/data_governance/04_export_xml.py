@@ -133,7 +133,7 @@ def export_mongo_to_xml():
     )
     if ok:
         logger.info(
-            f"[{col}] transferência remota concluída com sucesso"
+            "Transferência remota concluída com sucesso"
         )
     else:
         logger.warning(
