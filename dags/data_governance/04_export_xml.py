@@ -127,19 +127,19 @@ def export_mongo_to_xml():
     
     logger.info(f"Arquivo XML exportado com sucesso: {output_file}")
 
-    ok = transferir_arquivo_remoto(
-       local_file=output_file,
-       remote_dir=REMOTE_DIR
-    )
-    if ok:
-        logger.info(
-            "Transferência remota concluída com sucesso"
-        )
-    else:
-        logger.warning(
-            f"[{col}] exportado localmente, "
-            f"mas a transferência remota falhou"
-         )
+    #ok = transferir_arquivo_remoto(
+    #   local_file=output_file,
+    #   remote_dir=REMOTE_DIR
+    #)
+    #if ok:
+    #    logger.info(
+    #        "Transferência remota concluída com sucesso"
+    #    )
+    #else:
+    #    logger.warning(
+    #        f"[{col}] exportado localmente, "
+    #        f"mas a transferência remota falhou"
+    #     )
 
 default_args = {
     'owner': 'airflow',
