@@ -11,7 +11,7 @@ Principais Características:
 ---------------------------
 - Exporta dinamicamente todos os campos de cada documento MongoDB, tratando listas como campos XML repetidos.
 - Os arquivos XML de saída são nomeados de acordo com o campo `id_pk` de cada documento.
-- O diretório de saída é configurado via uma conexão Filesystem do Airflow (`DG_EXPORT_XML_FOLDER`).
+- O diretório de saída é configurado via uma conexão File system do Airflow (`DG_EXPORT_XML_FOLDER`).
 - Desenvolvido para interoperabilidade com o iah-X.
 
 Configuração:
