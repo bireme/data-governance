@@ -59,13 +59,13 @@ with DAG(
         wait_for_completion=True,
         deferrable=True,
     )
-
-    run_create_map = TriggerDagRunOperator(
-        task_id='run_TMGL_REGION_02_create_map',
-        trigger_dag_id='TMGL_REGION_02_create_map',
-        wait_for_completion=True,
-        deferrable=True,
-    )
+    # Desativado temporariamente
+    #run_create_map = TriggerDagRunOperator(
+    #    task_id='run_TMGL_REGION_02_create_map',
+    #    trigger_dag_id='TMGL_REGION_02_create_map',
+    #    wait_for_completion=True,
+    #    deferrable=True,
+    #)
 
     run_create_metric_regions = TriggerDagRunOperator(
         task_id='run_TMGL_REGION_02_create_metric_regions',
@@ -121,7 +121,8 @@ with DAG(
     run_setup >> run_create_metric_doctype >> run_export_html
     run_setup >> run_create_metric_journals >> run_export_html
     run_setup >> run_create_metric_languages >> run_export_html
-    run_setup >> run_create_map >> run_export_html
+    # Desativado temporariamente
+    # run_setup >> run_create_map >> run_export_html 
     run_setup >> run_create_metric_regions >> run_export_html
     run_setup >> run_create_metric_studytype >> run_export_html
     run_setup >> run_create_metric_subjects >> run_export_html
