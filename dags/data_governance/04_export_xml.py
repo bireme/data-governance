@@ -26,6 +26,7 @@ import logging
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from xml.sax.saxutils import escape
 from airflow import DAG
 from airflow.providers.mongo.hooks.mongo import MongoHook
@@ -35,6 +36,9 @@ from airflow.providers.sftp.hooks.sftp import SFTPHook
 
 SFTP_CONN_ID = "ssh_serverofi6"
 REMOTE_DIR = "/bases/iahx/proc/portal/main/xml.index"
+
+LOG_DB_NAME = "data_governance"
+LOG_COLLECTION_NAME = "log_FIs_qdadeEdate"
 
 def remove_invalid_xml_chars(text):
     if text is None:
@@ -55,6 +59,44 @@ def remove_invalid_xml_chars(text):
         '',
         text
     )
+
+def registrar_processamento(mongo_hook, nro_de_docs, nome_xml):
+    """
+    Grava um registro histórico em data_governance.log_FIs_qdadeEdate.
+    A collection não é apagada; se não existir, será criada no primeiro insert.
+    """
+    logger = logging.getLogger(__name__)
+
+    try:
+        log_collection = mongo_hook.get_collection(
+            LOG_COLLECTION_NAME,
+            LOG_DB_NAME
+        )
+
+        agora_sp = datetime.now(ZoneInfo("America/Sao_Paulo"))
+
+        registro = {
+            "db": "data_governance",
+            "nro_de_docs": nro_de_docs,
+            "data_de_processamento": agora_sp.strftime("%Y-%m-%d %H:%M:%S"),
+            "nome_xml": nome_xml,
+        }
+
+        resultado = log_collection.insert_one(registro)
+
+        logger.info(
+            f"Log gravado em {LOG_DB_NAME}.{LOG_COLLECTION_NAME} "
+            f"(_id={resultado.inserted_id}, nro_de_docs={nro_de_docs}, "
+            f"nome_xml={nome_xml})"
+        )
+        return True
+
+    except Exception as e:
+        logger.error(
+            f"Erro ao gravar log em {LOG_DB_NAME}.{LOG_COLLECTION_NAME}: {e}"
+        )
+        return False
+
 
 def transferir_arquivo_remoto(local_file, remote_dir):
     logger = logging.getLogger(__name__)
@@ -91,8 +133,11 @@ def export_mongo_to_xml():
 
     # Geração do nome do arquivo com timestamp
     timestamp = datetime.now().strftime('%Y%m%dT%H%M%S')
-    output_filename = f"data_governance_{timestamp}.xml"
+    #output_filename = f"data_governance_{timestamp}.xml"
+    output_filename = f"zzz_data_governance.xml"
     output_file = os.path.join(output_dir, output_filename)
+
+    id_count = 0
 
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
@@ -110,6 +155,12 @@ def export_mongo_to_xml():
             for key in sorted(doc.keys()):
                 value = doc[key]
 
+                if key == 'id':
+                    if isinstance(value, list):
+                        id_count += len(value)
+                    elif value is not None and str(value).strip() != '':
+                        id_count += 1
+
                 if isinstance(value, list):
                     for item in value:
                         clean_item = remove_invalid_xml_chars(item)
@@ -125,21 +176,30 @@ def export_mongo_to_xml():
 
         f.write('</add>')
     
-    logger.info(f"Arquivo XML exportado com sucesso: {output_file}")
+    logger.info(
+        f"Arquivo XML exportado com sucesso: {output_file} "
+        f"({id_count} campos id)"
+    )
 
-    #ok = transferir_arquivo_remoto(
-    #   local_file=output_file,
-    #   remote_dir=REMOTE_DIR
-    #)
-    #if ok:
-    #    logger.info(
-    #        "Transferência remota concluída com sucesso"
-    #    )
-    #else:
-    #    logger.warning(
-    #        f"[{col}] exportado localmente, "
-    #        f"mas a transferência remota falhou"
-    #     )
+    registrar_processamento(
+        mongo_hook=mongo_hook,
+        nro_de_docs=id_count,
+        nome_xml=output_filename
+    )
+
+    ok = transferir_arquivo_remoto(
+       local_file=output_file,
+       remote_dir=REMOTE_DIR
+    )
+    if ok:
+        logger.info(
+            "Transferência remota concluída com sucesso"
+        )
+    else:
+        logger.warning(
+            f"[{col}] exportado localmente, "
+            f"mas a transferência remota falhou"
+         )
 
 default_args = {
     'owner': 'airflow',
@@ -159,3 +219,4 @@ with DAG(
         task_id='export_mongo_to_xml',
         python_callable=export_mongo_to_xml
     )
+
