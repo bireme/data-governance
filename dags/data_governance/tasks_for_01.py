@@ -41,6 +41,11 @@ from airflow.decorators import task
 from pymongo import UpdateOne
 
 
+# User-Agent identificando o coletor institucional. O default do requests
+# ("python-requests/x.y.z") e bloqueado pelas regras do ModSecurity no nginx.
+USER_AGENT = "BIREME-DataGovernance/1.0 (+https://bvsalud.org; Airflow harvester)"
+
+
 class Timer:
     def __enter__(self):
         self.start = time.perf_counter()
@@ -52,6 +57,7 @@ class Timer:
 
 def get_requests_session():
     session = requests.Session()
+    session.headers.update({'User-Agent': USER_AGENT})
     retries = Retry(
         total=5,  # Number of total attempts
         backoff_factor=2,  # Wait 1s, 2s, 4s between retries
@@ -107,7 +113,7 @@ def harvest_fiadmin_and_store_in_mongodb(update_mode, initial_offset=0, limit=10
     url = fiadmin_conn.host
     offset = initial_offset
     extra_params = {}
-    headers = {'apikey': fiadmin_conn.password}
+    headers = {'apikey': fiadmin_conn.password, 'User-Agent': USER_AGENT}
     session = get_requests_session()
     total_records = None
 
