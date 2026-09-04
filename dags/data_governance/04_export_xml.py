@@ -35,7 +35,8 @@ from airflow.hooks.filesystem import FSHook
 from airflow.providers.sftp.hooks.sftp import SFTPHook
 
 SFTP_CONN_ID = "ssh_serverofi6"
-REMOTE_DIR = "/bases/iahx/proc/portal/main/xml.index"
+#REMOTE_DIR = "/bases/iahx/proc/portal/main/xml.index"
+REMOTE_DIR = "/bases/iahx/proc/mdl5/main/xml.index"
 
 LOG_DB_NAME = "data_governance"
 LOG_COLLECTION_NAME = "log_FIs_qdadeEdate"
