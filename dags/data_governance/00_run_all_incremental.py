@@ -79,4 +79,11 @@ with DAG(
         deferrable=True,
     )
 
-    run_incremental_update >> run_create_iahx_xml_collection >> run_x01_create_iahx_xml_collection >> run_enrich_xml >> run_enrich_xml_x01 >> run_export_xml
+    run_export_xml_tmgl = TriggerDagRunOperator(
+        task_id='run_DG_04_export_xml_tmgl',
+        trigger_dag_id='DG_04_export_xml_tmgl',
+        wait_for_completion=True,
+        deferrable=True,
+    )
+    
+    run_incremental_update >> run_create_iahx_xml_collection >> run_x01_create_iahx_xml_collection >> run_enrich_xml >> run_enrich_xml_x01 >> run_export_xml >> run_export_xml_tmgl
