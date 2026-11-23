@@ -38,7 +38,7 @@ from urllib3.util.retry import Retry
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.hooks.base import BaseHook
 from airflow.decorators import task
-from pymongo import UpdateOne
+from pymongo import ReplaceOne
 
 
 # User-Agent identificando o coletor institucional. O default do requests
@@ -187,9 +187,9 @@ def send_json_to_mongodb(json_data, collection):
     for doc in json_data:
         if 'id' in doc:
             batch.append(
-                UpdateOne(
+                ReplaceOne(
                     {'id': doc['id']},    # Filtro para identificar o documento
-                    {'$set': doc},        # Atualiza todos os campos do documento
+                    doc,                  # Substitui o documento inteiro pelos dados atuais da API
                     upsert=True           # Insere se não existir
                 )
             )
